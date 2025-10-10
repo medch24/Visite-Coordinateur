@@ -2,10 +2,10 @@
   "name": "teacher-evaluation-system",
   "version": "1.0.0",
   "description": "A web application for teacher evaluation - Vercel serverless version",
-  "type": "module",
+  "main": "index.html",
   "scripts": {
-    "dev": "vercel dev",
-    "build": "echo 'Build completed - serverless functions ready'"
+    "build": "echo 'Static build completed'",
+    "start": "echo 'Static site - no start needed'"
   },
   "dependencies": {
     "mongoose": "^7.5.0"
