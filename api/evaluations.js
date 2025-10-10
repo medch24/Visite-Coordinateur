@@ -1,45 +1,21 @@
-const mongoose = require('mongoose');
+// Base de données temporaire en mémoire pour les évaluations
+let EVALUATIONS_DATA = [];
 
-// Configuration MongoDB
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://demo:demo123@cluster0.mongodb.net/teacherEvaluationDB?retryWrites=true&w=majority';
-
-// Fonction de connexion MongoDB avec gestion d'erreurs
-let cachedConnection = null;
-async function connectToDatabase() {
-    if (cachedConnection) {
-        return cachedConnection;
-    }
-    
-    try {
-        const connection = await mongoose.connect(MONGODB_URI, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-            serverSelectionTimeoutMS: 5000,
-            maxPoolSize: 10,
-        });
-        cachedConnection = connection;
-        console.log('Connected to MongoDB');
-        return connection;
-    } catch (error) {
-        console.error('MongoDB connection error:', error);
-        throw error;
-    }
+// Fonction pour ajouter une évaluation
+function addEvaluation(evaluationData) {
+    const evaluation = {
+        id: Date.now().toString(),
+        ...evaluationData,
+        date: new Date()
+    };
+    EVALUATIONS_DATA.push(evaluation);
+    return evaluation;
 }
 
-// Schéma des évaluations
-const evaluationSchema = new mongoose.Schema({
-    teacherName: String,
-    coordinatorName: String,
-    date: { type: Date, default: Date.now },
-    criteria: mongoose.Schema.Types.Mixed,
-    comments: {
-        toImprove: String,
-        toEliminate: String
-    },
-    grandTotal: Number
-});
-
-const Evaluation = mongoose.models.Evaluation || mongoose.model('Evaluation', evaluationSchema);
+// Fonction pour récupérer les évaluations d'un enseignant
+function getEvaluationsByTeacher(teacherName) {
+    return EVALUATIONS_DATA.filter(eval => eval.teacherName === teacherName);
+}
 
 export default async function handler(req, res) {
     // Headers CORS
@@ -54,12 +30,10 @@ export default async function handler(req, res) {
     }
 
     try {
-        await connectToDatabase();
-
         if (req.method === 'POST') {
             // Créer une nouvelle évaluation
-            const evaluation = new Evaluation(req.body);
-            await evaluation.save();
+            console.log('Creating new evaluation:', req.body); // Pour debug
+            const evaluation = addEvaluation(req.body);
             res.json({ success: true, evaluation });
         } else if (req.method === 'GET') {
             // Obtenir les évaluations pour un enseignant
@@ -67,13 +41,14 @@ export default async function handler(req, res) {
             if (!teacherName) {
                 return res.status(400).json({ success: false, message: 'Teacher name required' });
             }
-            const evaluations = await Evaluation.find({ teacherName });
+            console.log('Getting evaluations for:', teacherName); // Pour debug
+            const evaluations = getEvaluationsByTeacher(teacherName);
             res.json(evaluations);
         } else {
             res.status(405).json({ success: false, message: 'Method not allowed' });
         }
     } catch (error) {
         console.error('Evaluations error:', error);
-        res.status(500).json({ success: false, message: 'Server error' });
+        res.status(500).json({ success: false, message: 'Server error: ' + error.message });
     }
 }
