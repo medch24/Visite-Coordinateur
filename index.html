@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-lang-en="Teacher Evaluation System" data-lang-fr="Système d'Évaluation des Enseignants">Teacher Evaluation System</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div class="container">
+        <!-- Language Switcher -->
+        <div class="language-switcher">
+            <button id="lang-en">English</button>
+            <button id="lang-fr">Français</button>
+        </div>
+
+        <!-- Login Page -->
+        <div id="login-page" class="page active">
+            <div class="card">
+                <h1 data-lang-en="Login" data-lang-fr="Connexion">Login</h1>
+                <form id="login-form">
+                    <input type="text" id="username" placeholder-en="Username" placeholder-fr="Nom d'utilisateur" required>
+                    <input type="password" id="password" placeholder-en="Password" placeholder-fr="Mot de passe" required>
+                    <button type="submit" data-lang-en="Login" data-lang-fr="Se connecter">Login</button>
+                </form>
+                <p id="login-error" class="error-message"></p>
+            </div>
+        </div>
+
+        <!-- Coordinator Dashboard -->
+        <div id="coordinator-dashboard" class="page">
+            <h1 data-lang-en="Coordinator Dashboard" data-lang-fr="Tableau de Bord Coordinateur">Coordinator Dashboard</h1>
+            <h2 id="coordinator-welcome"></h2>
+            <h3 data-lang-en="Select a teacher to evaluate:" data-lang-fr="Sélectionnez un enseignant à évaluer :">Select a teacher to evaluate:</h3>
+            <select id="teacher-select"></select>
+            <div id="evaluation-form-container"></div>
+            <button id="logout-btn" data-lang-en="Logout" data-lang-fr="Déconnexion">Logout</button>
+        </div>
+
+        <!-- Teacher Dashboard -->
+        <div id="teacher-dashboard" class="page">
+            <h1 data-lang-en="Teacher Dashboard" data-lang-fr="Tableau de Bord Enseignant">Teacher Dashboard</h1>
+            <h2 id="teacher-welcome"></h2>
+            <div id="evaluation-reports"></div>
+            <button id="logout-btn-teacher" data-lang-en="Logout" data-lang-fr="Déconnexion">Logout</button>
+        </div>
+
+    </div>
+
+    <script>
+        // --- Client-Side Logic ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const state = {
+                currentUser: null,
+                currentLang: 'en'
+            };
+
+            const pages = {
+                login: document.getElementById('login-page'),
+                coordinator: document.getElementById('coordinator-dashboard'),
+                teacher: document.getElementById('teacher-dashboard')
+            };
+
+            // --- Language Switcher ---
+            const langElements = document.querySelectorAll('[data-lang-en], [data-lang-fr]');
+            const placeholderElements = document.querySelectorAll('[placeholder-en], [placeholder-fr]');
+
+            function setLanguage(lang) {
+                state.currentLang = lang;
+                langElements.forEach(el => {
+                    el.textContent = el.dataset[`lang-${lang}`];
+                    if(el.tagName === 'TITLE') document.title = el.dataset[`lang-${lang}`];
+                });
+                placeholderElements.forEach(el => {
+                    el.placeholder = el.getAttribute(`placeholder-${lang}`);
+                });
+            }
+
+            document.getElementById('lang-en').addEventListener('click', () => setLanguage('en'));
+            document.getElementById('lang-fr').addEventListener('click', () => setLanguage('fr'));
+
+
+            // --- Navigation ---
+            function showPage(pageName) {
+                Object.values(pages).forEach(page => page.classList.remove('active'));
+                pages[pageName].classList.add('active');
+            }
+
+            // --- Login Logic ---
+            document.getElementById('login-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                
+                try {
+                    const response = await fetch('/api/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, password })
+                    });
+
+                    const data = await response.json();
+                    if (data.success) {
+                        state.currentUser = data.user;
+                        if (data.user.role === 'coordinator') {
+                            renderCoordinatorDashboard();
+                            showPage('coordinator');
+                        } else {
+                            renderTeacherDashboard();
+                            showPage('teacher');
+                        }
+                    } else {
+                        document.getElementById('login-error').textContent = state.currentLang === 'fr' ? 'Identifiants invalides' : 'Invalid credentials';
+                    }
+                } catch (error) {
+                    document.getElementById('login-error').textContent = state.currentLang === 'fr' ? 'Erreur de connexion' : 'Login error';
+                }
+            });
+            
+            // --- Logout ---
+            function logout() {
+                state.currentUser = null;
+                document.getElementById('login-form').reset();
+                document.getElementById('login-error').textContent = '';
+                showPage('login');
+            }
+            document.getElementById('logout-btn').addEventListener('click', logout);
+            document.getElementById('logout-btn-teacher').addEventListener('click', logout);
+
+
+            // --- Coordinator Logic ---
+            function renderCoordinatorDashboard() {
+                document.getElementById('coordinator-welcome').textContent = `${state.currentLang === 'fr' ? 'Bienvenue' : 'Welcome'}, ${state.currentUser.username}`;
+                const teacherSelect = document.getElementById('teacher-select');
+                teacherSelect.innerHTML = `<option value="">${state.currentLang === 'fr' ? 'Choisir...' : 'Choose...'}</option>`;
+                state.currentUser.assignedTeachers.forEach(teacher => {
+                    const option = document.createElement('option');
+                    option.value = teacher;
+                    option.textContent = teacher;
+                    teacherSelect.appendChild(option);
+                });
+            }
+
+            document.getElementById('teacher-select').addEventListener('change', (e) => {
+                const teacherName = e.target.value;
+                if (teacherName) {
+                    renderEvaluationForm(teacherName);
+                } else {
+                    document.getElementById('evaluation-form-container').innerHTML = '';
+                }
+            });
+
+            // --- Evaluation Form ---
+            function renderEvaluationForm(teacherName) {
+                const criteria = {
+                    professionalOutlook: {
+                        title_en: "PROFESSIONAL OUTLOOK",
+                        title_fr: "PERSPECTIVE PROFESSIONNELLE",
+                        items: [
+                            { text_en: "Speaks with an effective voice and tone.", text_fr: "Parle avec une voix et un ton efficaces." },
+                            { text_en: "Uses standard English in both oral and written expression.", text_fr: "Utilise un anglais standard à l'oral et à l'écrit." },
+                            { text_en: "Uses appropriate eye contact, body language, movement, and posture.", text_fr: "Utilise un contact visuel, un langage corporel, des mouvements et une posture appropriés." },
+                        ]
+                    },
+                    contentKnowledge: {
+                         title_en: "CONTENT KNOWLEDGE",
+                         title_fr: "CONNAISSANCE DU CONTENU",
+                         items: [
+                            { text_en: "Integrates literacy AND mathematics into content area instruction when necessary.", text_fr: "Intègre la littératie ET les mathématiques dans l'enseignement disciplinaire si nécessaire." },
+                            { text_en: "Demonstrates appropriate level of knowledge and skills in content area(s).", text_fr: "Démontre un niveau approprié de connaissances et de compétences dans le(s) domaine(s) de contenu." },
+                         ]
+                    },
+                    instructionAndAssessments: {
+                        title_en: "INSTRUCTION AND ASSESSMENTS",
+                        title_fr: "ENSEIGNEMENT ET ÉVALUATIONS",
+                        items: [
+                            { text_en: "Prepares detailed lesson plans with significant objectives that reflect key concepts.", text_fr: "Prépare des plans de leçon détaillés avec des objectifs significatifs qui reflètent les concepts clés."},
+                            { text_en: "Plans instructional strategies and activities that require higher order thinking skills.", text_fr: "Planifie des stratégies et des activités pédagogiques qui nécessitent des compétences de pensée d'ordre supérieur."},
+                            { text_en: "Uses questioning strategies to engage students and stimulate higher order thinking.", text_fr: "Utilise des stratégies de questionnement pour engager les étudiants et stimuler la pensée d'ordre supérieur."},
+                        ]
+                    }
+                };
+
+                let formHTML = `<form id="eval-form" class="card"><h3>${state.currentLang === 'fr' ? 'Évaluation pour' : 'Evaluation for'} ${teacherName}</h3>`;
+                let criteriaIndex = 0;
+                
+                for(const category in criteria){
+                    formHTML += `<fieldset><legend>${criteria[category][`title_${state.currentLang}`]}</legend>`;
+                    criteria[category].items.forEach((item, index) => {
+                        formHTML += `<div class="criteria-row">
+                            <p>${item[`text_${state.currentLang}`]}</p>
+                            <div class="rating">
+                                ${[1,2,3,4,5].map(num => `
+                                <input type="radio" id="crit${criteriaIndex}-${num}" name="crit${criteriaIndex}" value="${num}" required>
+                                <label for="crit${criteriaIndex}-${num}">${num}</label>
+                                `).join('')}
+                            </div>
+                        </div>`;
+                        criteriaIndex++;
+                    });
+                    formHTML += `</fieldset>`;
+                }
+                
+                formHTML += `
+                    <div class="comments-section">
+                        <div>
+                            <label for="comments-improve" data-lang-en="Comments (To Improve)" data-lang-fr="Commentaires (À améliorer)">Comments (To Improve)</label>
+                            <textarea id="comments-improve" required></textarea>
+                        </div>
+                        <div>
+                            <label for="comments-eliminate" data-lang-en="Comments (To Eliminate)" data-lang-fr="Commentaires (À éliminer)">Comments (To Eliminate)</label>
+                            <textarea id="comments-eliminate" required></textarea>
+                        </div>
+                    </div>
+                    <div class="grand-total">
+                        <span data-lang-en="Grand Total:" data-lang-fr="Total Général :">Grand Total:</span>
+                        <span id="grand-total-display">0</span>
+                    </div>
+                    <button type="submit" data-lang-en="Submit Evaluation" data-lang-fr="Soumettre l'évaluation">Submit Evaluation</button>
+                </form>`;
+
+                const container = document.getElementById('evaluation-form-container');
+                container.innerHTML = formHTML;
+
+                // Automatic Total Calculation
+                container.querySelector('#eval-form').addEventListener('change', () => {
+                    const ratings = container.querySelectorAll('input[type="radio"]:checked');
+                    let total = 0;
+                    ratings.forEach(r => total += parseInt(r.value, 10));
+                    document.getElementById('grand-total-display').textContent = total;
+                });
+                
+                // Form Submission
+                container.querySelector('#eval-form').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const formData = new FormData(e.target);
+                    const criteriaData = {};
+                    let grandTotal = 0;
+                    for(let [key, value] of formData.entries()){
+                        criteriaData[key] = parseInt(value, 10);
+                        grandTotal += parseInt(value, 10);
+                    }
+                    
+                    const payload = {
+                        teacherName,
+                        coordinatorName: state.currentUser.username,
+                        criteria: criteriaData,
+                        comments: {
+                            toImprove: document.getElementById('comments-improve').value,
+                            toEliminate: document.getElementById('comments-eliminate').value
+                        },
+                        grandTotal
+                    };
+
+                    try {
+                        await fetch('/api/evaluations', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                        alert(state.currentLang === 'fr' ? 'Évaluation soumise !' : 'Evaluation submitted!');
+                        container.innerHTML = '';
+                    } catch (error) {
+                         alert(state.currentLang === 'fr' ? 'Erreur lors de la soumission.' : 'Error submitting.');
+                    }
+                });
+            }
+
+            // --- Teacher Logic ---
+            async function renderTeacherDashboard() {
+                document.getElementById('teacher-welcome').textContent = `${state.currentLang === 'fr' ? 'Bienvenue' : 'Welcome'}, ${state.currentUser.username}`;
+                const reportsContainer = document.getElementById('evaluation-reports');
+                reportsContainer.innerHTML = `<h4>${state.currentLang === 'fr' ? 'Chargement des rapports...' : 'Loading reports...'}</h4>`;
+
+                try {
+                    const response = await fetch(`/api/evaluations/${state.currentUser.username}`);
+                    const evaluations = await response.json();
+                    
+                    if (evaluations.length === 0) {
+                        reportsContainer.innerHTML = `<p>${state.currentLang === 'fr' ? 'Aucun rapport d\'évaluation trouvé.' : 'No evaluation reports found.'}</p>`;
+                        return;
+                    }
+                    
+                    let reportsHTML = '';
+                    evaluations.forEach(eval => {
+                        reportsHTML += `
+                            <div class="card report-card">
+                                <h3>${state.currentLang === 'fr' ? 'Rapport du' : 'Report from'} ${new Date(eval.date).toLocaleDateString()}</h3>
+                                <p><strong>${state.currentLang === 'fr' ? 'Évaluateur :' : 'Evaluator:'}</strong> ${eval.coordinatorName}</p>
+                                <p><strong>${state.currentLang === 'fr' ? 'Total Général :' : 'Grand Total:'}</strong> ${eval.grandTotal}</p>
+                                <div class="comments-section">
+                                    <div>
+                                        <h4>${state.currentLang === 'fr' ? 'Recommandations (À améliorer)' : 'Recommendations (To Improve)'}</h4>
+                                        <p>${eval.comments.toImprove}</p>
+                                    </div>
+                                    <div>
+                                        <h4>${state.currentLang === 'fr' ? 'Recommandations (À éliminer)' : 'Recommendations (To Eliminate)'}</h4>
+                                        <p>${eval.comments.toEliminate}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    reportsContainer.innerHTML = reportsHTML;
+                } catch (error) {
+                    reportsContainer.innerHTML = `<p class="error-message">${state.currentLang === 'fr' ? 'Impossible de charger les rapports.' : 'Could not load reports.'}</p>`;
+                }
+            }
+            
+            // Initial load
+            setLanguage('en');
+        });
+    </script>
+</body>
+</html>
