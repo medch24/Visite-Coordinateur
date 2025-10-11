@@ -13,7 +13,7 @@ function findUser(username, password) {
     return USERS_DATA.find(user => user.username === username && user.password === password);
 }
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
     // Définir les headers CORS
     res.setHeader('Access-Control-Allow-Credentials', true);
     res.setHeader('Access-Control-Allow-Origin', '*');

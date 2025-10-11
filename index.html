@@ -21,10 +21,30 @@
                 <h1 data-lang-en="Login" data-lang-fr="Connexion">Login</h1>
                 <form id="login-form">
                     <input type="text" id="username" placeholder-en="Username" placeholder-fr="Nom d'utilisateur" required>
-                    <input type="password" id="password" placeholder-en="Password" placeholder-fr="Mot de passe" required>
+                    <div class="password-container">
+                        <input type="password" id="password" placeholder-en="Password" placeholder-fr="Mot de passe" required>
+                        <button type="button" id="toggle-password" class="password-toggle" aria-label="Show password">
+                            <span id="password-icon">👁️</span>
+                        </button>
+                    </div>
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="remember-me">
+                        <label for="remember-me" data-lang-en="Remember me" data-lang-fr="Rester connecté">Remember me</label>
+                    </div>
                     <button type="submit" data-lang-en="Login" data-lang-fr="Se connecter">Login</button>
                 </form>
                 <p id="login-error" class="error-message"></p>
+                <div class="test-credentials">
+                    <h4 data-lang-en="Test Accounts" data-lang-fr="Comptes de Test">Test Accounts</h4>
+                    <p><strong data-lang-en="Coordinators" data-lang-fr="Coordinateurs">Coordinators:</strong><br>
+                    Mohamed / Mohamed@86<br>
+                    Zohra / Zohra@40<br>
+                    Rasha / Rasha@26</p>
+                    <p><strong data-lang-en="Teachers" data-lang-fr="Enseignants">Teachers:</strong><br>
+                    Morched / Morched<br>
+                    Kamel / Kamel<br>
+                    <em data-lang-en="(Any teacher name as username/password)" data-lang-fr="(Nom d'enseignant comme identifiant/mot de passe)">(Any teacher name as username/password)</em></p>
+                </div>
             </div>
         </div>
 
@@ -80,6 +100,46 @@
             document.getElementById('lang-en').addEventListener('click', () => setLanguage('en'));
             document.getElementById('lang-fr').addEventListener('click', () => setLanguage('fr'));
 
+            // --- Password Toggle Functionality ---
+            document.getElementById('toggle-password').addEventListener('click', function() {
+                const passwordInput = document.getElementById('password');
+                const passwordIcon = document.getElementById('password-icon');
+                
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    passwordIcon.textContent = '🙈';
+                } else {
+                    passwordInput.type = 'password';
+                    passwordIcon.textContent = '👁️';
+                }
+            });
+
+            // --- Remember Me Functionality ---
+            // Charger les données sauvegardées au démarrage
+            function loadSavedCredentials() {
+                const savedCredentials = localStorage.getItem('teacherEvaluationCredentials');
+                if (savedCredentials) {
+                    const { username, password, rememberMe } = JSON.parse(savedCredentials);
+                    if (rememberMe) {
+                        document.getElementById('username').value = username;
+                        document.getElementById('password').value = password;
+                        document.getElementById('remember-me').checked = true;
+                    }
+                }
+            }
+
+            // Sauvegarder les données si "Rester connecté" est coché
+            function saveCredentials(username, password, rememberMe) {
+                if (rememberMe) {
+                    const credentials = { username, password, rememberMe: true };
+                    localStorage.setItem('teacherEvaluationCredentials', JSON.stringify(credentials));
+                } else {
+                    localStorage.removeItem('teacherEvaluationCredentials');
+                }
+            }
+
+            // Charger les données sauvegardées au démarrage
+            loadSavedCredentials();
 
             // --- Navigation ---
             function showPage(pageName) {
@@ -92,6 +152,7 @@
                 e.preventDefault();
                 const username = document.getElementById('username').value;
                 const password = document.getElementById('password').value;
+                const rememberMe = document.getElementById('remember-me').checked;
                 
                 try {
                     const response = await fetch('/api/login', {
@@ -102,6 +163,9 @@
 
                     const data = await response.json();
                     if (data.success) {
+                        // Sauvegarder les identifiants si demandé
+                        saveCredentials(username, password, rememberMe);
+                        
                         state.currentUser = data.user;
                         if (data.user.role === 'coordinator') {
                             renderCoordinatorDashboard();
@@ -110,11 +174,15 @@
                             renderTeacherDashboard();
                             showPage('teacher');
                         }
+                        
+                        // Effacer les messages d'erreur
+                        document.getElementById('login-error').textContent = '';
                     } else {
                         document.getElementById('login-error').textContent = state.currentLang === 'fr' ? 'Identifiants invalides' : 'Invalid credentials';
                     }
                 } catch (error) {
-                    document.getElementById('login-error').textContent = state.currentLang === 'fr' ? 'Erreur de connexion' : 'Login error';
+                    console.error('Login error:', error);
+                    document.getElementById('login-error').textContent = state.currentLang === 'fr' ? 'Erreur de connexion - Vérifiez votre connexion' : 'Connection error - Check your connection';
                 }
             });
             
@@ -123,6 +191,16 @@
                 state.currentUser = null;
                 document.getElementById('login-form').reset();
                 document.getElementById('login-error').textContent = '';
+                
+                // Ne pas effacer les identifiants si "Rester connecté" est coché
+                const rememberMe = document.getElementById('remember-me').checked;
+                if (!rememberMe) {
+                    localStorage.removeItem('teacherEvaluationCredentials');
+                } else {
+                    // Recharger les identifiants sauvegardés
+                    loadSavedCredentials();
+                }
+                
                 showPage('login');
             }
             document.getElementById('logout-btn').addEventListener('click', logout);

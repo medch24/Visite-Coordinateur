@@ -2,7 +2,7 @@
 // NOTE: Dans une vraie application, ceci serait partagé entre les modules
 let EVALUATIONS_DATA = [];
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
     // Headers CORS
     res.setHeader('Access-Control-Allow-Credentials', true);
     res.setHeader('Access-Control-Allow-Origin', '*');
