@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title data-lang-en="Teacher Evaluation System" data-lang-fr="Système d'Évaluation des Enseignants">Teacher Evaluation System</title>
     <link rel="stylesheet" href="styles.css">
+    <!-- Libraries for Word document generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/7.8.2/docx.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 </head>
 <body>
 
@@ -41,9 +44,27 @@
         <div id="coordinator-dashboard" class="page">
             <h1 data-lang-en="Coordinator Dashboard" data-lang-fr="Tableau de Bord Coordinateur">Coordinator Dashboard</h1>
             <h2 id="coordinator-welcome"></h2>
-            <h3 data-lang-en="Select a teacher to evaluate:" data-lang-fr="Sélectionnez un enseignant à évaluer :">Select a teacher to evaluate:</h3>
-            <select id="teacher-select"></select>
-            <div id="evaluation-form-container"></div>
+            
+            <!-- Navigation Tabs -->
+            <div class="coordinator-tabs">
+                <button id="new-evaluation-tab" class="tab-btn active" data-lang-en="New Evaluation" data-lang-fr="Nouvelle Évaluation">New Evaluation</button>
+                <button id="view-evaluations-tab" class="tab-btn" data-lang-en="View Previous Evaluations" data-lang-fr="Voir Évaluations Précédentes">View Previous Evaluations</button>
+            </div>
+
+            <!-- New Evaluation Tab -->
+            <div id="new-evaluation-content" class="tab-content active">
+                <h3 data-lang-en="Select a teacher to evaluate:" data-lang-fr="Sélectionnez un enseignant à évaluer :">Select a teacher to evaluate:</h3>
+                <select id="teacher-select"></select>
+                <div id="evaluation-form-container"></div>
+            </div>
+
+            <!-- Previous Evaluations Tab -->
+            <div id="previous-evaluations-content" class="tab-content">
+                <h3 data-lang-en="Select a teacher to view evaluations:" data-lang-fr="Sélectionnez un enseignant pour voir les évaluations :">Select a teacher to view evaluations:</h3>
+                <select id="teacher-select-view"></select>
+                <div id="previous-evaluations-container"></div>
+            </div>
+
             <button id="logout-btn" data-lang-en="Logout" data-lang-fr="Déconnexion">Logout</button>
         </div>
 
@@ -311,8 +332,19 @@
                             <label for="lesson-subject">${state.currentLang === 'fr' ? 'Matière enseignée :' : 'Subject Taught:'}</label>
                             <input type="text" id="lesson-subject" placeholder="${state.currentLang === 'fr' ? 'Ex: Mathématiques' : 'Ex: Mathematics'}" required>
                         </div>
+                        <div class="form-row">
+                            <label for="class-name">${state.currentLang === 'fr' ? 'Classe :' : 'Class:'}</label>
+                            <input type="text" id="class-name" placeholder="${state.currentLang === 'fr' ? 'Ex: 6ème A' : 'Ex: Grade 6A'}" required>
+                        </div>
+                        <div class="form-row">
+                            <label for="semester">${state.currentLang === 'fr' ? 'Semestre :' : 'Semester:'}</label>
+                            <select id="semester" required>
+                                <option value="">${state.currentLang === 'fr' ? 'Sélectionner...' : 'Select...'}</option>
+                                <option value="1">${state.currentLang === 'fr' ? '1er Semestre' : '1st Semester'}</option>
+                                <option value="2">${state.currentLang === 'fr' ? '2ème Semestre' : '2nd Semester'}</option>
+                            </select>
+                        </div>
                     </div>`;
-                
                 let criteriaIndex = 0;
                 
                 for(const category in criteria){
@@ -392,17 +424,10 @@
                     ratings.forEach(r => total += parseInt(r.value, 10));
                     
                     document.getElementById('grand-total-display').textContent = total;
-                    document.getElementById('performance-level').textContent = getPerformanceLevel(total);
                     
-                    // Changer la couleur du niveau selon le score
-                    const levelElement = document.getElementById('performance-level');
-                    levelElement.className = 'level-value';
-                    if (total >= 90) levelElement.classList.add('level-excellent');
-                    else if (total >= 80) levelElement.classList.add('level-very-good');
-                    else if (total >= 70) levelElement.classList.add('level-good');
-                    else if (total >= 60) levelElement.classList.add('level-satisfactory');
-                    else if (total >= 50) levelElement.classList.add('level-needs-improvement');
-                    else levelElement.classList.add('level-unsatisfactory');
+                    // Update performance level
+                    const performanceLevel = getPerformanceLevel(total);
+                    document.getElementById('performance-level').textContent = performanceLevel;
                 });
                 
                 // Form Submission
@@ -413,6 +438,8 @@
                     const visitDate = document.getElementById('visit-date').value;
                     const visitTime = document.getElementById('visit-time').value;
                     const lessonSubject = document.getElementById('lesson-subject').value;
+                    const className = document.getElementById('class-name').value;
+                    const semester = document.getElementById('semester').value;
                     
                     const formData = new FormData(e.target);
                     const criteriaData = {};
@@ -431,7 +458,10 @@
                         visitDate,
                         visitTime,
                         lessonSubject,
+                        className,
+                        semester,
                         criteria: criteriaData,
+                        criteriaDetails: criteria, // Ajouter les détails des critères pour affichage ultérieur
                         comments: {
                             strengths: document.getElementById('comments-strengths').value,
                             toImprove: document.getElementById('comments-improve').value,
