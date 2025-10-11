@@ -29,7 +29,7 @@
                 </button>
             </div>
             <button id="settings-btn" class="settings-btn" style="display: none;">
-                <i class="fas fa-cog"></i>
+                <i class="fas fa-cog"></i> <span data-lang-en="Settings" data-lang-fr="Paramètres">Settings</span>
             </button>
         </div>
         
@@ -65,7 +65,7 @@
                     <div class="password-container">
                         <input type="password" id="password" placeholder-en="Password" placeholder-fr="Mot de passe" required>
                         <button type="button" id="toggle-password" class="password-toggle" aria-label="Show password">
-                            <span id="password-icon">👁️</span>
+                            <i class="fas fa-eye"></i>
                         </button>
                     </div>
                     <div class="checkbox-container">
@@ -89,8 +89,11 @@
         <div id="coordinator-dashboard" class="page">
             <h1 data-lang-en="Coordinator Dashboard" data-lang-fr="Tableau de Bord Coordinateur">Coordinator Dashboard</h1>
             <h2 id="coordinator-welcome"></h2>
-            <h3 data-lang-en="Select a teacher to evaluate:" data-lang-fr="Sélectionnez un enseignant à évaluer :">Select a teacher to evaluate:</h3>
-            <select id="teacher-select"></select>
+            <div class="card">
+                <h3 data-lang-en="Select a teacher to evaluate:" data-lang-fr="Sélectionnez un enseignant à évaluer :">Select a teacher to evaluate:</h3>
+                <select id="teacher-select"></select>
+            </div>
+            <div id="previous-evaluations-container"></div>
             <div id="evaluation-form-container"></div>
             <button id="logout-btn" data-lang-en="Logout" data-lang-fr="Déconnexion">Logout</button>
         </div>
@@ -101,6 +104,19 @@
             <h2 id="teacher-welcome"></h2>
             <div id="evaluation-reports"></div>
             <button id="logout-btn-teacher" data-lang-en="Logout" data-lang-fr="Déconnexion">Logout</button>
+        </div>
+        
+        <!-- Modal for Evaluation Details -->
+        <div id="details-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 data-lang-en="Evaluation Details" data-lang-fr="Détails de l'Évaluation">Evaluation Details</h2>
+                    <button class="close-btn" id="close-modal-btn"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="modal-body" id="modal-body-content">
+                    <!-- Detailed content will be injected here -->
+                </div>
+            </div>
         </div>
 
     </div>
@@ -118,6 +134,24 @@
                 coordinator: document.getElementById('coordinator-dashboard'),
                 teacher: document.getElementById('teacher-dashboard')
             };
+            
+            // --- Database Management ---
+            let EVALUATIONS_DATABASE = [];
+
+            function saveEvaluationsToStorage() {
+                localStorage.setItem('evaluationsDatabase', JSON.stringify(EVALUATIONS_DATABASE));
+            }
+
+            function loadEvaluationsFromStorage() {
+                const storedData = localStorage.getItem('evaluationsDatabase');
+                if (storedData) {
+                    EVALUATIONS_DATABASE = JSON.parse(storedData);
+                }
+            }
+            
+            // Load data on startup
+            loadEvaluationsFromStorage();
+
 
             // --- Language Switcher ---
             const langElements = document.querySelectorAll('[data-lang-en], [data-lang-fr]');
@@ -126,8 +160,9 @@
             function setLanguage(lang) {
                 state.currentLang = lang;
                 langElements.forEach(el => {
-                    el.textContent = el.dataset[`lang-${lang}`];
-                    if(el.tagName === 'TITLE') document.title = el.dataset[`lang-${lang}`];
+                    const text = el.dataset[`lang-${lang}`];
+                    if (text) el.textContent = text;
+                    if(el.tagName === 'TITLE') document.title = text;
                 });
                 placeholderElements.forEach(el => {
                     el.placeholder = el.getAttribute(`placeholder-${lang}`);
@@ -148,14 +183,16 @@
             // --- Password Toggle Functionality ---
             document.getElementById('toggle-password').addEventListener('click', function() {
                 const passwordInput = document.getElementById('password');
-                const passwordIcon = document.getElementById('password-icon');
+                const passwordIcon = this.querySelector('i');
                 
                 if (passwordInput.type === 'password') {
                     passwordInput.type = 'text';
-                    passwordIcon.textContent = '🙈';
+                    passwordIcon.classList.remove('fa-eye');
+                    passwordIcon.classList.add('fa-eye-slash');
                 } else {
                     passwordInput.type = 'password';
-                    passwordIcon.textContent = '👁️';
+                    passwordIcon.classList.remove('fa-eye-slash');
+                    passwordIcon.classList.add('fa-eye');
                 }
             });
 
@@ -198,9 +235,7 @@
                 // Enseignants
                 ...['Morched', 'Kamel', 'Abas', 'Zine', 'Youssef', 'Oumarou', 'Tonga', 'Sylvano', 'Sami', 'Mohamed Ali', 'Aichetou', 'Inas', 'Anwar', 'Souha', 'Amal', 'Shanouja', 'Jana', 'Hiba', 'Rouba', 'Rayan', 'Imane', 'Nesrine', 'Fatima', 'Samar', 'Romana', 'Nour'].map(name => ({ username: name, password: name, role: 'teacher' }))
             ];
-
-            // Base de données évaluations côté client
-            let EVALUATIONS_DATABASE = [];
+            
 
             // --- Login Logic ---
             document.getElementById('login-form').addEventListener('submit', (e) => {
@@ -259,10 +294,8 @@
                 
                 // Show settings button for coordinators
                 const settingsBtn = document.getElementById('settings-btn');
-                if (settingsBtn) {
-                    settingsBtn.style.display = 'block';
-                    window.initSettingsPanel();
-                }
+                settingsBtn.style.display = 'inline-flex';
+                window.initSettingsPanel();
                 
                 // Load and apply saved school settings
                 const savedSchoolName = localStorage.getItem('schoolName') || 'Educational Excellence Institute';
@@ -273,14 +306,49 @@
             document.getElementById('teacher-select').addEventListener('change', (e) => {
                 const teacherName = e.target.value;
                 if (teacherName) {
+                    renderPreviousEvaluations(teacherName);
                     renderEvaluationForm(teacherName);
                 } else {
                     document.getElementById('evaluation-form-container').innerHTML = '';
+                    document.getElementById('previous-evaluations-container').innerHTML = '';
                 }
             });
+            
+            function renderPreviousEvaluations(teacherName) {
+                const container = document.getElementById('previous-evaluations-container');
+                const previousEvals = EVALUATIONS_DATABASE.filter(e => e.teacherName === teacherName);
+                
+                if(previousEvals.length === 0) {
+                    container.innerHTML = '';
+                    return;
+                }
+
+                let listHTML = `<div class="card">
+                    <h3 data-lang-en="Previous Evaluations for ${teacherName}" data-lang-fr="Évaluations Précédentes pour ${teacherName}">Previous Evaluations for ${teacherName}</h3>
+                    <ul class="previous-eval-list">`;
+
+                previousEvals.sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(ev => {
+                    listHTML += `<li>
+                        <span>
+                            <i class="fas fa-calendar-alt"></i> ${new Date(ev.date).toLocaleDateString()}
+                            - <b data-lang-en="Score:" data-lang-fr="Score :">Score:</b> ${ev.grandTotal}/100
+                        </span>
+                        <button class="view-btn" onclick="showEvaluationDetails('${ev.id}')">
+                            <i class="fas fa-eye"></i> <span data-lang-en="View" data-lang-fr="Voir">View</span>
+                        </button>
+                    </li>`;
+                });
+
+                listHTML += `</ul></div>`;
+                container.innerHTML = listHTML;
+                setLanguage(state.currentLang);
+            }
 
             // --- Comprehensive 100-Point Evaluation System ---
             function renderEvaluationForm(teacherName) {
+                const existingEvalsCount = EVALUATIONS_DATABASE.filter(e => e.teacherName === teacherName).length;
+                const visitNumber = existingEvalsCount + 1;
+
                 const criteria = {
                     preparation: {
                         title_en: "PREPARATION AND PLANNING",
@@ -331,36 +399,28 @@
                     }
                 };
 
-                // Performance Level Function
-                function getPerformanceLevel(score) {
-                    if (score >= 90) return { label_en: "Excellent", label_fr: "Excellent", class: "excellent", color: "#27ae60" };
-                    if (score >= 80) return { label_en: "Very Good", label_fr: "Très Bien", class: "very-good", color: "#2ecc71" };
-                    if (score >= 70) return { label_en: "Good", label_fr: "Bien", class: "good", color: "#f39c12" };
-                    if (score >= 60) return { label_en: "Satisfactory", label_fr: "Satisfaisant", class: "satisfactory", color: "#e67e22" };
-                    return { label_en: "Needs Improvement", label_fr: "Besoin d'Amélioration", class: "needs-improvement", color: "#e74c3c" };
-                }
-
                 let formHTML = `<form id="eval-form" class="card">
-                    <h3>${state.currentLang === 'fr' ? 'Évaluation Professionnelle pour' : 'Professional Evaluation for'} ${teacherName}</h3>
+                    <h3>${state.currentLang === 'fr' ? 'Nouvelle Évaluation pour' : 'New Evaluation for'} ${teacherName}</h3>
                     
                     <div class="evaluation-metadata">
                         <div class="metadata-row">
-                            <div class="metadata-item">
-                                <label for="class-field">${state.currentLang === 'fr' ? 'Classe:' : 'Class:'}</label>
-                                <input type="text" id="class-field" name="class" required placeholder="${state.currentLang === 'fr' ? 'Ex: 5ème A' : 'Ex: Grade 5A'}">
+                             <div class="metadata-item">
+                                <label for="visit-number">${state.currentLang === 'fr' ? 'Numéro de Visite:' : 'Visit Number:'}</label>
+                                <input type="text" id="visit-number" name="visitNumber" value="${visitNumber}" readonly>
                             </div>
                             <div class="metadata-item">
-                                <label for="semester-field">${state.currentLang === 'fr' ? 'Semestre:' : 'Semester:'}</label>
-                                <select id="semester-field" name="semester" required>
-                                    <option value="">${state.currentLang === 'fr' ? 'Choisir...' : 'Choose...'}</option>
-                                    <option value="Fall">${state.currentLang === 'fr' ? 'Automne' : 'Fall'}</option>
-                                    <option value="Spring">${state.currentLang === 'fr' ? 'Printemps' : 'Spring'}</option>
-                                    <option value="Summer">${state.currentLang === 'fr' ? 'Été' : 'Summer'}</option>
+                                <label for="visit-date">${state.currentLang === 'fr' ? 'Date de Visite:' : 'Visit Date:'}</label>
+                                <input type="date" id="visit-date" name="visitDate" required value="${new Date().toISOString().split('T')[0]}">
+                            </div>
+                             <div class="metadata-item">
+                                <label for="session-number">${state.currentLang === 'fr' ? 'Numéro de Séance:' : 'Session Number:'}</label>
+                                <select id="session-number" name="sessionNumber" required>
+                                    ${Array.from({length: 8}, (_, i) => `<option value="${i+1}">${i+1}</option>`).join('')}
                                 </select>
                             </div>
                             <div class="metadata-item">
-                                <label for="visit-date">${state.currentLang === 'fr' ? 'Date de visite:' : 'Visit Date:'}</label>
-                                <input type="date" id="visit-date" name="visitDate" required value="${new Date().toISOString().split('T')[0]}">
+                                <label for="subject-field">${state.currentLang === 'fr' ? 'Matière:' : 'Subject:'}</label>
+                                <input type="text" id="subject-field" name="subject" required placeholder="${state.currentLang === 'fr' ? 'Ex: Mathématiques' : 'Ex: Mathematics'}">
                             </div>
                         </div>
                     </div>`;
@@ -476,27 +536,17 @@
                         // Calculate weighted score (rating/5 * maxPoints)
                         const weightedScore = Math.round((ratingValue / 5) * maxPoints);
                         
-                        // Update individual criteria display
                         const criteriaIndex = rating.name.replace('crit', '');
-                        const scoreDisplay = container.querySelector(`[data-criteria="${criteriaIndex}"]`);
-                        if (scoreDisplay) {
-                            scoreDisplay.textContent = weightedScore;
-                        }
+                        container.querySelector(`[data-criteria="${criteriaIndex}"]`).textContent = weightedScore;
                         
-                        // Add to category total
                         categoryTotals[category] += weightedScore;
                         grandTotal += weightedScore;
                     });
                     
-                    // Update category totals
                     Object.keys(categoryTotals).forEach(category => {
-                        const categoryDisplay = container.querySelector(`[data-category="${category}"]`);
-                        if (categoryDisplay) {
-                            categoryDisplay.textContent = categoryTotals[category];
-                        }
+                        container.querySelector(`[data-category="${category}"]`).textContent = categoryTotals[category];
                     });
                     
-                    // Update grand total and performance level
                     document.getElementById('grand-total-display').textContent = grandTotal;
                     
                     const performanceLevel = getPerformanceLevel(grandTotal);
@@ -505,7 +555,6 @@
                     levelDisplay.className = `performance-level ${performanceLevel.class}`;
                     levelDisplay.style.color = performanceLevel.color;
                     
-                    // Enable Word generation if all criteria are rated
                     const wordBtn = document.getElementById('generate-word-btn');
                     const allRated = ratings.length === criteriaIndex;
                     wordBtn.disabled = !allRated;
@@ -513,71 +562,108 @@
                     return { grandTotal, categoryTotals, performanceLevel };
                 }
                 
-                // Attach calculation to form changes
                 container.querySelector('#eval-form').addEventListener('change', calculateScores);
                 
                 // Word Document Generation
                 async function generateWordDocument(evaluationData) {
-                    try {
-                        const { Document, Paragraph, TextRun, HeadingLevel, AlignmentType, Packer } = docx;
-                        
-                        const doc = new Document({
-                            sections: [{
-                                properties: {},
-                                children: [
-                                    new Paragraph({
-                                        text: state.currentLang === 'fr' ? 'RAPPORT D\'ÉVALUATION PROFESSIONNELLE' : 'PROFESSIONAL EVALUATION REPORT',
-                                        heading: HeadingLevel.HEADING_1,
-                                        alignment: AlignmentType.CENTER,
-                                    }),
-                                    new Paragraph({ text: '' }),
-                                    new Paragraph({ children: [new TextRun({ text: (state.currentLang === 'fr' ? 'Enseignant: ' : 'Teacher: ') + evaluationData.teacherName, bold: true })] }),
-                                    new Paragraph({ children: [new TextRun({ text: (state.currentLang === 'fr' ? 'Évaluateur: ' : 'Evaluator: ') + evaluationData.coordinatorName })] }),
-                                    new Paragraph({ children: [new TextRun({ text: (state.currentLang === 'fr' ? 'Classe: ' : 'Class: ') + evaluationData.class })] }),
-                                    new Paragraph({ children: [new TextRun({ text: (state.currentLang === 'fr' ? 'Semestre: ' : 'Semester: ') + evaluationData.semester })] }),
-                                    new Paragraph({ children: [new TextRun({ text: (state.currentLang === 'fr' ? 'Date: ' : 'Date: ') + evaluationData.visitDate })] }),
-                                    new Paragraph({ text: '' }),
-                                    new Paragraph({ children: [new TextRun({ text: (state.currentLang === 'fr' ? 'SCORE TOTAL: ' : 'TOTAL SCORE: ') + evaluationData.grandTotal + '/100', bold: true, size: 24 })] }),
-                                    new Paragraph({ children: [new TextRun({ text: (state.currentLang === 'fr' ? 'Niveau: ' : 'Level: ') + (evaluationData.performanceLevel ? evaluationData.performanceLevel[`label_${state.currentLang}`] : 'N/A'), bold: true })] }),
-                                    new Paragraph({ text: '' }),
-                                    new Paragraph({ children: [new TextRun({ text: state.currentLang === 'fr' ? 'FORCES ET EXCELLENCE' : 'STRENGTHS AND EXCELLENCE', bold: true })] }),
-                                    new Paragraph({ children: [new TextRun({ text: evaluationData.comments.strengths })] }),
-                                    new Paragraph({ text: '' }),
-                                    new Paragraph({ children: [new TextRun({ text: state.currentLang === 'fr' ? 'DOMAINES À AMÉLIORER' : 'AREAS FOR IMPROVEMENT', bold: true })] }),
-                                    new Paragraph({ children: [new TextRun({ text: evaluationData.comments.toImprove })] }),
-                                    new Paragraph({ text: '' }),
-                                    new Paragraph({ children: [new TextRun({ text: state.currentLang === 'fr' ? 'RECOMMANDATIONS SPÉCIFIQUES' : 'SPECIFIC RECOMMENDATIONS', bold: true })] }),
-                                    new Paragraph({ children: [new TextRun({ text: evaluationData.comments.recommendations })] }),
-                                ]
-                            }]
-                        });
-                        
-                        const blob = await Packer.toBlob(doc);
-                        const fileName = `Evaluation_${evaluationData.teacherName}_${evaluationData.visitDate}.docx`;
-                        saveAs(blob, fileName);
-                        
-                        return true;
-                    } catch (error) {
-                        console.error('Error generating Word document:', error);
-                        alert(state.currentLang === 'fr' ? 'Erreur lors de la génération du document Word.' : 'Error generating Word document.');
-                        return false;
-                    }
+                     const { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableCell, TableRow, WidthType, AlignmentType, BorderStyle } = docx;
+                    const doc = new Document({
+                        sections: [{
+                            children: [
+                                new Paragraph({ text: state.currentLang === 'fr' ? 'RAPPORT D\'ÉVALUATION PROFESSIONNELLE' : 'PROFESSIONAL EVALUATION REPORT', heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER }),
+                                new Paragraph({ text: '' }),
+                                new Paragraph({ children: [new TextRun({ text: `${state.currentLang === 'fr' ? 'Enseignant' : 'Teacher'}: `, bold: true }), new TextRun(evaluationData.teacherName)] }),
+                                new Paragraph({ children: [new TextRun({ text: `${state.currentLang === 'fr' ? 'Évaluateur' : 'Evaluator'}: `, bold: true }), new TextRun(evaluationData.coordinatorName)] }),
+                                new Paragraph({ children: [new TextRun({ text: `${state.currentLang === 'fr' ? 'Date' : 'Date'}: `, bold: true }), new TextRun(evaluationData.visitDate)] }),
+                                new Paragraph({ children: [new TextRun({ text: `${state.currentLang === 'fr' ? 'Matière' : 'Subject'}: `, bold: true }), new TextRun(evaluationData.subject)] }),
+                                new Paragraph({ children: [new TextRun({ text: `${state.currentLang === 'fr' ? 'Séance' : 'Session'} N°: `, bold: true }), new TextRun(evaluationData.sessionNumber)] }),
+                                new Paragraph({ text: '' }),
+                                new Paragraph({ children: [
+                                    new TextRun({ text: `${state.currentLang === 'fr' ? 'SCORE TOTAL' : 'TOTAL SCORE'}: ${evaluationData.grandTotal}/100`, bold: true, size: 28 }),
+                                    new TextRun({ text: ` (${evaluationData.performanceLevel[`label_${state.currentLang}`]})`, bold: true, color: "008000", size: 28 })
+                                ]}),
+                                new Paragraph({ text: '' }),
+                                new Paragraph({ text: state.currentLang === 'fr' ? 'TABLEAU DES RÉSULTATS' : 'RESULTS TABLE', heading: HeadingLevel.HEADING_2 }),
+                                new Table({
+                                    width: { size: 100, type: WidthType.PERCENTAGE },
+                                    rows: [
+                                        new TableRow({
+                                            children: [
+                                                new TableCell({ width: { size: 60, type: WidthType.PERCENTAGE }, children: [new Paragraph({ text: state.currentLang === 'fr' ? 'Critère' : 'Criterion', alignment: AlignmentType.CENTER })] }),
+                                                new TableCell({ width: { size: 20, type: WidthType.PERCENTAGE }, children: [new Paragraph({ text: state.currentLang === 'fr' ? 'Note (1-5)' : 'Rating (1-5)', alignment: AlignmentType.CENTER })] }),
+                                                new TableCell({ width: { size: 20, type: WidthType.PERCENTAGE }, children: [new Paragraph({ text: state.currentLang === 'fr' ? 'Score' : 'Score', alignment: AlignmentType.CENTER })] }),
+                                            ]
+                                        }),
+                                        // Dynamically create rows from criteria
+                                        ...Object.entries(evaluationData.criteriaDetails).flatMap(([categoryKey, categoryData], catIndex) => {
+                                            const categoryRows = [
+                                                new TableRow({
+                                                    children: [
+                                                        new TableCell({
+                                                            children: [new Paragraph({ text: categoryData[`title_${state.currentLang}`], bold: true })],
+                                                            columnSpan: 3,
+                                                            shading: { fill: "D3D3D3" }
+                                                        })
+                                                    ]
+                                                }),
+                                                ...categoryData.items.map((item, itemIndex) => {
+                                                    const critKey = `crit${Object.values(evaluationData.criteriaDetails).slice(0, catIndex).reduce((acc, val) => acc + val.items.length, 0) + itemIndex}`;
+                                                    const rating = evaluationData.rawCriteria[critKey]?.rating || 0;
+                                                    const score = Math.round((rating / 5) * item.points);
+                                                    return new TableRow({
+                                                        children: [
+                                                            new TableCell({ children: [new Paragraph(item[`text_${state.currentLang}`])] }),
+                                                            new TableCell({ children: [new Paragraph({ text: rating.toString(), alignment: AlignmentType.CENTER })] }),
+                                                            new TableCell({ children: [new Paragraph({ text: `${score}/${item.points}`, alignment: AlignmentType.CENTER })] }),
+                                                        ]
+                                                    });
+                                                })
+                                            ];
+                                            return categoryRows;
+                                        })
+                                    ]
+                                }),
+                                new Paragraph({ text: '' }),
+                                new Paragraph({ text: state.currentLang === 'fr' ? 'FORCES ET POINTS FORTS' : 'STRENGTHS AND STRONG POINTS', heading: HeadingLevel.HEADING_2 }),
+                                new Paragraph(evaluationData.comments.strengths),
+                                new Paragraph({ text: '' }),
+                                new Paragraph({ text: state.currentLang === 'fr' ? 'DOMAINES À AMÉLIORER' : 'AREAS TO IMPROVE', heading: HeadingLevel.HEADING_2 }),
+                                new Paragraph(evaluationData.comments.toImprove),
+                                new Paragraph({ text: '' }),
+                                new Paragraph({ text: state.currentLang === 'fr' ? 'RECOMMANDATIONS' : 'RECOMMENDATIONS', heading: HeadingLevel.HEADING_2 }),
+                                new Paragraph(evaluationData.comments.recommendations),
+                            ]
+                        }]
+                    });
+
+                    Packer.toBlob(doc).then(blob => {
+                        saveAs(blob, `Evaluation_${evaluationData.teacherName}_${evaluationData.visitDate}.docx`);
+                    });
                 }
                 
                 // Word Generation Button
-                container.querySelector('#generate-word-btn').addEventListener('click', async () => {
+                container.querySelector('#generate-word-btn').addEventListener('click', () => {
                     const scores = calculateScores();
                     const formData = new FormData(container.querySelector('#eval-form'));
+                    
+                    const ratings = container.querySelectorAll('input[type="radio"]:checked');
+                    const rawCriteria = {};
+                    ratings.forEach(rating => {
+                        rawCriteria[rating.name] = {
+                            rating: parseInt(rating.value),
+                        };
+                    });
                     
                     const evaluationData = {
                         teacherName,
                         coordinatorName: state.currentUser.username,
-                        class: formData.get('class'),
-                        semester: formData.get('semester'),
+                        subject: formData.get('subject'),
+                        sessionNumber: formData.get('sessionNumber'),
                         visitDate: formData.get('visitDate'),
                         grandTotal: scores.grandTotal,
-                        categoryScores: scores.categoryTotals,
                         performanceLevel: scores.performanceLevel,
+                        criteriaDetails: criteria,
+                        rawCriteria: rawCriteria,
                         comments: {
                             strengths: formData.get('strengths'),
                             toImprove: formData.get('toImprove'),
@@ -586,25 +672,37 @@
                     };
                     
                     if (!evaluationData.comments.strengths || !evaluationData.comments.toImprove || !evaluationData.comments.recommendations) {
-                        alert(state.currentLang === 'fr' ? 'Veuillez remplir tous les commentaires.' : 'Please fill in all comments.');
+                        alert(state.currentLang === 'fr' ? 'Veuillez remplir tous les champs de commentaires.' : 'Please fill in all comment fields.');
                         return;
                     }
                     
-                    await generateWordDocument(evaluationData);
+                    generateWordDocument(evaluationData);
                 });
                 
                 // Form Submission
-                container.querySelector('#eval-form').addEventListener('submit', async (e) => {
+                container.querySelector('#eval-form').addEventListener('submit', (e) => {
                     e.preventDefault();
                     const formData = new FormData(e.target);
                     const scores = calculateScores();
                     
+                    const ratings = container.querySelectorAll('input[type="radio"]:checked');
+                    if (ratings.length < criteriaIndex) {
+                        alert(state.currentLang === 'fr' ? 'Veuillez noter tous les critères avant de soumettre.' : 'Please rate all criteria before submitting.');
+                        return;
+                    }
+                    const rawCriteria = {};
+                     ratings.forEach(rating => {
+                        rawCriteria[rating.name] = {
+                            rating: parseInt(rating.value)
+                        };
+                    });
+
                     const evaluation = {
                         id: Date.now().toString(),
                         teacherName,
                         coordinatorName: state.currentUser.username,
-                        class: formData.get('class'),
-                        semester: formData.get('semester'),
+                        subject: formData.get('subject'),
+                        sessionNumber: formData.get('sessionNumber'),
                         visitDate: formData.get('visitDate'),
                         criteriaDetails: criteria,
                         grandTotal: scores.grandTotal,
@@ -615,28 +713,18 @@
                             toImprove: formData.get('toImprove'),
                             recommendations: formData.get('recommendations')
                         },
-                        date: new Date(),
-                        rawCriteria: {}
+                        date: new Date().toISOString(),
+                        rawCriteria: rawCriteria
                     };
                     
-                    // Store raw criteria scores
-                    const ratings = container.querySelectorAll('input[type="radio"]:checked');
-                    ratings.forEach(rating => {
-                        evaluation.rawCriteria[rating.name] = {
-                            rating: parseInt(rating.value),
-                            maxPoints: parseInt(rating.dataset.maxPoints),
-                            category: rating.dataset.category
-                        };
-                    });
-                    
                     EVALUATIONS_DATABASE.push(evaluation);
-                    console.log('Evaluation saved:', evaluation);
+                    saveEvaluationsToStorage();
                     
                     alert(state.currentLang === 'fr' ? 'Évaluation enregistrée avec succès !' : 'Evaluation saved successfully!');
                     
-                    // Clear form
                     container.innerHTML = '';
                     document.getElementById('teacher-select').value = '';
+                    document.getElementById('previous-evaluations-container').innerHTML = '';
                 });
             }
 
@@ -645,149 +733,133 @@
                 document.getElementById('teacher-welcome').textContent = `${state.currentLang === 'fr' ? 'Bienvenue' : 'Welcome'}, ${state.currentUser.username}`;
                 const reportsContainer = document.getElementById('evaluation-reports');
                 
-                // Filter evaluations for this teacher
                 const evaluations = EVALUATIONS_DATABASE.filter(eval => eval.teacherName === state.currentUser.username);
-                console.log(`Found ${evaluations.length} evaluations for ${state.currentUser.username}`);
                 
                 if (evaluations.length === 0) {
-                    reportsContainer.innerHTML = `
-                        <div class="card no-evaluations">
-                            <h3>${state.currentLang === 'fr' ? 'Aucune évaluation disponible' : 'No evaluations available'}</h3>
-                            <p>${state.currentLang === 'fr' ? 'Vos évaluations apparaîtront ici une fois qu\'elles seront effectuées par les coordinateurs.' : 'Your evaluations will appear here once they are conducted by coordinators.'}</p>
-                        </div>
-                    `;
+                    reportsContainer.innerHTML = `<div class="card no-evaluations">
+                        <h3>${state.currentLang === 'fr' ? 'Aucune évaluation disponible' : 'No evaluations available'}</h3>
+                        <p>${state.currentLang === 'fr' ? 'Vos évaluations apparaîtront ici.' : 'Your evaluations will appear here.'}</p>
+                    </div>`;
                     return;
                 }
                 
-                // Sort evaluations by date (most recent first)
                 evaluations.sort((a, b) => new Date(b.date) - new Date(a.date));
                 
-                // Generate reports HTML with enhanced design
                 let reportsHTML = '';
                 evaluations.forEach((eval, index) => {
-                    const performanceLevel = getPerformanceLevel(eval.grandTotal);
                     const isLatest = index === 0;
                     
                     reportsHTML += `
                         <div class="evaluation-card ${isLatest ? 'latest' : ''}">
                             <div class="card-header">
                                 <div class="eval-date">
-                                    <i class="fas fa-calendar"></i>
+                                    <i class="fas fa-calendar-check"></i>
                                     ${new Date(eval.date).toLocaleDateString()}
-                                    ${isLatest ? `<span class="latest-badge">${state.currentLang === 'fr' ? 'Récent' : 'Latest'}</span>` : ''}
+                                    ${isLatest ? `<span class="latest-badge">${state.currentLang === 'fr' ? 'RÉCENT' : 'LATEST'}</span>` : ''}
                                 </div>
-                                <div class="eval-score">
-                                    <span class="score-number">${eval.grandTotal}</span>
-                                    <span class="score-max">/100</span>
+                                <div class="eval-meta">
+                                    <span data-lang-en="Evaluator" data-lang-fr="Évaluateur">Evaluator</span>: ${eval.coordinatorName}
                                 </div>
                             </div>
                             
                             <div class="card-content">
-                                <div class="eval-meta">
-                                    <div><strong>${state.currentLang === 'fr' ? 'Évaluateur:' : 'Evaluator:'}</strong> ${eval.coordinatorName}</div>
-                                    <div><strong>${state.currentLang === 'fr' ? 'Classe:' : 'Class:'}</strong> ${eval.class || 'N/A'}</div>
-                                    <div><strong>${state.currentLang === 'fr' ? 'Semestre:' : 'Semester:'}</strong> ${eval.semester || 'N/A'}</div>
-                                </div>
-                                
-                                <div class="performance-badge ${performanceLevel ? performanceLevel.class : ''}">
-                                    ${performanceLevel ? (state.currentLang === 'fr' ? performanceLevel.label_fr : performanceLevel.label_en) : 'N/A'}
-                                </div>
-                                
-                                <div class="category-breakdown">
-                                    <h5>${state.currentLang === 'fr' ? 'Répartition par Catégorie' : 'Category Breakdown'}</h5>
-                                    ${eval.categoryScores ? Object.entries(eval.categoryScores).map(([category, score]) => {
-                                        const categoryData = {
-                                            preparation: { maxPoints: 25, title_en: "Preparation", title_fr: "Préparation" },
-                                            activities: { maxPoints: 30, title_en: "Activities", title_fr: "Activités" },
-                                            classroomControl: { maxPoints: 20, title_en: "Classroom Control", title_fr: "Contrôle" },
-                                            personalCriteria: { maxPoints: 25, title_en: "Personal Criteria", title_fr: "Critères Personnels" }
-                                        }[category] || { maxPoints: 0, title_en: category, title_fr: category };
-                                        
-                                        const percentage = Math.round((score / categoryData.maxPoints) * 100);
-                                        return `
-                                            <div class="category-item">
-                                                <span class="category-name">${categoryData[`title_${state.currentLang}`]}</span>
-                                                <span class="category-score">${score}/${categoryData.maxPoints}</span>
-                                                <div class="progress-bar">
-                                                    <div class="progress-fill" style="width: ${percentage}%; background: ${performanceLevel ? performanceLevel.color : '#ccc'};"></div>
-                                                </div>
-                                            </div>`;
-                                    }).join('') : '<p>Category details not available</p>'}
-                                </div>
-                                
-                                <div class="comments-preview">
-                                    <div class="comment-item">
-                                        <h6>${state.currentLang === 'fr' ? 'Forces' : 'Strengths'}</h6>
-                                        <p>${eval.comments?.strengths || eval.comments?.toImprove || 'No comments available'}</p>
+                                <div class="overall-progress">
+                                    <div class="progress-bar-container">
+                                        <div class="progress-bar-fill" style="width: ${eval.grandTotal}%; background-color: ${eval.performanceLevel.color};"></div>
                                     </div>
-                                    <div class="comment-item">
-                                        <h6>${state.currentLang === 'fr' ? 'Améliorations' : 'Improvements'}</h6>
-                                        <p>${eval.comments?.recommendations || eval.comments?.toEliminate || 'No comments available'}</p>
+                                    <div class="score-summary">
+                                        <span class="score-number">${eval.grandTotal}</span>
+                                        <span class="score-max">/100</span>
+                                        <span class="performance-badge" style="background-color: ${eval.performanceLevel.color}">${state.currentLang === 'fr' ? eval.performanceLevel.label_fr : eval.performanceLevel.label_en}</span>
                                     </div>
                                 </div>
                                 
                                 <div class="card-actions">
-                                    <button onclick="generateWordReport('${eval.id}')" class="download-btn">
-                                        <i class="fas fa-file-word"></i>
-                                        ${state.currentLang === 'fr' ? 'Télécharger Word' : 'Download Word'}
+                                    <button class="details-btn" onclick="showEvaluationDetails('${eval.id}')">
+                                        <i class="fas fa-search-plus"></i>
+                                        ${state.currentLang === 'fr' ? 'Voir Détails' : 'View Details'}
                                     </button>
                                 </div>
                             </div>
-                        </div>
-                    `;
+                        </div>`;
                 });
                 
                 reportsContainer.innerHTML = reportsHTML;
-                
-                // Performance Level Function (Global)
-                window.getPerformanceLevel = function(score) {
-                    if (score >= 90) return { label_en: "Excellent", label_fr: "Excellent", class: "excellent", color: "#27ae60" };
-                    if (score >= 80) return { label_en: "Very Good", label_fr: "Très Bien", class: "very-good", color: "#2ecc71" };
-                    if (score >= 70) return { label_en: "Good", label_fr: "Bien", class: "good", color: "#f39c12" };
-                    if (score >= 60) return { label_en: "Satisfactory", label_fr: "Satisfaisant", class: "satisfactory", color: "#e67e22" };
-                    return { label_en: "Needs Improvement", label_fr: "Besoin d'Amélioration", class: "needs-improvement", color: "#e74c3c" };
-                };
+                setLanguage(state.currentLang);
             }
             
-            // --- Global Word Report Generation ---
-            window.generateWordReport = async function(evalId) {
-                const evaluation = EVALUATIONS_DATABASE.find(eval => eval.id === evalId);
-                if (!evaluation) return;
-                
-                try {
-                    const { Document, Paragraph, TextRun, HeadingLevel, AlignmentType, Packer } = docx;
-                    
-                    const doc = new Document({
-                        sections: [{
-                            properties: {},
-                            children: [
-                                new Paragraph({
-                                    text: state.currentLang === 'fr' ? 'RAPPORT D\'ÉVALUATION PROFESSIONNEL' : 'PROFESSIONAL EVALUATION REPORT',
-                                    heading: HeadingLevel.HEADING_1,
-                                    alignment: AlignmentType.CENTER,
-                                }),
-                                new Paragraph({ text: '' }),
-                                new Paragraph({ children: [new TextRun({ text: (state.currentLang === 'fr' ? 'Enseignant: ' : 'Teacher: ') + evaluation.teacherName, bold: true })] }),
-                                new Paragraph({ children: [new TextRun({ text: (state.currentLang === 'fr' ? 'Évaluateur: ' : 'Evaluator: ') + evaluation.coordinatorName })] }),
-                                new Paragraph({ children: [new TextRun({ text: (state.currentLang === 'fr' ? 'Date: ' : 'Date: ') + new Date(evaluation.date).toLocaleDateString() })] }),
-                                new Paragraph({ children: [new TextRun({ text: (state.currentLang === 'fr' ? 'Classe: ' : 'Class: ') + (evaluation.class || 'N/A') })] }),
-                                new Paragraph({ children: [new TextRun({ text: (state.currentLang === 'fr' ? 'Semestre: ' : 'Semester: ') + (evaluation.semester || 'N/A') })] }),
-                                new Paragraph({ text: '' }),
-                                new Paragraph({ children: [new TextRun({ text: (state.currentLang === 'fr' ? 'SCORE TOTAL: ' : 'TOTAL SCORE: ') + evaluation.grandTotal + '/100', bold: true })] }),
-                                new Paragraph({ text: '' }),
-                                new Paragraph({ children: [new TextRun({ text: state.currentLang === 'fr' ? 'COMMENTAIRES' : 'COMMENTS', bold: true })] }),
-                                new Paragraph({ children: [new TextRun({ text: evaluation.comments?.strengths || evaluation.comments?.toImprove || 'No comments available' })] }),
-                            ]
-                        }]
-                    });
-                    
-                    const blob = await Packer.toBlob(doc);
-                    const fileName = `Evaluation_${evaluation.teacherName}_${new Date(evaluation.date).toISOString().split('T')[0]}.docx`;
-                    saveAs(blob, fileName);
-                } catch (error) {
-                    console.error('Download error:', error);
-                    alert(state.currentLang === 'fr' ? 'Erreur lors du téléchargement.' : 'Download error.');
+            // --- Modal Logic ---
+            const modal = document.getElementById('details-modal');
+            const closeModalBtn = document.getElementById('close-modal-btn');
+            
+            closeModalBtn.onclick = () => modal.style.display = "none";
+            window.onclick = (event) => {
+                if (event.target == modal) {
+                    modal.style.display = "none";
                 }
+            }
+
+            window.showEvaluationDetails = function(evalId) {
+                const evaluation = EVALUATIONS_DATABASE.find(ev => ev.id === evalId);
+                if (!evaluation) return;
+
+                const modalBody = document.getElementById('modal-body-content');
+                let detailsHTML = `
+                    <div class="detail-grid">
+                        <div><strong>${state.currentLang === 'fr' ? 'Date' : 'Date'}:</strong> ${new Date(evaluation.date).toLocaleDateString()}</div>
+                        <div><strong>${state.currentLang === 'fr' ? 'Évaluateur' : 'Evaluator'}:</strong> ${evaluation.coordinatorName}</div>
+                        <div><strong>${state.currentLang === 'fr' ? 'Matière' : 'Subject'}:</strong> ${evaluation.subject}</div>
+                        <div><strong>${state.currentLang === 'fr' ? 'Séance N°' : 'Session #'}:</strong> ${evaluation.sessionNumber}</div>
+                    </div>
+                    <h4>${state.currentLang === 'fr' ? 'Scores par critère' : 'Scores by criterion'}</h4>
+                `;
+                
+                let criteriaTableHTML = `<div class="criteria-table-details">`;
+                let critIndex = 0;
+                for (const categoryKey in evaluation.criteriaDetails) {
+                    const category = evaluation.criteriaDetails[categoryKey];
+                    criteriaTableHTML += `<div class="category-detail-header">${category[`title_${state.currentLang}`]}</div>`;
+                    
+                    category.items.forEach(item => {
+                        const critKey = `crit${critIndex}`;
+                        const rating = evaluation.rawCriteria[critKey]?.rating || 'N/A';
+                        const score = (rating !== 'N/A') ? Math.round((rating / 5) * item.points) : 'N/A';
+                        
+                        criteriaTableHTML += `
+                            <div class="criteria-detail-row">
+                                <div class="criteria-detail-text">${item[`text_${state.currentLang}`]}</div>
+                                <div class="criteria-detail-rating">Note: <strong>${rating}/5</strong></div>
+                                <div class="criteria-detail-score">Score: <strong>${score}/${item.points}</strong></div>
+                            </div>
+                        `;
+                        critIndex++;
+                    });
+                }
+                criteriaTableHTML += `</div>`;
+
+                detailsHTML += criteriaTableHTML;
+
+                detailsHTML += `
+                    <h4>${state.currentLang === 'fr' ? 'Commentaires' : 'Comments'}</h4>
+                    <div class="comments-details">
+                        <div class="comment-item"><h6><i class="fas fa-star"></i> ${state.currentLang === 'fr' ? 'Forces' : 'Strengths'}</h6><p>${evaluation.comments.strengths}</p></div>
+                        <div class="comment-item"><h6><i class="fas fa-arrow-up"></i> ${state.currentLang === 'fr' ? 'Améliorations' : 'Improvements'}</h6><p>${evaluation.comments.toImprove}</p></div>
+                        <div class="comment-item"><h6><i class="fas fa-lightbulb"></i> ${state.currentLang === 'fr' ? 'Recommandations' : 'Recommendations'}</h6><p>${evaluation.comments.recommendations}</p></div>
+                    </div>
+                `;
+
+                modalBody.innerHTML = detailsHTML;
+                modal.style.display = 'flex';
+                setLanguage(state.currentLang);
+            };
+            
+             // --- Performance Level Function (Global) ---
+            window.getPerformanceLevel = function(score) {
+                if (score >= 90) return { label_en: "Excellent", label_fr: "Excellent", class: "excellent", color: "#27ae60" };
+                if (score >= 80) return { label_en: "Very Good", label_fr: "Très Bien", class: "very-good", color: "#2ecc71" };
+                if (score >= 70) return { label_en: "Good", label_fr: "Bien", class: "good", color: "#f39c12" };
+                if (score >= 60) return { label_en: "Satisfactory", label_fr: "Satisfaisant", class: "satisfactory", color: "#e67e22" };
+                return { label_en: "Needs Improvement", label_fr: "Besoin d'Amélioration", class: "needs-improvement", color: "#e74c3c" };
             };
 
             // --- Settings Management ---
@@ -799,52 +871,33 @@
                 const schoolNameInput = document.getElementById('school-name-input');
                 const logoUrlInput = document.getElementById('logo-url-input');
                 
-                if (!settingsBtn || !settingsPanel) return;
-                
-                // Load saved settings
                 const savedSchoolName = localStorage.getItem('schoolName') || 'Educational Excellence Institute';
                 const savedLogoUrl = localStorage.getItem('logoUrl') || 'https://lh3.googleusercontent.com/d/1lQ3Babrs3Wgv4rakVmkK0oCWcM0cTKPK';
                 
-                if (schoolNameInput) schoolNameInput.value = savedSchoolName;
-                if (logoUrlInput) logoUrlInput.value = savedLogoUrl;
+                schoolNameInput.value = savedSchoolName;
+                logoUrlInput.value = savedLogoUrl;
                 
-                settingsBtn.addEventListener('click', () => {
-                    settingsPanel.classList.add('active');
+                settingsBtn.addEventListener('click', () => settingsPanel.classList.add('active'));
+                closeSettings.addEventListener('click', () => settingsPanel.classList.remove('active'));
+                
+                saveSettings.addEventListener('click', () => {
+                    const schoolName = schoolNameInput.value.trim() || 'Educational Excellence Institute';
+                    const logoUrl = logoUrlInput.value.trim() || 'https://lh3.googleusercontent.com/d/1lQ3Babrs3Wgv4rakVmkK0oCWcM0cTKPK';
+                    
+                    localStorage.setItem('schoolName', schoolName);
+                    localStorage.setItem('logoUrl', logoUrl);
+                    
+                    updateSchoolDisplay(schoolName, logoUrl);
+                    settingsPanel.classList.remove('active');
+                    alert(state.currentLang === 'fr' ? 'Paramètres sauvegardés !' : 'Settings saved!');
                 });
                 
-                if (closeSettings) {
-                    closeSettings.addEventListener('click', () => {
-                        settingsPanel.classList.remove('active');
-                    });
-                }
-                
-                if (saveSettings) {
-                    saveSettings.addEventListener('click', () => {
-                        const schoolName = (schoolNameInput?.value?.trim()) || 'Educational Excellence Institute';
-                        const logoUrl = (logoUrlInput?.value?.trim()) || 'https://lh3.googleusercontent.com/d/1lQ3Babrs3Wgv4rakVmkK0oCWcM0cTKPK';
-                        
-                        localStorage.setItem('schoolName', schoolName);
-                        localStorage.setItem('logoUrl', logoUrl);
-                        
-                        // Update the logo immediately
-                        const schoolLogoImg = document.querySelector('.school-logo img');
-                        if (schoolLogoImg) schoolLogoImg.src = logoUrl;
-                        
-                        settingsPanel.classList.remove('active');
-                        alert(state.currentLang === 'fr' ? 'Paramètres sauvegardés !' : 'Settings saved!');
-                    });
-                }
-                
-                // Click outside to close
                 settingsPanel.addEventListener('click', (e) => {
-                    if (e.target === settingsPanel) {
-                        settingsPanel.classList.remove('active');
-                    }
+                    if (e.target === settingsPanel) settingsPanel.classList.remove('active');
                 });
             };
             
             function updateSchoolDisplay(schoolName, logoUrl) {
-                // Update school logo if exists
                 const schoolLogoImg = document.querySelector('.school-logo img');
                 if (schoolLogoImg && logoUrl) {
                     schoolLogoImg.src = logoUrl;
@@ -852,29 +905,7 @@
                         this.src = 'https://lh3.googleusercontent.com/d/1lQ3Babrs3Wgv4rakVmkK0oCWcM0cTKPK';
                     };
                 }
-                
-                // Update title with school name
-                const titleElements = document.querySelectorAll('h1');
-                titleElements.forEach(title => {
-                    if (title.textContent.includes('Dashboard')) {
-                        const role = title.textContent.includes('Coordinator') ? 
-                            (state.currentLang === 'fr' ? 'Coordinateur' : 'Coordinator') :
-                            (state.currentLang === 'fr' ? 'Enseignant' : 'Teacher');
-                        title.textContent = `${schoolName} - ${role} Dashboard`;
-                    }
-                });
             }
-            
-            // Show settings for coordinators after login
-            setTimeout(() => {
-                if (state.currentUser && state.currentUser.role === 'coordinator') {
-                    const settingsBtn = document.getElementById('settings-btn');
-                    if (settingsBtn) {
-                        settingsBtn.style.display = 'block';
-                        window.initSettingsPanel();
-                    }
-                }
-            }, 500);
             
             // Initial load
             setLanguage('en');
