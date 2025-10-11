@@ -9,6 +9,11 @@
 <body>
 
     <div class="container">
+        <!-- School Logo -->
+        <div class="school-logo">
+            <img src="https://lh3.googleusercontent.com/d/1lQ3Babrs3Wgv4rakVmkK0oCWcM0cTKPK" alt="School Logo" />
+        </div>
+
         <!-- Language Switcher -->
         <div class="language-switcher">
             <button id="lang-en">English</button>
@@ -150,9 +155,9 @@
             // --- Base de données utilisateurs côté client (solution temporaire fonctionnelle) ---
             const USERS_DATABASE = [
                 // Coordinateurs
-                { username: 'Mohamed', password: 'Mohamed@86', role: 'coordinator', assignedTeachers: ['Morched', 'Kamel', 'Abas', 'Zine', 'Youssef', 'Oumarou', 'Tonga', 'Sylvano', 'Sami', 'Mohamed Ali'] },
-                { username: 'Zohra', password: 'Zohra@40', role: 'coordinator', assignedTeachers: ['Aichetou', 'Inas', 'Anwar', 'Souha', 'Amal', 'Shanouja', 'Jana', 'Hiba'] },
-                { username: 'Rasha', password: 'Rasha@26', role: 'coordinator', assignedTeachers: ['Amal', 'Rouba', 'Rayan', 'Imane', 'Nesrine', 'Fatima', 'Samar', 'Romana', 'Nour'] },
+                { username: 'Mohamed', password: 'Medch!!!', role: 'coordinator', assignedTeachers: ['Morched', 'Kamel', 'Abas', 'Zine', 'Youssef', 'Oumarou', 'Tonga', 'Sylvano', 'Sami', 'Mohamed Ali'] },
+                { username: 'Zohra', password: 'Zohra**!!', role: 'coordinator', assignedTeachers: ['Aichetou', 'Inas', 'Anwar', 'Souha', 'Amal', 'Shanouja', 'Jana', 'Hiba'] },
+                { username: 'Racha', password: 'Racha@@!!', role: 'coordinator', assignedTeachers: ['Amal', 'Rouba', 'Rayan', 'Imane', 'Nesrine', 'Fatima', 'Samar', 'Romana', 'Nour'] },
                 // Enseignants
                 ...['Morched', 'Kamel', 'Abas', 'Zine', 'Youssef', 'Oumarou', 'Tonga', 'Sylvano', 'Sami', 'Mohamed Ali', 'Aichetou', 'Inas', 'Anwar', 'Souha', 'Amal', 'Shanouja', 'Jana', 'Hiba', 'Rouba', 'Rayan', 'Imane', 'Nesrine', 'Fatima', 'Samar', 'Romana', 'Nour'].map(name => ({ username: name, password: name, role: 'teacher' }))
             ];
@@ -241,49 +246,97 @@
             // --- Evaluation Form ---
             function renderEvaluationForm(teacherName) {
                 const criteria = {
-                    professionalOutlook: {
-                        title_en: "PROFESSIONAL OUTLOOK",
-                        title_fr: "PERSPECTIVE PROFESSIONNELLE",
+                    preparation: {
+                        title_en: "PREPARATION AND PLANNING",
+                        title_fr: "PRÉPARATION ET PLANIFICATION",
+                        maxPoints: 25,
                         items: [
-                            { text_en: "Speaks with an effective voice and tone.", text_fr: "Parle avec une voix et un ton efficaces." },
-                            { text_en: "Uses standard English in both oral and written expression.", text_fr: "Utilise un anglais standard à l'oral et à l'écrit." },
-                            { text_en: "Uses appropriate eye contact, body language, movement, and posture.", text_fr: "Utilise un contact visuel, un langage corporel, des mouvements et une posture appropriés." },
+                            { text_en: "Prepares comprehensive lesson plans with clear learning objectives", text_fr: "Prépare des plans de cours complets avec des objectifs d'apprentissage clairs", points: 5 },
+                            { text_en: "Demonstrates thorough knowledge of curriculum and standards", text_fr: "Démontre une connaissance approfondie du curriculum et des standards", points: 5 },
+                            { text_en: "Selects appropriate materials and resources for lessons", text_fr: "Sélectionne des matériaux et ressources appropriés pour les leçons", points: 5 },
+                            { text_en: "Plans differentiated instruction to meet diverse student needs", text_fr: "Planifie un enseignement différencié pour répondre aux besoins diversifiés des étudiants", points: 5 },
+                            { text_en: "Designs assessments aligned with learning objectives", text_fr: "Conçoit des évaluations alignées avec les objectifs d'apprentissage", points: 5 }
                         ]
                     },
-                    contentKnowledge: {
-                         title_en: "CONTENT KNOWLEDGE",
-                         title_fr: "CONNAISSANCE DU CONTENU",
-                         items: [
-                            { text_en: "Integrates literacy AND mathematics into content area instruction when necessary.", text_fr: "Intègre la littératie ET les mathématiques dans l'enseignement disciplinaire si nécessaire." },
-                            { text_en: "Demonstrates appropriate level of knowledge and skills in content area(s).", text_fr: "Démontre un niveau approprié de connaissances et de compétences dans le(s) domaine(s) de contenu." },
-                         ]
-                    },
-                    instructionAndAssessments: {
-                        title_en: "INSTRUCTION AND ASSESSMENTS",
-                        title_fr: "ENSEIGNEMENT ET ÉVALUATIONS",
+                    activities: {
+                        title_en: "TEACHING ACTIVITIES AND METHODS",
+                        title_fr: "ACTIVITÉS ET MÉTHODES D'ENSEIGNEMENT",
+                        maxPoints: 30,
                         items: [
-                            { text_en: "Prepares detailed lesson plans with significant objectives that reflect key concepts.", text_fr: "Prépare des plans de leçon détaillés avec des objectifs significatifs qui reflètent les concepts clés."},
-                            { text_en: "Plans instructional strategies and activities that require higher order thinking skills.", text_fr: "Planifie des stratégies et des activités pédagogiques qui nécessitent des compétences de pensée d'ordre supérieur."},
-                            { text_en: "Uses questioning strategies to engage students and stimulate higher order thinking.", text_fr: "Utilise des stratégies de questionnement pour engager les étudiants et stimuler la pensée d'ordre supérieur."},
+                            { text_en: "Delivers clear and well-structured lessons", text_fr: "Dispense des leçons claires et bien structurées", points: 6 },
+                            { text_en: "Uses varied teaching strategies and methodologies effectively", text_fr: "Utilise efficacement des stratégies et méthodologies d'enseignement variées", points: 6 },
+                            { text_en: "Incorporates technology and multimedia resources appropriately", text_fr: "Intègre de manière appropriée la technologie et les ressources multimédias", points: 6 },
+                            { text_en: "Promotes critical thinking and problem-solving skills", text_fr: "Favorise la pensée critique et les compétences de résolution de problèmes", points: 6 },
+                            { text_en: "Provides timely and constructive feedback to students", text_fr: "Fournit aux étudiants des commentaires opportuns et constructifs", points: 6 }
+                        ]
+                    },
+                    classroomControl: {
+                        title_en: "CLASSROOM MANAGEMENT AND CONTROL",
+                        title_fr: "GESTION ET CONTRÔLE DE LA CLASSE",
+                        maxPoints: 20,
+                        items: [
+                            { text_en: "Maintains an organized and conducive learning environment", text_fr: "Maintient un environnement d'apprentissage organisé et propice", points: 5 },
+                            { text_en: "Manages student behavior effectively and fairly", text_fr: "Gère le comportement des étudiants de manière efficace et équitable", points: 5 },
+                            { text_en: "Uses time efficiently and maintains lesson pace", text_fr: "Utilise le temps efficacement et maintient le rythme de la leçon", points: 5 },
+                            { text_en: "Handles disruptions professionally and minimally", text_fr: "Gère les perturbations de manière professionnelle et minimale", points: 5 }
+                        ]
+                    },
+                    personalCriteria: {
+                        title_en: "PERSONAL AND PROFESSIONAL QUALITIES",
+                        title_fr: "QUALITÉS PERSONNELLES ET PROFESSIONNELLES",
+                        maxPoints: 25,
+                        items: [
+                            { text_en: "Demonstrates professional appearance and punctuality", text_fr: "Démontre une apparence professionnelle et une ponctualité", points: 5 },
+                            { text_en: "Shows enthusiasm and passion for teaching", text_fr: "Montre de l'enthousiasme et une passion pour l'enseignement", points: 5 },
+                            { text_en: "Communicates effectively with students using appropriate language", text_fr: "Communique efficacement avec les étudiants en utilisant un langage approprié", points: 5 },
+                            { text_en: "Builds positive relationships with students", text_fr: "Établit des relations positives avec les étudiants", points: 5 },
+                            { text_en: "Reflects on practice and seeks continuous improvement", text_fr: "Réfléchit sur la pratique et cherche une amélioration continue", points: 5 }
                         ]
                     }
                 };
 
-                let formHTML = `<form id="eval-form" class="card"><h3>${state.currentLang === 'fr' ? 'Évaluation pour' : 'Evaluation for'} ${teacherName}</h3>`;
+                let formHTML = `<form id="eval-form" class="card">
+                    <h3>${state.currentLang === 'fr' ? 'Évaluation pour' : 'Evaluation for'} ${teacherName}</h3>
+                    
+                    <!-- Class and Semester Fields -->
+                    <div class="basic-info-section">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="class-field">${state.currentLang === 'fr' ? 'Classe :' : 'Class:'}</label>
+                                <input type="text" id="class-field" name="class" required placeholder="${state.currentLang === 'fr' ? 'Ex: 6ème A' : 'Ex: Grade 6A'}">
+                            </div>
+                            <div class="form-group">
+                                <label for="semester-field">${state.currentLang === 'fr' ? 'Semestre :' : 'Semester:'}</label>
+                                <select id="semester-field" name="semester" required>
+                                    <option value="">${state.currentLang === 'fr' ? 'Sélectionner...' : 'Select...'}</option>
+                                    <option value="1">${state.currentLang === 'fr' ? '1er Semestre' : '1st Semester'}</option>
+                                    <option value="2">${state.currentLang === 'fr' ? '2ème Semestre' : '2nd Semester'}</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                `;
                 let criteriaIndex = 0;
                 
                 for(const category in criteria){
-                    formHTML += `<fieldset><legend>${criteria[category][`title_${state.currentLang}`]}</legend>`;
-                    criteria[category].items.forEach((item, index) => {
+                    const cat = criteria[category];
+                    formHTML += `<fieldset>
+                        <legend>${cat[`title_${state.currentLang}`]} (${state.currentLang === 'fr' ? 'Maximum' : 'Max'}: ${cat.maxPoints} ${state.currentLang === 'fr' ? 'points' : 'points'})</legend>`;
+                    
+                    cat.items.forEach((item, index) => {
                         formHTML += `<div class="criteria-row">
-                            <p>${item[`text_${state.currentLang}`]}</p>
-                            <div class="rating">
-                                ${[1,2,3,4,5].map(num => `
-                                <input type="radio" id="crit${criteriaIndex}-${num}" name="crit${criteriaIndex}" value="${num}" required>
-                                <label for="crit${criteriaIndex}-${num}">${num}</label>
-                                `).join('')}
-                            </div>
-                        </div>`;
+                            <p>${item[`text_${state.currentLang}`]} <span class="points-info">(${item.points} ${state.currentLang === 'fr' ? 'pts max' : 'pts max'})</span></p>
+                            <div class="rating">`;
+                        
+                        // Créer des options de notation basées sur les points maximum de l'item
+                        for(let i = 0; i <= item.points; i++) {
+                            formHTML += `
+                                <input type="radio" id="crit${criteriaIndex}-${i}" name="crit${criteriaIndex}" value="${i}" ${i === 0 ? '' : ''} required>
+                                <label for="crit${criteriaIndex}-${i}">${i}</label>
+                            `;
+                        }
+                        
+                        formHTML += `</div></div>`;
                         criteriaIndex++;
                     });
                     formHTML += `</fieldset>`;
@@ -292,30 +345,58 @@
                 formHTML += `
                     <div class="comments-section">
                         <div>
-                            <label for="comments-improve" data-lang-en="Comments (To Improve)" data-lang-fr="Commentaires (À améliorer)">Comments (To Improve)</label>
-                            <textarea id="comments-improve" required></textarea>
+                            <label for="comments-strengths">${state.currentLang === 'fr' ? 'Points forts observés :' : 'Observed Strengths:'}</label>
+                            <textarea id="comments-strengths" placeholder="${state.currentLang === 'fr' ? 'Décrivez les aspects positifs de la performance...' : 'Describe positive aspects of performance...'}" required></textarea>
                         </div>
                         <div>
-                            <label for="comments-eliminate" data-lang-en="Comments (To Eliminate)" data-lang-fr="Commentaires (À éliminer)">Comments (To Eliminate)</label>
-                            <textarea id="comments-eliminate" required></textarea>
+                            <label for="comments-improve">${state.currentLang === 'fr' ? 'Domaines à améliorer :' : 'Areas for Improvement:'}</label>
+                            <textarea id="comments-improve" placeholder="${state.currentLang === 'fr' ? 'Identifiez les aspects nécessitant une amélioration...' : 'Identify aspects needing improvement...'}" required></textarea>
+                        </div>
+                        <div>
+                            <label for="comments-recommendations">${state.currentLang === 'fr' ? 'Recommandations spécifiques :' : 'Specific Recommendations:'}</label>
+                            <textarea id="comments-recommendations" placeholder="${state.currentLang === 'fr' ? 'Actions concrètes recommandées...' : 'Concrete recommended actions...'}" required></textarea>
                         </div>
                     </div>
-                    <div class="grand-total">
-                        <span data-lang-en="Grand Total:" data-lang-fr="Total Général :">Grand Total:</span>
-                        <span id="grand-total-display">0</span>
+                    
+                    <div class="score-summary">
+                        <div class="total-score">
+                            <span class="score-label">${state.currentLang === 'fr' ? 'Score Total :' : 'Total Score:'}</span>
+                            <span id="grand-total-display" class="score-value">0</span>
+                            <span class="score-max">/ 100</span>
+                        </div>
+                        <div class="performance-level">
+                            <span class="level-label">${state.currentLang === 'fr' ? 'Niveau :' : 'Performance Level:'}</span>
+                            <span id="performance-level" class="level-value">${state.currentLang === 'fr' ? 'À calculer' : 'To be calculated'}</span>
+                        </div>
                     </div>
-                    <button type="submit" data-lang-en="Submit Evaluation" data-lang-fr="Soumettre l'évaluation">Submit Evaluation</button>
+                    
+                    <div class="form-buttons">
+                        <button type="submit" class="submit-btn">
+                            <i class="btn-icon">💾</i>
+                            ${state.currentLang === 'fr' ? 'Enregistrer l\'Évaluation' : 'Save Evaluation'}
+                        </button>
+                        <button type="button" id="generate-word" class="word-btn">
+                            <i class="btn-icon">📄</i>
+                            ${state.currentLang === 'fr' ? 'Générer Rapport Word' : 'Generate Word Report'}
+                        </button>
+                    </div>
                 </form>`;
 
                 const container = document.getElementById('evaluation-form-container');
                 container.innerHTML = formHTML;
 
-                // Automatic Total Calculation
+                // Automatic Total Calculation and Performance Level Update
                 container.querySelector('#eval-form').addEventListener('change', () => {
                     const ratings = container.querySelectorAll('input[type="radio"]:checked');
                     let total = 0;
                     ratings.forEach(r => total += parseInt(r.value, 10));
                     document.getElementById('grand-total-display').textContent = total;
+                    
+                    // Update performance level
+                    const performanceLevel = getPerformanceLevel(total);
+                    const levelElement = document.getElementById('performance-level');
+                    levelElement.textContent = state.currentLang === 'fr' ? performanceLevel.label_fr : performanceLevel.label_en;
+                    levelElement.className = `level-value ${performanceLevel.class}`;
                 });
                 
                 // Form Submission
@@ -324,18 +405,26 @@
                     const formData = new FormData(e.target);
                     const criteriaData = {};
                     let grandTotal = 0;
+                    
+                    // Separate criteria data from other form data
                     for(let [key, value] of formData.entries()){
-                        criteriaData[key] = parseInt(value, 10);
-                        grandTotal += parseInt(value, 10);
+                        if (key.startsWith('crit')) {
+                            criteriaData[key] = parseInt(value, 10);
+                            grandTotal += parseInt(value, 10);
+                        }
                     }
                     
                     const payload = {
                         teacherName,
                         coordinatorName: state.currentUser.username,
+                        class: formData.get('class'),
+                        semester: formData.get('semester'),
                         criteria: criteriaData,
+                        criteriaDetails: criteria, // Ajouter les détails des critères pour affichage ultérieur
                         comments: {
+                            strengths: document.getElementById('comments-strengths').value,
                             toImprove: document.getElementById('comments-improve').value,
-                            toEliminate: document.getElementById('comments-eliminate').value
+                            recommendations: document.getElementById('comments-recommendations').value
                         },
                         grandTotal
                     };
@@ -356,6 +445,199 @@
                     // Réinitialiser la sélection d'enseignant
                     document.getElementById('teacher-select').value = '';
                 });
+                
+                // Génération Word
+                container.querySelector('#generate-word').addEventListener('click', () => {
+                    generateWordReport(teacherName, criteria);
+                });
+            }
+
+            // --- Word Generation Function ---
+            async function generateWordReport(teacherName, criteria) {
+                try {
+                    const visitDate = document.getElementById('visit-date')?.value || new Date().toISOString().split('T')[0];
+                    const visitTime = document.getElementById('visit-time')?.value || '';
+                    const lessonSubject = document.getElementById('lesson-subject')?.value || '';
+                    const className = document.getElementById('class-field')?.value || '';
+                    const semester = document.getElementById('semester-field')?.value || '';
+                    
+                    const { Document, Paragraph, TextRun, HeadingLevel, AlignmentType, Table, TableRow, TableCell, WidthType } = docx;
+                    
+                    // Collect current form data
+                    const formData = new FormData(document.getElementById('eval-form'));
+                    const criteriaData = {};
+                    let grandTotal = 0;
+                    
+                    for(let [key, value] of formData.entries()){
+                        if (key.startsWith('crit')) {
+                            criteriaData[key] = parseInt(value, 10);
+                            grandTotal += parseInt(value, 10);
+                        }
+                    }
+                    
+                    const comments = {
+                        strengths: document.getElementById('comments-strengths')?.value || '',
+                        toImprove: document.getElementById('comments-improve')?.value || '',
+                        recommendations: document.getElementById('comments-recommendations')?.value || ''
+                    };
+                    
+                    // Create detailed criteria breakdown
+                    const criteriaBreakdown = [];
+                    let criteriaIndex = 0;
+                    
+                    for(const category in criteria) {
+                        const cat = criteria[category];
+                        criteriaBreakdown.push({
+                            categoryTitle: cat[`title_${state.currentLang}`],
+                            maxPoints: cat.maxPoints,
+                            items: cat.items.map((item, index) => ({
+                                text: item[`text_${state.currentLang}`],
+                                maxPoints: item.points,
+                                score: criteriaData[`crit${criteriaIndex + index}`] || 0
+                            }))
+                        });
+                        criteriaIndex += cat.items.length;
+                    }
+                    
+                    // Performance level
+                    const performanceLevel = getPerformanceLevel(grandTotal);
+                    
+                    const doc = new Document({
+                        sections: [{
+                            children: [
+                                // Header
+                                new Paragraph({
+                                    children: [new TextRun({ text: state.currentLang === 'fr' ? 'RAPPORT D\'ÉVALUATION ACADÉMIQUE' : 'ACADEMIC EVALUATION REPORT', bold: true, size: 28 })],
+                                    alignment: AlignmentType.CENTER,
+                                    spacing: { after: 400 }
+                                }),
+                                
+                                // Basic Information Table
+                                new Table({
+                                    width: { size: 100, type: WidthType.PERCENTAGE },
+                                    rows: [
+                                        new TableRow({
+                                            children: [
+                                                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: state.currentLang === 'fr' ? 'Enseignant:' : 'Teacher:', bold: true })] })] }),
+                                                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: teacherName })] })] })
+                                            ]
+                                        }),
+                                        new TableRow({
+                                            children: [
+                                                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: state.currentLang === 'fr' ? 'Évaluateur:' : 'Evaluator:', bold: true })] })] }),
+                                                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: state.currentUser.username })] })] })
+                                            ]
+                                        }),
+                                        new TableRow({
+                                            children: [
+                                                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: state.currentLang === 'fr' ? 'Date:' : 'Date:', bold: true })] })] }),
+                                                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: visitDate })] })] })
+                                            ]
+                                        }),
+                                        ...(className ? [new TableRow({
+                                            children: [
+                                                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: state.currentLang === 'fr' ? 'Classe:' : 'Class:', bold: true })] })] }),
+                                                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: className })] })] })
+                                            ]
+                                        })] : []),
+                                        ...(semester ? [new TableRow({
+                                            children: [
+                                                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: state.currentLang === 'fr' ? 'Semestre:' : 'Semester:', bold: true })] })] }),
+                                                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: semester === '1' ? (state.currentLang === 'fr' ? '1er Semestre' : '1st Semester') : (state.currentLang === 'fr' ? '2ème Semestre' : '2nd Semester') })] })] })
+                                            ]
+                                        })] : [])
+                                    ]
+                                }),
+                                
+                                new Paragraph({ text: "", spacing: { after: 200 } }),
+                                
+                                // Score Summary
+                                new Paragraph({
+                                    children: [
+                                        new TextRun({ text: `${state.currentLang === 'fr' ? 'Score Total: ' : 'Total Score: '}${grandTotal}/100`, bold: true, size: 24 }),
+                                        new TextRun({ text: ` - ${state.currentLang === 'fr' ? performanceLevel.label_fr : performanceLevel.label_en}`, bold: true, size: 24 })
+                                    ],
+                                    alignment: AlignmentType.CENTER,
+                                    spacing: { after: 400 }
+                                }),
+                                
+                                // Detailed Criteria Breakdown
+                                new Paragraph({
+                                    children: [new TextRun({ text: state.currentLang === 'fr' ? 'DÉTAIL DES CRITÈRES D\'ÉVALUATION' : 'DETAILED EVALUATION CRITERIA', bold: true, size: 20 })],
+                                    spacing: { after: 200 }
+                                }),
+                                
+                                // Criteria Tables
+                                ...criteriaBreakdown.flatMap(category => [
+                                    new Paragraph({
+                                        children: [new TextRun({ text: `${category.categoryTitle} (${category.maxPoints} pts max)`, bold: true, size: 16 })],
+                                        spacing: { before: 200, after: 100 }
+                                    }),
+                                    new Table({
+                                        width: { size: 100, type: WidthType.PERCENTAGE },
+                                        rows: [
+                                            new TableRow({
+                                                children: [
+                                                    new TableCell({ 
+                                                        children: [new Paragraph({ children: [new TextRun({ text: state.currentLang === 'fr' ? 'Critère' : 'Criteria', bold: true })] })] 
+                                                    }),
+                                                    new TableCell({ 
+                                                        children: [new Paragraph({ children: [new TextRun({ text: state.currentLang === 'fr' ? 'Points Max' : 'Max Points', bold: true })] })] 
+                                                    }),
+                                                    new TableCell({ 
+                                                        children: [new Paragraph({ children: [new TextRun({ text: state.currentLang === 'fr' ? 'Score Obtenu' : 'Score Obtained', bold: true })] })] 
+                                                    })
+                                                ]
+                                            }),
+                                            ...category.items.map(item => new TableRow({
+                                                children: [
+                                                    new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.text })] })] }),
+                                                    new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.maxPoints.toString() })] })] }),
+                                                    new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.score.toString() })] })] })
+                                                ]
+                                            }))
+                                        ]
+                                    })
+                                ]),
+                                
+                                new Paragraph({ text: "", spacing: { after: 400 } }),
+                                
+                                // Comments Section
+                                new Paragraph({
+                                    children: [new TextRun({ text: state.currentLang === 'fr' ? 'COMMENTAIRES DÉTAILLÉS' : 'DETAILED COMMENTS', bold: true, size: 20 })],
+                                    spacing: { after: 200 }
+                                }),
+                                
+                                new Paragraph({
+                                    children: [new TextRun({ text: state.currentLang === 'fr' ? 'Points forts observés:' : 'Observed Strengths:', bold: true })],
+                                    spacing: { before: 100 }
+                                }),
+                                new Paragraph({ children: [new TextRun({ text: comments.strengths })] }),
+                                
+                                new Paragraph({
+                                    children: [new TextRun({ text: state.currentLang === 'fr' ? 'Domaines à améliorer:' : 'Areas for Improvement:', bold: true })],
+                                    spacing: { before: 200 }
+                                }),
+                                new Paragraph({ children: [new TextRun({ text: comments.toImprove })] }),
+                                
+                                new Paragraph({
+                                    children: [new TextRun({ text: state.currentLang === 'fr' ? 'Recommandations spécifiques:' : 'Specific Recommendations:', bold: true })],
+                                    spacing: { before: 200 }
+                                }),
+                                new Paragraph({ children: [new TextRun({ text: comments.recommendations })] })
+                            ]
+                        }]
+                    });
+                    
+                    const blob = await docx.Packer.toBlob(doc);
+                    const fileName = `Evaluation_${teacherName}_${visitDate}.docx`;
+                    saveAs(blob, fileName);
+                    
+                    alert(state.currentLang === 'fr' ? 'Rapport Word généré avec succès !' : 'Word report generated successfully!');
+                } catch (error) {
+                    console.error('Error generating Word document:', error);
+                    alert(state.currentLang === 'fr' ? 'Erreur lors de la génération du document Word' : 'Error generating Word document');
+                }
             }
 
             // --- Teacher Logic ---
@@ -368,32 +650,195 @@
                 console.log(`Trouvé ${evaluations.length} évaluations pour ${state.currentUser.username}`);
                 
                 if (evaluations.length === 0) {
-                    reportsContainer.innerHTML = `<p>${state.currentLang === 'fr' ? 'Aucun rapport d\'évaluation trouvé.' : 'No evaluation reports found.'}</p>`;
+                    reportsContainer.innerHTML = `
+                        <div class="card no-evaluations">
+                            <h3>${state.currentLang === 'fr' ? 'Aucune évaluation disponible' : 'No evaluations available'}</h3>
+                            <p>${state.currentLang === 'fr' ? 'Vos évaluations apparaîtront ici une fois qu\'elles seront effectuées par les coordinateurs.' : 'Your evaluations will appear here once they are conducted by coordinators.'}</p>
+                        </div>
+                    `;
                     return;
                 }
+                
+                // Sort evaluations by date (most recent first)
+                evaluations.sort((a, b) => new Date(b.date) - new Date(a.date));
+                
+                // Calculate statistics
+                const latestScore = evaluations[0].grandTotal;
+                const averageScore = evaluations.reduce((sum, eval) => sum + eval.grandTotal, 0) / evaluations.length;
+                const firstScore = evaluations[evaluations.length - 1].grandTotal;
+                const progression = evaluations.length > 1 ? latestScore - firstScore : 0;
+                
+                let reportsHTML = `
+                    <!-- Statistiques de progression -->
+                    <div class="card statistics-card">
+                        <h3>${state.currentLang === 'fr' ? 'Statistiques de Performance' : 'Performance Statistics'}</h3>
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <span class="stat-label">${state.currentLang === 'fr' ? 'Nombre d\'évaluations' : 'Total Evaluations'}</span>
+                                <span class="stat-value">${evaluations.length}</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">${state.currentLang === 'fr' ? 'Score moyen' : 'Average Score'}</span>
+                                <span class="stat-value">${averageScore.toFixed(1)}/100</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">${state.currentLang === 'fr' ? 'Dernière évaluation' : 'Latest Score'}</span>
+                                <span class="stat-value">${latestScore}/100</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">${state.currentLang === 'fr' ? 'Progression' : 'Progress'}</span>
+                                <span class="stat-value ${progression >= 0 ? 'positive' : 'negative'}">
+                                    ${progression >= 0 ? '+' : ''}${progression} ${state.currentLang === 'fr' ? 'points' : 'points'}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
                     
-                    let reportsHTML = '';
-                    evaluations.forEach(eval => {
-                        reportsHTML += `
-                            <div class="card report-card">
-                                <h3>${state.currentLang === 'fr' ? 'Rapport du' : 'Report from'} ${new Date(eval.date).toLocaleDateString()}</h3>
-                                <p><strong>${state.currentLang === 'fr' ? 'Évaluateur :' : 'Evaluator:'}</strong> ${eval.coordinatorName}</p>
-                                <p><strong>${state.currentLang === 'fr' ? 'Total Général :' : 'Grand Total:'}</strong> ${eval.grandTotal}</p>
-                                <div class="comments-section">
-                                    <div>
-                                        <h4>${state.currentLang === 'fr' ? 'Recommandations (À améliorer)' : 'Recommendations (To Improve)'}</h4>
+                    <!-- Historique des évaluations -->
+                    <div class="card">
+                        <h3>${state.currentLang === 'fr' ? 'Historique des Évaluations' : 'Evaluation History'}</h3>
+                        <div class="evaluations-timeline">`;
+                
+                evaluations.forEach((eval, index) => {
+                    const evalDate = new Date(eval.date);
+                    const isLatest = index === 0;
+                    
+                    reportsHTML += `
+                        <div class="timeline-item ${isLatest ? 'latest' : ''}">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <div class="eval-header">
+                                    <h4>${state.currentLang === 'fr' ? 'Évaluation du' : 'Evaluation from'} ${evalDate.toLocaleDateString(state.currentLang === 'fr' ? 'fr-FR' : 'en-US')}</h4>
+                                    <span class="eval-score">${eval.grandTotal}/100</span>
+                                    <span class="eval-level ${eval.performanceLevel ? eval.performanceLevel.toLowerCase().replace(' ', '-') : ''}">${eval.performanceLevel || getPerformanceLevel(eval.grandTotal)}</span>
+                                </div>
+                                <div class="eval-details">
+                                    <p><strong>${state.currentLang === 'fr' ? 'Évaluateur :' : 'Evaluator:'}</strong> ${eval.coordinatorName}</p>
+                                    ${eval.visitDate ? `<p><strong>${state.currentLang === 'fr' ? 'Date de visite :' : 'Visit Date:'}</strong> ${eval.visitDate}</p>` : ''}
+                                    ${eval.lessonSubject ? `<p><strong>${state.currentLang === 'fr' ? 'Matière :' : 'Subject:'}</strong> ${eval.lessonSubject}</p>` : ''}
+                                    ${eval.class ? `<p><strong>${state.currentLang === 'fr' ? 'Classe :' : 'Class:'}</strong> ${eval.class}</p>` : ''}
+                                    ${eval.semester ? `<p><strong>${state.currentLang === 'fr' ? 'Semestre :' : 'Semester:'}</strong> ${eval.semester === '1' ? (state.currentLang === 'fr' ? '1er Semestre' : '1st Semester') : (state.currentLang === 'fr' ? '2ème Semestre' : '2nd Semester')}</p>` : ''}
+                                </div>
+                                
+                                <div class="eval-comments">
+                                    ${eval.comments.strengths ? `
+                                    <div class="comment-section">
+                                        <h5>${state.currentLang === 'fr' ? 'Points forts' : 'Strengths'}</h5>
+                                        <p>${eval.comments.strengths}</p>
+                                    </div>` : ''}
+                                    
+                                    ${eval.comments.toImprove ? `
+                                    <div class="comment-section">
+                                        <h5>${state.currentLang === 'fr' ? 'À améliorer' : 'To Improve'}</h5>
                                         <p>${eval.comments.toImprove}</p>
-                                    </div>
-                                    <div>
-                                        <h4>${state.currentLang === 'fr' ? 'Recommandations (À éliminer)' : 'Recommendations (To Eliminate)'}</h4>
-                                        <p>${eval.comments.toEliminate}</p>
+                                    </div>` : ''}
+                                    
+                                    ${eval.comments.recommendations ? `
+                                    <div class="comment-section">
+                                        <h5>${state.currentLang === 'fr' ? 'Recommandations' : 'Recommendations'}</h5>
+                                        <p>${eval.comments.recommendations}</p>
+                                    </div>` : ''}
+                                </div>
+                                
+                                <!-- Detailed Criteria Breakdown -->
+                                <div class="criteria-breakdown">
+                                    <button class="toggle-details" onclick="toggleCriteriaDetails('${eval.id}')">
+                                        <i id="toggle-icon-${eval.id}">▼</i>
+                                        ${state.currentLang === 'fr' ? 'Voir détails des critères' : 'View criteria details'}
+                                    </button>
+                                    <div id="criteria-details-${eval.id}" class="criteria-details" style="display: none;">
+                                        ${eval.criteriaDetails ? renderCriteriaDetails(eval) : ''}
                                     </div>
                                 </div>
+                                
+                                <div class="eval-actions">
+                                    <button onclick="generateWordReport('${eval.id}')" class="btn-download">
+                                        <i>📄</i> ${state.currentLang === 'fr' ? 'Télécharger Rapport' : 'Download Report'}
+                                    </button>
+                                </div>
                             </div>
-                        `;
-                    });
+                        </div>
+                    `;
+                });
+                
+                reportsHTML += `
+                        </div>
+                    </div>
+                `;
+                
                 reportsContainer.innerHTML = reportsHTML;
             }
+            
+            function renderCriteriaDetails(evaluation) {
+                if (!evaluation.criteriaDetails) return '';
+                
+                let detailsHTML = '<div class="criteria-table">';
+                let criteriaIndex = 0;
+                
+                for (const category in evaluation.criteriaDetails) {
+                    const cat = evaluation.criteriaDetails[category];
+                    detailsHTML += `
+                        <div class="criteria-category">
+                            <h6>${cat[`title_${state.currentLang}`]} (${cat.maxPoints} pts max)</h6>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>${state.currentLang === 'fr' ? 'Critère' : 'Criteria'}</th>
+                                        <th>${state.currentLang === 'fr' ? 'Points Max' : 'Max Points'}</th>
+                                        <th>${state.currentLang === 'fr' ? 'Score Obtenu' : 'Score Obtained'}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                    `;
+                    
+                    cat.items.forEach((item, index) => {
+                        const score = evaluation.criteria[`crit${criteriaIndex}`] || 0;
+                        detailsHTML += `
+                            <tr>
+                                <td>${item[`text_${state.currentLang}`]}</td>
+                                <td>${item.points}</td>
+                                <td class="score-cell ${score === item.points ? 'perfect' : score >= item.points * 0.8 ? 'good' : 'needs-improvement'}">${score}</td>
+                            </tr>
+                        `;
+                        criteriaIndex++;
+                    });
+                    
+                    detailsHTML += `
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                }
+                
+                detailsHTML += '</div>';
+                return detailsHTML;
+            }
+            
+            function toggleCriteriaDetails(evaluationId) {
+                const detailsDiv = document.getElementById(`criteria-details-${evaluationId}`);
+                const iconSpan = document.getElementById(`toggle-icon-${evaluationId}`);
+                
+                if (detailsDiv.style.display === 'none') {
+                    detailsDiv.style.display = 'block';
+                    iconSpan.textContent = '▲';
+                } else {
+                    detailsDiv.style.display = 'none';
+                    iconSpan.textContent = '▼';
+                }
+            }
+            
+            function generateWordReport(evaluationId) {
+                const evaluation = EVALUATIONS_DATABASE.find(eval => eval.id === evaluationId);
+                if (!evaluation) return;
+                
+                const performanceLevel = getPerformanceLevel(evaluation.grandTotal);
+                const fileName = `Evaluation_${evaluation.teacherName}_${new Date(evaluation.date).toISOString().split('T')[0]}.docx`;
+                alert(state.currentLang === 'fr' ? `Génération du document Word: ${fileName}\n\nScore: ${evaluation.grandTotal}/100\nNiveau: ${evaluation.performanceLevel || getPerformanceLevel(evaluation.grandTotal)}` : `Generating Word document: ${fileName}\n\nScore: ${evaluation.grandTotal}/100\nLevel: ${evaluation.performanceLevel || getPerformanceLevel(evaluation.grandTotal)}`);
+            }
+            
+            // Expose functions globally for onclick handlers
+            window.toggleCriteriaDetails = toggleCriteriaDetails;
+            window.generateWordReport = generateWordReport;
             
             // Initial load
             setLanguage('en');
