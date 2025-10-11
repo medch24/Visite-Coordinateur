@@ -3,8 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-lang-en="Teacher Evaluation System" data-lang-fr="Système d'Évaluation des Enseignants">Teacher Evaluation System</title>
+    <title data-lang-en="Professional Teacher Evaluation System" data-lang-fr="Système Professionnel d'Évaluation des Enseignants">Professional Teacher Evaluation System</title>
     <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Word Document Generation Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/7.5.0/docx.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 </head>
 <body>
 
@@ -14,10 +18,42 @@
             <img src="https://lh3.googleusercontent.com/d/1lQ3Babrs3Wgv4rakVmkK0oCWcM0cTKPK" alt="School Logo" />
         </div>
 
-        <!-- Language Switcher -->
-        <div class="language-switcher">
-            <button id="lang-en">English</button>
-            <button id="lang-fr">Français</button>
+        <!-- Professional Header Controls -->
+        <div class="header-controls">
+            <div class="language-switcher">
+                <button id="lang-en" class="lang-btn active">
+                    <i class="fas fa-globe"></i> EN
+                </button>
+                <button id="lang-fr" class="lang-btn">
+                    <i class="fas fa-globe"></i> FR
+                </button>
+            </div>
+            <button id="settings-btn" class="settings-btn" style="display: none;">
+                <i class="fas fa-cog"></i>
+            </button>
+        </div>
+        
+        <!-- Settings Panel -->
+        <div id="settings-panel" class="settings-panel">
+            <div class="settings-content">
+                <div class="settings-header">
+                    <h3 data-lang-en="System Settings" data-lang-fr="Paramètres Système">System Settings</h3>
+                    <button id="close-settings" class="close-btn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="settings-form">
+                    <div class="setting-group">
+                        <label for="school-name-input" data-lang-en="School/Institution Name" data-lang-fr="Nom de l'École/Institution">School/Institution Name</label>
+                        <input type="text" id="school-name-input" placeholder="Enter school name...">
+                    </div>
+                    <div class="setting-group">
+                        <label for="logo-url-input" data-lang-en="Logo URL" data-lang-fr="URL du Logo">Logo URL</label>
+                        <input type="url" id="logo-url-input" placeholder="https://example.com/logo.png">
+                    </div>
+                    <button id="save-settings" class="save-btn" data-lang-en="Save Settings" data-lang-fr="Enregistrer">Save Settings</button>
+                </div>
+            </div>
         </div>
 
         <!-- Login Page -->
@@ -39,16 +75,12 @@
                     <button type="submit" data-lang-en="Login" data-lang-fr="Se connecter">Login</button>
                 </form>
                 <p id="login-error" class="error-message"></p>
-                <div class="test-credentials">
-                    <h4 data-lang-en="Test Accounts" data-lang-fr="Comptes de Test">Test Accounts</h4>
-                    <p><strong data-lang-en="Coordinators" data-lang-fr="Coordinateurs">Coordinators:</strong><br>
-                    Mohamed / Mohamed@86<br>
-                    Zohra / Zohra@40<br>
-                    Rasha / Rasha@26</p>
-                    <p><strong data-lang-en="Teachers" data-lang-fr="Enseignants">Teachers:</strong><br>
-                    Morched / Morched<br>
-                    Kamel / Kamel<br>
-                    <em data-lang-en="(Any teacher name as username/password)" data-lang-fr="(Nom d'enseignant comme identifiant/mot de passe)">(Any teacher name as username/password)</em></p>
+                <div class="login-help">
+                    <p data-lang-en="Please contact your system administrator for login credentials." data-lang-fr="Veuillez contacter votre administrateur système pour les identifiants de connexion.">Please contact your system administrator for login credentials.</p>
+                    <div class="help-contact">
+                        <i class="fas fa-envelope"></i>
+                        <span data-lang-en="Support: admin@school.edu" data-lang-fr="Support: admin@school.edu">Support: admin@school.edu</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -841,7 +873,7 @@
             window.generateWordReport = generateWordReport;
             
             // Initial load
-            setLanguage('en');
+            // --- Settings Management ---\n            window.initSettingsPanel = function() {\n                const settingsBtn = document.getElementById('settings-btn');\n                const settingsPanel = document.getElementById('settings-panel');\n                const closeSettings = document.getElementById('close-settings');\n                const saveSettings = document.getElementById('save-settings');\n                const schoolNameInput = document.getElementById('school-name-input');\n                const logoUrlInput = document.getElementById('logo-url-input');\n                \n                if (!settingsBtn || !settingsPanel) return;\n                \n                // Load saved settings\n                const savedSchoolName = localStorage.getItem('schoolName') || 'Educational Excellence Institute';\n                const savedLogoUrl = localStorage.getItem('logoUrl') || 'https://lh3.googleusercontent.com/d/1lQ3Babrs3Wgv4rakVmkK0oCWcM0cTKPK';\n                \n                if (schoolNameInput) schoolNameInput.value = savedSchoolName;\n                if (logoUrlInput) logoUrlInput.value = savedLogoUrl;\n                \n                settingsBtn.addEventListener('click', () => {\n                    settingsPanel.classList.add('active');\n                });\n                \n                if (closeSettings) {\n                    closeSettings.addEventListener('click', () => {\n                        settingsPanel.classList.remove('active');\n                    });\n                }\n                \n                if (saveSettings) {\n                    saveSettings.addEventListener('click', () => {\n                        const schoolName = (schoolNameInput?.value?.trim()) || 'Educational Excellence Institute';\n                        const logoUrl = (logoUrlInput?.value?.trim()) || 'https://lh3.googleusercontent.com/d/1lQ3Babrs3Wgv4rakVmkK0oCWcM0cTKPK';\n                        \n                        localStorage.setItem('schoolName', schoolName);\n                        localStorage.setItem('logoUrl', logoUrl);\n                        \n                        // Update the logo immediately\n                        const schoolLogoImg = document.querySelector('.school-logo img');\n                        if (schoolLogoImg) schoolLogoImg.src = logoUrl;\n                        \n                        settingsPanel.classList.remove('active');\n                        alert(state.currentLang === 'fr' ? 'Paramètres sauvegardés !' : 'Settings saved!');\n                    });\n                }\n                \n                // Click outside to close\n                settingsPanel.addEventListener('click', (e) => {\n                    if (e.target === settingsPanel) {\n                        settingsPanel.classList.remove('active');\n                    }\n                });\n            };\n            \n            // Show settings for coordinators after login\n            setTimeout(() => {\n                if (state.currentUser && state.currentUser.role === 'coordinator') {\n                    const settingsBtn = document.getElementById('settings-btn');\n                    if (settingsBtn) {\n                        settingsBtn.style.display = 'block';\n                        window.initSettingsPanel();\n                    }\n                }\n            }, 500);\n            \n            setLanguage('en');
         });
     </script>
 </body>
