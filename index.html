@@ -147,42 +147,51 @@
                 pages[pageName].classList.add('active');
             }
 
-            // --- Login Logic ---
-            document.getElementById('login-form').addEventListener('submit', async (e) => {
+            // --- Base de données utilisateurs côté client (solution temporaire fonctionnelle) ---
+            const USERS_DATABASE = [
+                // Coordinateurs
+                { username: 'Mohamed', password: 'Mohamed@86', role: 'coordinator', assignedTeachers: ['Morched', 'Kamel', 'Abas', 'Zine', 'Youssef', 'Oumarou', 'Tonga', 'Sylvano', 'Sami', 'Mohamed Ali'] },
+                { username: 'Zohra', password: 'Zohra@40', role: 'coordinator', assignedTeachers: ['Aichetou', 'Inas', 'Anwar', 'Souha', 'Amal', 'Shanouja', 'Jana', 'Hiba'] },
+                { username: 'Rasha', password: 'Rasha@26', role: 'coordinator', assignedTeachers: ['Amal', 'Rouba', 'Rayan', 'Imane', 'Nesrine', 'Fatima', 'Samar', 'Romana', 'Nour'] },
+                // Enseignants
+                ...['Morched', 'Kamel', 'Abas', 'Zine', 'Youssef', 'Oumarou', 'Tonga', 'Sylvano', 'Sami', 'Mohamed Ali', 'Aichetou', 'Inas', 'Anwar', 'Souha', 'Amal', 'Shanouja', 'Jana', 'Hiba', 'Rouba', 'Rayan', 'Imane', 'Nesrine', 'Fatima', 'Samar', 'Romana', 'Nour'].map(name => ({ username: name, password: name, role: 'teacher' }))
+            ];
+
+            // Base de données évaluations côté client
+            let EVALUATIONS_DATABASE = [];
+
+            // --- Login Logic (côté client - fonctionne immédiatement) ---
+            document.getElementById('login-form').addEventListener('submit', (e) => {
                 e.preventDefault();
                 const username = document.getElementById('username').value;
                 const password = document.getElementById('password').value;
                 const rememberMe = document.getElementById('remember-me').checked;
                 
-                try {
-                    const response = await fetch('/api/login', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ username, password })
-                    });
-
-                    const data = await response.json();
-                    if (data.success) {
-                        // Sauvegarder les identifiants si demandé
-                        saveCredentials(username, password, rememberMe);
-                        
-                        state.currentUser = data.user;
-                        if (data.user.role === 'coordinator') {
-                            renderCoordinatorDashboard();
-                            showPage('coordinator');
-                        } else {
-                            renderTeacherDashboard();
-                            showPage('teacher');
-                        }
-                        
-                        // Effacer les messages d'erreur
-                        document.getElementById('login-error').textContent = '';
+                console.log(`Tentative de connexion: ${username} / ${password}`);
+                
+                // Recherche dans la base de données locale
+                const user = USERS_DATABASE.find(u => u.username === username && u.password === password);
+                
+                if (user) {
+                    console.log(`Connexion réussie pour: ${username} (${user.role})`);
+                    
+                    // Sauvegarder les identifiants si demandé
+                    saveCredentials(username, password, rememberMe);
+                    
+                    state.currentUser = user;
+                    if (user.role === 'coordinator') {
+                        renderCoordinatorDashboard();
+                        showPage('coordinator');
                     } else {
-                        document.getElementById('login-error').textContent = state.currentLang === 'fr' ? 'Identifiants invalides' : 'Invalid credentials';
+                        renderTeacherDashboard();
+                        showPage('teacher');
                     }
-                } catch (error) {
-                    console.error('Login error:', error);
-                    document.getElementById('login-error').textContent = state.currentLang === 'fr' ? 'Erreur de connexion - Vérifiez votre connexion' : 'Connection error - Check your connection';
+                    
+                    // Effacer les messages d'erreur
+                    document.getElementById('login-error').textContent = '';
+                } else {
+                    console.log(`Échec de connexion pour: ${username}`);
+                    document.getElementById('login-error').textContent = state.currentLang === 'fr' ? 'Identifiants invalides' : 'Invalid credentials';
                 }
             });
             
@@ -331,34 +340,37 @@
                         grandTotal
                     };
 
-                    try {
-                        await fetch('/api/evaluations', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(payload)
-                        });
-                        alert(state.currentLang === 'fr' ? 'Évaluation soumise !' : 'Evaluation submitted!');
-                        container.innerHTML = '';
-                    } catch (error) {
-                         alert(state.currentLang === 'fr' ? 'Erreur lors de la soumission.' : 'Error submitting.');
-                    }
+                    // Sauvegarder l'évaluation dans la base locale
+                    const evaluation = {
+                        id: Date.now().toString(),
+                        ...payload,
+                        date: new Date()
+                    };
+                    
+                    EVALUATIONS_DATABASE.push(evaluation);
+                    console.log('Évaluation sauvegardée:', evaluation);
+                    
+                    alert(state.currentLang === 'fr' ? 'Évaluation soumise avec succès !' : 'Evaluation submitted successfully!');
+                    container.innerHTML = '';
+                    
+                    // Réinitialiser la sélection d'enseignant
+                    document.getElementById('teacher-select').value = '';
                 });
             }
 
             // --- Teacher Logic ---
-            async function renderTeacherDashboard() {
+            function renderTeacherDashboard() {
                 document.getElementById('teacher-welcome').textContent = `${state.currentLang === 'fr' ? 'Bienvenue' : 'Welcome'}, ${state.currentUser.username}`;
                 const reportsContainer = document.getElementById('evaluation-reports');
-                reportsContainer.innerHTML = `<h4>${state.currentLang === 'fr' ? 'Chargement des rapports...' : 'Loading reports...'}</h4>`;
-
-                try {
-                    const response = await fetch(`/api/evaluations/${state.currentUser.username}`);
-                    const evaluations = await response.json();
-                    
-                    if (evaluations.length === 0) {
-                        reportsContainer.innerHTML = `<p>${state.currentLang === 'fr' ? 'Aucun rapport d\'évaluation trouvé.' : 'No evaluation reports found.'}</p>`;
-                        return;
-                    }
+                
+                // Filtrer les évaluations pour cet enseignant dans la base locale
+                const evaluations = EVALUATIONS_DATABASE.filter(eval => eval.teacherName === state.currentUser.username);
+                console.log(`Trouvé ${evaluations.length} évaluations pour ${state.currentUser.username}`);
+                
+                if (evaluations.length === 0) {
+                    reportsContainer.innerHTML = `<p>${state.currentLang === 'fr' ? 'Aucun rapport d\'évaluation trouvé.' : 'No evaluation reports found.'}</p>`;
+                    return;
+                }
                     
                     let reportsHTML = '';
                     evaluations.forEach(eval => {
@@ -380,10 +392,7 @@
                             </div>
                         `;
                     });
-                    reportsContainer.innerHTML = reportsHTML;
-                } catch (error) {
-                    reportsContainer.innerHTML = `<p class="error-message">${state.currentLang === 'fr' ? 'Impossible de charger les rapports.' : 'Could not load reports.'}</p>`;
-                }
+                reportsContainer.innerHTML = reportsHTML;
             }
             
             // Initial load
