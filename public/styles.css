@@ -54,8 +54,8 @@ h1, h2, h3 {
     margin-top: 0;
 }
 h1 { text-align: center; font-size: 2.2rem; margin-bottom: 2rem; }
-h2 { font-size: 1.6rem; border-bottom: 2px solid var(--primary-color); padding-bottom: 0.5rem; margin-bottom: 1rem; }
-h3 { font-size: 1.3rem; margin-bottom: 1rem; }
+h2 { font-size: 1.6rem; padding-bottom: 0.5rem; margin-bottom: 1rem; }
+h3 { font-size: 1.3rem; margin-bottom: 1rem; display: flex; align-items: center; gap: .5rem;}
 
 button {
     background-color: var(--primary-color);
@@ -135,7 +135,7 @@ input[readonly] { background-color: #f0f0f0; cursor: not-allowed; }
     position: absolute; right: 1rem; top: 50%; transform: translateY(-50%);
     background: none; border: none; cursor: pointer; color: var(--text-color); font-size: 1.2rem;
 }
-.checkbox-container { display: flex; align-items: center; gap: 0.5rem; }
+.checkbox-container { display: flex; align-items: center; gap: 0.5rem; margin-block: .5rem; }
 .login-help { margin-top: 2rem; text-align: center; padding: 1rem; background: var(--secondary-color); border-radius: 8px; }
 .error-message { color: var(--danger-color); text-align: center; margin-top: 1rem; }
 
@@ -155,12 +155,13 @@ input[readonly] { background-color: #f0f0f0; cursor: not-allowed; }
 /* --- Evaluation Form --- */
 .evaluation-metadata { margin-bottom: 2rem; }
 .metadata-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+.metadata-item label { display: block; font-weight: bold; margin-bottom: .25rem; font-size: .9rem; }
 fieldset { border: 1px solid #ddd; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; }
 legend.category-header {
-    width: 100%; display: flex; justify-content: space-between; align-items: center;
-    font-size: 1.1rem; font-weight: 700; color: var(--primary-color); padding: 0.5rem 0;
-    border-bottom: 2px solid #eee; margin-bottom: 1rem;
+    width: auto; font-size: 1.1rem; font-weight: 700; color: var(--primary-color); 
+    padding-inline: .5rem;
 }
+.category-header {display: flex; justify-content: space-between; align-items: center;}
 .criteria-table .table-header { display: grid; grid-template-columns: 4fr 1fr 2fr 1fr; font-weight: bold; padding-bottom: 0.5rem; border-bottom: 1px solid #ccc; }
 .criteria-row { display: grid; grid-template-columns: 4fr 1fr 2fr 1fr; align-items: center; padding: 1rem 0; border-bottom: 1px solid #f0f0f0; }
 .rating-controls { display: flex; justify-content: center; gap: 5px; }
@@ -230,7 +231,6 @@ legend.category-header {
 /* --- Responsive Design --- */
 @media (max-width: 992px) {
     .comments-section { grid-template-columns: 1fr; }
-    .criteria-table .table-header, .criteria-row { grid-template-columns: 3fr 1fr 2fr 1fr; }
 }
 
 @media (max-width: 768px) {
@@ -240,9 +240,15 @@ legend.category-header {
         grid-template-columns: 1fr; gap: 0.5rem; text-align: center;
         padding: 1rem; border: 1px solid #eee; border-radius: 8px; margin-bottom: 0.5rem;
     }
+    .criteria-text, .max-points, .calculated-score {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        padding-inline: 1rem;
+    }
     .criteria-text::before, .max-points::before, .calculated-score::before { font-weight: bold; }
     .criteria-text::before { content: 'Critère: '; }
     .max-points::before { content: 'Points Max: '; }
     .calculated-score::before { content: 'Score: '; }
-    .rating-controls { justify-content: center; }
+    .rating-controls { justify-content: center; margin-top: .5rem; }
 }
