@@ -52,10 +52,28 @@
         <div id="coordinator-dashboard" class="page">
             <h1 data-lang-en="Coordinator Dashboard" data-lang-fr="Tableau de Bord Coordinateur">Coordinator Dashboard</h1>
             <h2 id="coordinator-welcome"></h2>
-            <h3 data-lang-en="Select a teacher to evaluate:" data-lang-fr="Sélectionnez un enseignant à évaluer :">Select a teacher to evaluate:</h3>
-            <select id="teacher-select"></select>
-            <div id="evaluation-form-container"></div>
-            <button id="logout-btn" data-lang-en="Logout" data-lang-fr="Déconnexion">Logout</button>
+            
+            <!-- Navigation Tabs -->
+            <div class="coordinator-tabs">
+                <button id="new-evaluation-tab" class="tab-btn active" data-lang-en="New Evaluation" data-lang-fr="Nouvelle Évaluation">Nouvelle Évaluation</button>
+                <button id="view-evaluations-tab" class="tab-btn" data-lang-en="Previous Evaluations" data-lang-fr="Évaluations Précédentes">Évaluations Précédentes</button>
+            </div>
+
+            <!-- New Evaluation Tab -->
+            <div id="new-evaluation-content" class="tab-content active">
+                <h3 data-lang-en="Select a teacher to evaluate:" data-lang-fr="Sélectionnez un enseignant à évaluer :">Sélectionnez un enseignant à évaluer :</h3>
+                <select id="teacher-select"></select>
+                <div id="evaluation-form-container"></div>
+            </div>
+
+            <!-- Previous Evaluations Tab -->
+            <div id="previous-evaluations-content" class="tab-content">
+                <h3 data-lang-en="Select a teacher to view evaluations:" data-lang-fr="Sélectionnez un enseignant pour voir les évaluations :">Sélectionnez un enseignant pour voir les évaluations :</h3>
+                <select id="teacher-select-view"></select>
+                <div id="previous-evaluations-container"></div>
+            </div>
+
+            <button id="logout-btn" data-lang-en="Logout" data-lang-fr="Déconnexion">Déconnexion</button>
         </div>
 
         <!-- Teacher Dashboard -->
@@ -219,14 +237,153 @@
             // --- Coordinator Logic ---
             function renderCoordinatorDashboard() {
                 document.getElementById('coordinator-welcome').textContent = `${state.currentLang === 'fr' ? 'Bienvenue' : 'Welcome'}, ${state.currentUser.username}`;
+                
+                // Populate both teacher selects
+                populateTeacherSelects();
+                
+                // Setup tab switching
+                setupCoordinatorTabs();
+            }
+
+            function populateTeacherSelects() {
                 const teacherSelect = document.getElementById('teacher-select');
-                teacherSelect.innerHTML = `<option value="">${state.currentLang === 'fr' ? 'Choisir...' : 'Choose...'}</option>`;
-                state.currentUser.assignedTeachers.forEach(teacher => {
-                    const option = document.createElement('option');
-                    option.value = teacher;
-                    option.textContent = teacher;
-                    teacherSelect.appendChild(option);
+                const teacherSelectView = document.getElementById('teacher-select-view');
+                
+                [teacherSelect, teacherSelectView].forEach(select => {
+                    if(select) {
+                        select.innerHTML = `<option value="">${state.currentLang === 'fr' ? 'Choisir...' : 'Choose...'}</option>`;
+                        state.currentUser.assignedTeachers.forEach(teacher => {
+                            const option = document.createElement('option');
+                            option.value = teacher;
+                            option.textContent = teacher;
+                            select.appendChild(option);
+                        });
+                    }
                 });
+            }
+
+            function setupCoordinatorTabs() {
+                const newEvalTab = document.getElementById('new-evaluation-tab');
+                const viewEvalTab = document.getElementById('view-evaluations-tab');
+                const newEvalContent = document.getElementById('new-evaluation-content');
+                const viewEvalContent = document.getElementById('previous-evaluations-content');
+
+                function switchTab(activeTab, activeContent) {
+                    // Remove active classes
+                    [newEvalTab, viewEvalTab].forEach(tab => tab && tab.classList.remove('active'));
+                    [newEvalContent, viewEvalContent].forEach(content => content && content.classList.remove('active'));
+                    
+                    // Add active classes
+                    if(activeTab) activeTab.classList.add('active');
+                    if(activeContent) activeContent.classList.add('active');
+                }
+
+                if(newEvalTab) {
+                    newEvalTab.addEventListener('click', () => {
+                        switchTab(newEvalTab, newEvalContent);
+                    });
+                }
+
+                if(viewEvalTab) {
+                    viewEvalTab.addEventListener('click', () => {
+                        switchTab(viewEvalTab, viewEvalContent);
+                    });
+                }
+
+                // Handle previous evaluations view
+                const teacherSelectView = document.getElementById('teacher-select-view');
+                if(teacherSelectView) {
+                    teacherSelectView.addEventListener('change', (e) => {
+                        const teacherName = e.target.value;
+                        if (teacherName) {
+                            renderPreviousEvaluations(teacherName);
+                        } else {
+                            const container = document.getElementById('previous-evaluations-container');
+                            if(container) container.innerHTML = '';
+                        }
+                    });
+                }
+            }
+
+            function renderPreviousEvaluations(teacherName) {
+                const container = document.getElementById('previous-evaluations-container');
+                if(!container) return;
+                
+                // Filter evaluations for selected teacher by current coordinator
+                const evaluations = EVALUATIONS_DATABASE
+                    .filter(eval => eval.teacherName === teacherName && eval.coordinatorName === state.currentUser.username)
+                    .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                if (evaluations.length === 0) {
+                    container.innerHTML = `<div class="card">
+                        <p>${state.currentLang === 'fr' ? 'Aucune évaluation trouvée pour cet enseignant.' : 'No evaluations found for this teacher.'}</p>
+                    </div>`;
+                    return;
+                }
+
+                let html = `<div class="card">
+                    <h3>${state.currentLang === 'fr' ? 'Évaluations précédentes pour' : 'Previous evaluations for'} ${teacherName}</h3>
+                    <div class="evaluations-list">`;
+
+                evaluations.forEach((evaluation, index) => {
+                    const evalDate = new Date(evaluation.date);
+                    const isLatest = index === 0;
+                    
+                    html += `
+                        <div class="evaluation-item ${isLatest ? 'latest' : ''}" style="border: 1px solid #ddd; margin: 10px 0; padding: 15px; border-radius: 8px;">
+                            <div class="eval-summary" style="display: flex; justify-content: space-between; align-items: center;">
+                                <div class="eval-info">
+                                    <h4>${state.currentLang === 'fr' ? 'Évaluation du' : 'Evaluation from'} ${evalDate.toLocaleDateString(state.currentLang === 'fr' ? 'fr-FR' : 'en-US')}</h4>
+                                    <div class="eval-meta">
+                                        ${evaluation.visitDate ? `<span><strong>${state.currentLang === 'fr' ? 'Date de visite :' : 'Visit Date:'}</strong> ${evaluation.visitDate}</span><br>` : ''}
+                                        ${evaluation.lessonSubject ? `<span><strong>${state.currentLang === 'fr' ? 'Matière :' : 'Subject:'}</strong> ${evaluation.lessonSubject}</span><br>` : ''}
+                                        ${evaluation.className ? `<span><strong>${state.currentLang === 'fr' ? 'Classe :' : 'Class:'}</strong> ${evaluation.className}</span><br>` : ''}
+                                        ${evaluation.semester ? `<span><strong>${state.currentLang === 'fr' ? 'Semestre :' : 'Semester:'}</strong> ${evaluation.semester === '1' ? (state.currentLang === 'fr' ? '1er Semestre' : '1st Semester') : (state.currentLang === 'fr' ? '2ème Semestre' : '2nd Semester')}</span>` : ''}
+                                    </div>
+                                </div>
+                                <div class="eval-score-section">
+                                    <div class="eval-score" style="font-size: 1.5em; font-weight: bold; color: #4a90e2;">${evaluation.grandTotal}/100</div>
+                                    <div class="eval-level" style="padding: 4px 12px; border-radius: 15px; font-size: 0.8em; font-weight: bold; background: #28a745; color: white;">
+                                        ${evaluation.performanceLevel || getPerformanceLevel(evaluation.grandTotal)}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="eval-actions" style="margin-top: 10px; display: flex; gap: 10px;">
+                                <button class="action-btn view-btn" onclick="toggleEvaluationDetails('${evaluation.id}')" style="padding: 8px 15px; background: #4a90e2; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                                    <span id="toggle-text-${evaluation.id}">${state.currentLang === 'fr' ? 'Voir détails' : 'View Details'}</span>
+                                </button>
+                                <button class="action-btn word-btn" onclick="generateWordReport('${evaluation.id}')" style="padding: 8px 15px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                                    ${state.currentLang === 'fr' ? 'Générer Word' : 'Generate Word'}
+                                </button>
+                            </div>
+                            
+                            <div id="details-${evaluation.id}" class="eval-details-full" style="display: none; margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 5px;">
+                                <div class="eval-comments">
+                                    ${evaluation.comments && evaluation.comments.strengths ? `
+                                    <div class="comment-section" style="margin-bottom: 15px;">
+                                        <h5>${state.currentLang === 'fr' ? 'Points forts' : 'Strengths'}</h5>
+                                        <p>${evaluation.comments.strengths}</p>
+                                    </div>` : ''}
+                                    
+                                    ${evaluation.comments && evaluation.comments.toImprove ? `
+                                    <div class="comment-section" style="margin-bottom: 15px;">
+                                        <h5>${state.currentLang === 'fr' ? 'À améliorer' : 'To Improve'}</h5>
+                                        <p>${evaluation.comments.toImprove}</p>
+                                    </div>` : ''}
+                                    
+                                    ${evaluation.comments && evaluation.comments.recommendations ? `
+                                    <div class="comment-section" style="margin-bottom: 15px;">
+                                        <h5>${state.currentLang === 'fr' ? 'Recommandations' : 'Recommendations'}</h5>
+                                        <p>${evaluation.comments.recommendations}</p>
+                                    </div>` : ''}
+                                </div>
+                            </div>
+                        </div>`;
+                });
+
+                html += `</div></div>`;
+                container.innerHTML = html;
             }
 
             document.getElementById('teacher-select').addEventListener('change', (e) => {
@@ -396,6 +553,46 @@
             }
             
             // Initial load
+            // --- Utility Functions ---
+            function getPerformanceLevel(score) {
+                const isFrench = state.currentLang === 'fr';
+                if (score >= 85) return isFrench ? 'Excellent' : 'Excellent';
+                if (score >= 70) return isFrench ? 'Bon' : 'Good';
+                if (score >= 60) return isFrench ? 'Satisfaisant' : 'Satisfactory';
+                if (score >= 50) return isFrench ? 'À améliorer' : 'Needs Improvement';
+                return isFrench ? 'Insuffisant' : 'Poor';
+            }
+
+            function generateWordReport(evaluationId) {
+                const evaluation = EVALUATIONS_DATABASE.find(eval => eval.id === evaluationId);
+                if (!evaluation) {
+                    alert(state.currentLang === 'fr' ? 'Évaluation non trouvée' : 'Evaluation not found');
+                    return;
+                }
+                
+                const fileName = `Evaluation_${evaluation.teacherName}_${new Date(evaluation.date).toISOString().split('T')[0]}.docx`;
+                alert(state.currentLang === 'fr' ? `Génération du document Word: ${fileName}\n\nScore: ${evaluation.grandTotal}/100\nNiveau: ${evaluation.performanceLevel || getPerformanceLevel(evaluation.grandTotal)}` : `Generating Word document: ${fileName}\n\nScore: ${evaluation.grandTotal}/100\nLevel: ${evaluation.performanceLevel || getPerformanceLevel(evaluation.grandTotal)}`);
+            }
+
+            function toggleEvaluationDetails(evaluationId) {
+                const detailsElement = document.getElementById(`details-${evaluationId}`);
+                const toggleText = document.getElementById(`toggle-text-${evaluationId}`);
+                
+                if (detailsElement && toggleText) {
+                    if (detailsElement.style.display === 'none') {
+                        detailsElement.style.display = 'block';
+                        toggleText.textContent = state.currentLang === 'fr' ? 'Masquer détails' : 'Hide Details';
+                    } else {
+                        detailsElement.style.display = 'none';
+                        toggleText.textContent = state.currentLang === 'fr' ? 'Voir détails' : 'View Details';
+                    }
+                }
+            }
+
+            // Make functions global for onclick handlers
+            window.toggleEvaluationDetails = toggleEvaluationDetails;
+            window.generateWordReport = generateWordReport;
+
             setLanguage('en');
         });
     </script>
