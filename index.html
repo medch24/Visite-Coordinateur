@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title data-lang-en="Teacher Evaluation System" data-lang-fr="Système d'Évaluation des Enseignants">Teacher Evaluation System</title>
     <link rel="stylesheet" href="styles.css">
+    <!-- Libraries for Word document generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/7.8.2/docx.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 </head>
 <body>
 
@@ -52,9 +55,27 @@
         <div id="coordinator-dashboard" class="page">
             <h1 data-lang-en="Coordinator Dashboard" data-lang-fr="Tableau de Bord Coordinateur">Coordinator Dashboard</h1>
             <h2 id="coordinator-welcome"></h2>
-            <h3 data-lang-en="Select a teacher to evaluate:" data-lang-fr="Sélectionnez un enseignant à évaluer :">Select a teacher to evaluate:</h3>
-            <select id="teacher-select"></select>
-            <div id="evaluation-form-container"></div>
+            
+            <!-- Navigation Tabs -->
+            <div class="coordinator-tabs">
+                <button id="new-evaluation-tab" class="tab-btn active" data-lang-en="New Evaluation" data-lang-fr="Nouvelle Évaluation">New Evaluation</button>
+                <button id="view-evaluations-tab" class="tab-btn" data-lang-en="View Previous Evaluations" data-lang-fr="Voir Évaluations Précédentes">View Previous Evaluations</button>
+            </div>
+
+            <!-- New Evaluation Tab -->
+            <div id="new-evaluation-content" class="tab-content active">
+                <h3 data-lang-en="Select a teacher to evaluate:" data-lang-fr="Sélectionnez un enseignant à évaluer :">Select a teacher to evaluate:</h3>
+                <select id="teacher-select"></select>
+                <div id="evaluation-form-container"></div>
+            </div>
+
+            <!-- Previous Evaluations Tab -->
+            <div id="previous-evaluations-content" class="tab-content">
+                <h3 data-lang-en="Select a teacher to view evaluations:" data-lang-fr="Sélectionnez un enseignant pour voir les évaluations :">Select a teacher to view evaluations:</h3>
+                <select id="teacher-select-view"></select>
+                <div id="previous-evaluations-container"></div>
+            </div>
+
             <button id="logout-btn" data-lang-en="Logout" data-lang-fr="Déconnexion">Logout</button>
         </div>
 
@@ -241,49 +262,118 @@
             // --- Evaluation Form ---
             function renderEvaluationForm(teacherName) {
                 const criteria = {
-                    professionalOutlook: {
-                        title_en: "PROFESSIONAL OUTLOOK",
-                        title_fr: "PERSPECTIVE PROFESSIONNELLE",
+                    preparation: {
+                        title_en: "LESSON PREPARATION AND PLANNING",
+                        title_fr: "PRÉPARATION ET PLANIFICATION DES COURS",
+                        maxPoints: 15,
                         items: [
-                            { text_en: "Speaks with an effective voice and tone.", text_fr: "Parle avec une voix et un ton efficaces." },
-                            { text_en: "Uses standard English in both oral and written expression.", text_fr: "Utilise un anglais standard à l'oral et à l'écrit." },
-                            { text_en: "Uses appropriate eye contact, body language, movement, and posture.", text_fr: "Utilise un contact visuel, un langage corporel, des mouvements et une posture appropriés." },
+                            { text_en: "Lesson plan is detailed with clear learning objectives", text_fr: "Plan de cours détaillé avec objectifs d'apprentissage clairs", points: 5 },
+                            { text_en: "Materials and resources are well-prepared and organized", text_fr: "Matériaux et ressources bien préparés et organisés", points: 5 },
+                            { text_en: "Activities align with curriculum standards and goals", text_fr: "Activités alignées avec les standards et objectifs du curriculum", points: 5 }
                         ]
                     },
                     contentKnowledge: {
-                         title_en: "CONTENT KNOWLEDGE",
-                         title_fr: "CONNAISSANCE DU CONTENU",
-                         items: [
-                            { text_en: "Integrates literacy AND mathematics into content area instruction when necessary.", text_fr: "Intègre la littératie ET les mathématiques dans l'enseignement disciplinaire si nécessaire." },
-                            { text_en: "Demonstrates appropriate level of knowledge and skills in content area(s).", text_fr: "Démontre un niveau approprié de connaissances et de compétences dans le(s) domaine(s) de contenu." },
-                         ]
-                    },
-                    instructionAndAssessments: {
-                        title_en: "INSTRUCTION AND ASSESSMENTS",
-                        title_fr: "ENSEIGNEMENT ET ÉVALUATIONS",
+                        title_en: "SUBJECT MATTER KNOWLEDGE",
+                        title_fr: "MAÎTRISE DE LA MATIÈRE",
+                        maxPoints: 20,
                         items: [
-                            { text_en: "Prepares detailed lesson plans with significant objectives that reflect key concepts.", text_fr: "Prépare des plans de leçon détaillés avec des objectifs significatifs qui reflètent les concepts clés."},
-                            { text_en: "Plans instructional strategies and activities that require higher order thinking skills.", text_fr: "Planifie des stratégies et des activités pédagogiques qui nécessitent des compétences de pensée d'ordre supérieur."},
-                            { text_en: "Uses questioning strategies to engage students and stimulate higher order thinking.", text_fr: "Utilise des stratégies de questionnement pour engager les étudiants et stimuler la pensée d'ordre supérieur."},
+                            { text_en: "Demonstrates deep understanding of subject matter", text_fr: "Démontre une compréhension approfondie de la matière", points: 7 },
+                            { text_en: "Provides accurate and up-to-date information", text_fr: "Fournit des informations précises et à jour", points: 6 },
+                            { text_en: "Makes connections between concepts and real-world applications", text_fr: "Établit des liens entre concepts et applications réelles", points: 7 }
+                        ]
+                    },
+                    instructionalMethods: {
+                        title_en: "INSTRUCTIONAL METHODS AND TECHNIQUES",
+                        title_fr: "MÉTHODES ET TECHNIQUES D'ENSEIGNEMENT",
+                        maxPoints: 25,
+                        items: [
+                            { text_en: "Uses variety of teaching strategies appropriate to content and students", text_fr: "Utilise diverses stratégies d'enseignement adaptées au contenu et aux étudiants", points: 8 },
+                            { text_en: "Engages students actively in learning process", text_fr: "Engage activement les étudiants dans le processus d'apprentissage", points: 9 },
+                            { text_en: "Provides clear explanations and instructions", text_fr: "Fournit des explications et instructions claires", points: 8 }
+                        ]
+                    },
+                    classroomManagement: {
+                        title_en: "CLASSROOM MANAGEMENT",
+                        title_fr: "GESTION DE CLASSE",
+                        maxPoints: 15,
+                        items: [
+                            { text_en: "Maintains positive learning environment", text_fr: "Maintient un environnement d'apprentissage positif", points: 5 },
+                            { text_en: "Manages time effectively during lesson", text_fr: "Gère efficacement le temps pendant la leçon", points: 5 },
+                            { text_en: "Handles disruptions appropriately and professionally", text_fr: "Gère les perturbations de manière appropriée et professionnelle", points: 5 }
+                        ]
+                    },
+                    studentInteraction: {
+                        title_en: "STUDENT INTERACTION AND ENGAGEMENT",
+                        title_fr: "INTERACTION ET ENGAGEMENT DES ÉTUDIANTS",
+                        maxPoints: 15,
+                        items: [
+                            { text_en: "Encourages student participation and questions", text_fr: "Encourage la participation et les questions des étudiants", points: 5 },
+                            { text_en: "Provides constructive feedback to students", text_fr: "Fournit des commentaires constructifs aux étudiants", points: 5 },
+                            { text_en: "Addresses diverse learning needs and styles", text_fr: "Répond aux besoins et styles d'apprentissage divers", points: 5 }
+                        ]
+                    },
+                    professionalism: {
+                        title_en: "PROFESSIONAL BEHAVIOR AND COMMUNICATION",
+                        title_fr: "COMPORTEMENT PROFESSIONNEL ET COMMUNICATION",
+                        maxPoints: 10,
+                        items: [
+                            { text_en: "Demonstrates professional demeanor and appearance", text_fr: "Démontre un comportement et une apparence professionnels", points: 3 },
+                            { text_en: "Communicates clearly and effectively", text_fr: "Communique clairement et efficacement", points: 4 },
+                            { text_en: "Shows punctuality and preparation", text_fr: "Fait preuve de ponctualité et de préparation", points: 3 }
                         ]
                     }
                 };
 
-                let formHTML = `<form id="eval-form" class="card"><h3>${state.currentLang === 'fr' ? 'Évaluation pour' : 'Evaluation for'} ${teacherName}</h3>`;
+                let formHTML = `<form id="eval-form" class="card">
+                    <h3>${state.currentLang === 'fr' ? 'Évaluation pour' : 'Evaluation for'} ${teacherName}</h3>
+                    
+                    <!-- Date and Time Information -->
+                    <div class="visit-info">
+                        <div class="form-row">
+                            <label for="visit-date">${state.currentLang === 'fr' ? 'Date de la visite :' : 'Visit Date:'}</label>
+                            <input type="date" id="visit-date" required>
+                        </div>
+                        <div class="form-row">
+                            <label for="visit-time">${state.currentLang === 'fr' ? 'Heure de la séance :' : 'Session Time:'}</label>
+                            <input type="time" id="visit-time" required>
+                        </div>
+                        <div class="form-row">
+                            <label for="lesson-subject">${state.currentLang === 'fr' ? 'Matière enseignée :' : 'Subject Taught:'}</label>
+                            <input type="text" id="lesson-subject" placeholder="${state.currentLang === 'fr' ? 'Ex: Mathématiques' : 'Ex: Mathematics'}" required>
+                        </div>
+                        <div class="form-row">
+                            <label for="class-name">${state.currentLang === 'fr' ? 'Classe :' : 'Class:'}</label>
+                            <input type="text" id="class-name" placeholder="${state.currentLang === 'fr' ? 'Ex: 6ème A' : 'Ex: Grade 6A'}" required>
+                        </div>
+                        <div class="form-row">
+                            <label for="semester">${state.currentLang === 'fr' ? 'Semestre :' : 'Semester:'}</label>
+                            <select id="semester" required>
+                                <option value="">${state.currentLang === 'fr' ? 'Sélectionner...' : 'Select...'}</option>
+                                <option value="1">${state.currentLang === 'fr' ? '1er Semestre' : '1st Semester'}</option>
+                                <option value="2">${state.currentLang === 'fr' ? '2ème Semestre' : '2nd Semester'}</option>
+                            </select>
+                        </div>
+                    </div>`;
                 let criteriaIndex = 0;
                 
                 for(const category in criteria){
-                    formHTML += `<fieldset><legend>${criteria[category][`title_${state.currentLang}`]}</legend>`;
-                    criteria[category].items.forEach((item, index) => {
+                    const cat = criteria[category];
+                    formHTML += `<fieldset>
+                        <legend>${cat[`title_${state.currentLang}`]} (${state.currentLang === 'fr' ? 'Maximum' : 'Max'}: ${cat.maxPoints} ${state.currentLang === 'fr' ? 'points' : 'points'})</legend>`;
+                    
+                    cat.items.forEach((item, index) => {
                         formHTML += `<div class="criteria-row">
-                            <p>${item[`text_${state.currentLang}`]}</p>
-                            <div class="rating">
-                                ${[1,2,3,4,5].map(num => `
-                                <input type="radio" id="crit${criteriaIndex}-${num}" name="crit${criteriaIndex}" value="${num}" required>
-                                <label for="crit${criteriaIndex}-${num}">${num}</label>
-                                `).join('')}
-                            </div>
-                        </div>`;
+                            <p>${item[`text_${state.currentLang}`]} <span class="points-info">(${item.points} ${state.currentLang === 'fr' ? 'pts max' : 'pts max'})</span></p>
+                            <div class="rating">`;
+                        
+                        // Créer des options de notation basées sur les points maximum de l'item
+                        for(let i = 0; i <= item.points; i++) {
+                            formHTML += `
+                                <input type="radio" id="crit${criteriaIndex}-${i}" name="crit${criteriaIndex}" value="${i}" ${i === 0 ? '' : ''} required>
+                                <label for="crit${criteriaIndex}-${i}">${i}</label>`;
+                        }
+                        
+                        formHTML += `</div></div>`;
                         criteriaIndex++;
                     });
                     formHTML += `</fieldset>`;
@@ -292,19 +382,35 @@
                 formHTML += `
                     <div class="comments-section">
                         <div>
-                            <label for="comments-improve" data-lang-en="Comments (To Improve)" data-lang-fr="Commentaires (À améliorer)">Comments (To Improve)</label>
-                            <textarea id="comments-improve" required></textarea>
+                            <label for="comments-strengths">${state.currentLang === 'fr' ? 'Points forts observés :' : 'Observed Strengths:'}</label>
+                            <textarea id="comments-strengths" placeholder="${state.currentLang === 'fr' ? 'Décrivez les aspects positifs de la performance...' : 'Describe positive aspects of performance...'}" required></textarea>
                         </div>
                         <div>
-                            <label for="comments-eliminate" data-lang-en="Comments (To Eliminate)" data-lang-fr="Commentaires (À éliminer)">Comments (To Eliminate)</label>
-                            <textarea id="comments-eliminate" required></textarea>
+                            <label for="comments-improve">${state.currentLang === 'fr' ? 'Domaines à améliorer :' : 'Areas for Improvement:'}</label>
+                            <textarea id="comments-improve" placeholder="${state.currentLang === 'fr' ? 'Suggestions constructives pour le développement professionnel...' : 'Constructive suggestions for professional development...'}" required></textarea>
+                        </div>
+                        <div>
+                            <label for="comments-recommendations">${state.currentLang === 'fr' ? 'Recommandations spécifiques :' : 'Specific Recommendations:'}</label>
+                            <textarea id="comments-recommendations" placeholder="${state.currentLang === 'fr' ? 'Actions concrètes recommandées...' : 'Concrete recommended actions...'}" required></textarea>
                         </div>
                     </div>
-                    <div class="grand-total">
-                        <span data-lang-en="Grand Total:" data-lang-fr="Total Général :">Grand Total:</span>
-                        <span id="grand-total-display">0</span>
+                    
+                    <div class="score-summary">
+                        <div class="total-score">
+                            <span class="score-label">${state.currentLang === 'fr' ? 'Score Total :' : 'Total Score:'}</span>
+                            <span id="grand-total-display" class="score-value">0</span>
+                            <span class="score-max">/ 100</span>
+                        </div>
+                        <div class="performance-level">
+                            <span class="level-label">${state.currentLang === 'fr' ? 'Niveau :' : 'Performance Level:'}</span>
+                            <span id="performance-level" class="level-value">${state.currentLang === 'fr' ? 'À calculer' : 'To be calculated'}</span>
+                        </div>
                     </div>
-                    <button type="submit" data-lang-en="Submit Evaluation" data-lang-fr="Soumettre l'évaluation">Submit Evaluation</button>
+                    
+                    <div class="form-buttons">
+                        <button type="submit" class="submit-btn">${state.currentLang === 'fr' ? 'Soumettre l\'évaluation' : 'Submit Evaluation'}</button>
+                        <button type="button" id="generate-word" class="word-btn">${state.currentLang === 'fr' ? 'Générer rapport Word' : 'Generate Word Report'}</button>
+                    </div>
                 </form>`;
 
                 const container = document.getElementById('evaluation-form-container');
@@ -316,28 +422,51 @@
                     let total = 0;
                     ratings.forEach(r => total += parseInt(r.value, 10));
                     document.getElementById('grand-total-display').textContent = total;
+                    
+                    // Update performance level
+                    const performanceLevel = getPerformanceLevel(total);
+                    document.getElementById('performance-level').textContent = performanceLevel;
                 });
                 
                 // Form Submission
-                container.querySelector('#eval-form').addEventListener('submit', async (e) => {
+                container.querySelector('#eval-form').addEventListener('submit', (e) => {
                     e.preventDefault();
+                    
+                    // Collecter toutes les données du formulaire
+                    const visitDate = document.getElementById('visit-date').value;
+                    const visitTime = document.getElementById('visit-time').value;
+                    const lessonSubject = document.getElementById('lesson-subject').value;
+                    const className = document.getElementById('class-name').value;
+                    const semester = document.getElementById('semester').value;
+                    
                     const formData = new FormData(e.target);
                     const criteriaData = {};
                     let grandTotal = 0;
-                    for(let [key, value] of formData.entries()){
-                        criteriaData[key] = parseInt(value, 10);
-                        grandTotal += parseInt(value, 10);
-                    }
+                    
+                    // Calculer le score total des critères seulement (pas les autres champs)
+                    const ratings = container.querySelectorAll('input[type="radio"]:checked');
+                    ratings.forEach(r => {
+                        criteriaData[r.name] = parseInt(r.value, 10);
+                        grandTotal += parseInt(r.value, 10);
+                    });
                     
                     const payload = {
                         teacherName,
                         coordinatorName: state.currentUser.username,
+                        visitDate,
+                        visitTime,
+                        lessonSubject,
+                        className,
+                        semester,
                         criteria: criteriaData,
+                        criteriaDetails: criteria, // Ajouter les détails des critères pour affichage ultérieur
                         comments: {
+                            strengths: document.getElementById('comments-strengths').value,
                             toImprove: document.getElementById('comments-improve').value,
-                            toEliminate: document.getElementById('comments-eliminate').value
+                            recommendations: document.getElementById('comments-recommendations').value
                         },
-                        grandTotal
+                        grandTotal,
+                        performanceLevel: getPerformanceLevel(grandTotal)
                     };
 
                     // Sauvegarder l'évaluation dans la base locale
