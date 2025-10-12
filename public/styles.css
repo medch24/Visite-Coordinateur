@@ -1,15 +1,16 @@
 @import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Montserrat:wght@500;600;700&display=swap');
 
 :root {
-    --primary-color: #005A9E; /* A deep, academic blue */
-    --secondary-color: #F0F4F8; /* A light, clean grey */
-    --accent-color: #E67E22; /* A warm accent for attention */
+    --primary-color: #005A9E;
+    --secondary-color: #F0F4F8;
+    --accent-color: #E67E22;
     --text-color: #34495E;
     --card-bg: #FFFFFF;
     --shadow: 0 6px 20px rgba(0, 90, 158, 0.1);
     --border-radius: 12px;
     --success-color: #27AE60;
     --danger-color: #E74C3C;
+    --word-blue: #2980B9;
 }
 
 * { box-sizing: border-box; }
@@ -27,13 +28,7 @@ body {
     line-height: 1.6;
 }
 
-.container {
-    width: 100%;
-    max-width: 1200px;
-    position: relative;
-}
-
-/* --- General & Reusable Components --- */
+.container { width: 100%; max-width: 1200px; position: relative; }
 .card {
     background: var(--card-bg);
     padding: 2rem;
@@ -43,16 +38,9 @@ body {
     border: 1px solid #EAECEE;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
-.card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 25px rgba(0, 90, 158, 0.15);
-}
+.card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0, 90, 158, 0.15); }
 
-h1, h2, h3 {
-    font-family: 'Montserrat', sans-serif;
-    color: var(--primary-color);
-    margin-top: 0;
-}
+h1, h2, h3 { font-family: 'Montserrat', sans-serif; color: var(--primary-color); margin-top: 0; }
 h1 { text-align: center; font-size: 2.2rem; margin-bottom: 2rem; }
 h2 { font-size: 1.6rem; padding-bottom: 0.5rem; margin-bottom: 1rem; }
 h3 { font-size: 1.3rem; margin-bottom: 1rem; display: flex; align-items: center; gap: .5rem;}
@@ -70,57 +58,27 @@ button {
     font-family: 'Montserrat', sans-serif;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 0.5rem;
 }
-button:hover {
-    background-color: #00487d;
-    transform: translateY(-3px);
-    box-shadow: 0 4px 12px rgba(0, 90, 158, 0.3);
-}
-button:disabled {
-    background-color: #bdc3c7;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-}
-button i { transition: transform 0.3s ease; }
-button:hover i { transform: scale(1.1); }
+button:hover { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); }
+button:disabled { background-color: #bdc3c7; cursor: not-allowed; transform: none; box-shadow: none; }
 
-/* --- Header & Settings --- */
 .school-logo { text-align: center; margin-bottom: 1.5rem; }
 .school-logo img { max-height: 90px; width: auto; border-radius: 8px; box-shadow: var(--shadow); }
 .header-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
-.lang-btn, .settings-btn {
+.lang-btn {
     background: var(--card-bg);
     border: 2px solid var(--primary-color);
     color: var(--primary-color);
     padding: 0.5rem 1rem;
 }
-.lang-btn.active, .lang-btn:hover, .settings-btn:hover { background: var(--primary-color); color: white; }
-.settings-panel {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px);
-    display: none; z-index: 1000; align-items: center; justify-content: center;
-    animation: fadeIn 0.3s ease;
-}
-.settings-panel.active { display: flex; }
-.settings-content {
-    background: var(--card-bg); border-radius: var(--border-radius); padding: 2rem;
-    width: 90%; max-width: 500px;
-    animation: slideInUp 0.4s ease;
-}
-.settings-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
-.close-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; transition: transform 0.3s ease; }
-.close-btn:hover { color: var(--danger-color); transform: rotate(90deg); }
-.save-btn { background: var(--success-color); width: 100%; }
+.lang-btn.active, .lang-btn:hover { background: var(--primary-color); color: white; }
 
-/* --- Page System --- */
 .page { display: none; }
 .page.active { display: block; animation: fadeIn 0.5s ease; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes slideInUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-/* --- Login Page --- */
 input[type="text"], input[type="password"], input[type="url"], input[type="date"], select, textarea {
     width: 100%; padding: 0.8rem 1rem; border: 1px solid #ccc;
     border-radius: 8px; font-size: 1rem; font-family: inherit; transition: all 0.3s ease;
@@ -139,86 +97,68 @@ input[readonly] { background-color: #f0f0f0; cursor: not-allowed; }
 .login-help { margin-top: 2rem; text-align: center; padding: 1rem; background: var(--secondary-color); border-radius: 8px; }
 .error-message { color: var(--danger-color); text-align: center; margin-top: 1rem; }
 
-/* --- Coordinator Dashboard --- */
 #coordinator-dashboard select { font-size: 1.1rem; padding: 0.8rem; margin-bottom: 1rem; }
 .previous-eval-list { list-style: none; padding: 0; }
 .previous-eval-list li {
-    display: flex; justify-content: space-between; align-items: center;
+    display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center;
     padding: 0.8rem; border-bottom: 1px solid #eee; transition: background-color 0.2s;
 }
-.previous-eval-list li:hover { background-color: var(--secondary-color); }
-.previous-eval-list li .view-btn {
-    background-color: var(--accent-color);
-    font-size: 0.8rem; padding: 0.4rem 0.8rem;
-}
+.previous-eval-list li:hover { background-color: #f9fafb; }
+.previous-eval-list .eval-info { display: flex; align-items: center; gap: 1.5rem; flex-grow: 1; }
+.previous-eval-list .eval-class { font-style: italic; }
+.previous-eval-list .eval-actions { display: flex; gap: 0.5rem; margin-left: 1rem; }
+.previous-eval-list .view-btn, .previous-eval-list .word-btn, .previous-eval-list .delete-btn { font-size: 0.8rem; padding: 0.4rem 0.8rem; }
+.previous-eval-list .view-btn { background-color: var(--accent-color); }
+.previous-eval-list .word-btn { background-color: var(--word-blue); }
+.previous-eval-list .delete-btn { background-color: var(--danger-color); }
+.previous-eval-list .delete-btn:hover { background-color: #c0392b; }
 
-/* --- Evaluation Form --- */
-.evaluation-metadata { margin-bottom: 2rem; }
-.metadata-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+.evaluation-metadata .metadata-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
 .metadata-item label { display: block; font-weight: bold; margin-bottom: .25rem; font-size: .9rem; }
 fieldset { border: 1px solid #ddd; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; }
-legend.category-header {
-    width: auto; font-size: 1.1rem; font-weight: 700; color: var(--primary-color); 
-    padding-inline: .5rem;
-}
+legend.category-header { width: auto; font-size: 1.1rem; font-weight: 700; color: var(--primary-color); padding-inline: .5rem; }
 .category-header {display: flex; justify-content: space-between; align-items: center;}
 .criteria-table .table-header { display: grid; grid-template-columns: 4fr 1fr 2fr 1fr; font-weight: bold; padding-bottom: 0.5rem; border-bottom: 1px solid #ccc; }
 .criteria-row { display: grid; grid-template-columns: 4fr 1fr 2fr 1fr; align-items: center; padding: 1rem 0; border-bottom: 1px solid #f0f0f0; }
 .rating-controls { display: flex; justify-content: center; gap: 5px; }
 .rating-controls input[type="radio"] { display: none; }
-.rating-controls label {
-    width: 30px; height: 30px; line-height: 30px; text-align: center; border: 1px solid #ccc;
-    border-radius: 50%; cursor: pointer; transition: all 0.2s ease;
-}
+.rating-controls label { width: 30px; height: 30px; line-height: 30px; text-align: center; border: 1px solid #ccc; border-radius: 50%; cursor: pointer; transition: all 0.2s ease; }
 .rating-controls label:hover { background: #e0e0e0; }
 .rating-controls input:checked + label { background: var(--primary-color); color: white; border-color: var(--primary-color); transform: scale(1.1); }
 .calculated-score, .max-points { text-align: center; font-weight: bold; }
 .evaluation-summary { text-align: center; margin: 2rem 0; }
-.total-score-section {
-    background: var(--secondary-color); padding: 1.5rem; border-radius: var(--border-radius);
-    display: inline-flex; flex-direction: column; align-items: center;
-}
+.total-score-section { background: var(--secondary-color); padding: 1.5rem; border-radius: var(--border-radius); display: inline-flex; flex-direction: column; align-items: center; }
 .score-display .total-number { font-size: 3rem; font-weight: 700; color: var(--primary-color); }
 .score-display .total-max { font-size: 1.5rem; color: #7f8c8d; }
 .performance-level { font-size: 1.2rem; font-weight: bold; margin-top: 0.5rem; }
-.comments-section { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; margin-top: 2rem; }
+.performance-level.excellent { color: var(--success-color); }
+.performance-level.needs-improvement { color: var(--danger-color); }
+.comments-section { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
 .comments-section label { display: flex; align-items: center; gap: 0.5rem; font-weight: bold; margin-bottom: 0.5rem; color: var(--primary-color); }
 .form-actions { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem; }
-.word-btn { background-color: #2980B9; }
 .submit-btn { background-color: var(--success-color); }
+.submit-btn:hover { background-color: #219a52; }
 
-/* --- Teacher Dashboard --- */
-.evaluation-card {
-    background: white; border-radius: var(--border-radius); box-shadow: var(--shadow);
-    margin-bottom: 1.5rem; overflow: hidden; border: 1px solid #eee; transition: all 0.3s ease;
-}
+.evaluation-card { background: white; border-radius: var(--border-radius); box-shadow: var(--shadow); margin-bottom: 1.5rem; overflow: hidden; border: 1px solid #eee; }
 .evaluation-card.latest { border-left: 5px solid var(--primary-color); }
-.card-header {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 1rem 1.5rem; background-color: var(--secondary-color);
-}
+.card-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; background-color: var(--secondary-color); }
 .eval-date { font-weight: bold; display: flex; align-items: center; gap: 0.5rem; }
-.latest-badge { background-color: var(--accent-color); color: white; font-size: 0.7rem; padding: 2px 8px; border-radius: 10px; }
+.latest-badge { background-color: var(--accent-color); color: white; font-size: 0.7rem; padding: 2px 8px; border-radius: 10px; font-weight: bold; }
 .card-content { padding: 1.5rem; }
 .overall-progress { margin-bottom: 1.5rem; }
 .progress-bar-container { height: 20px; background: #e0e0e0; border-radius: 10px; overflow: hidden; }
 .progress-bar-fill { height: 100%; border-radius: 10px; transition: width 0.5s ease-in-out; }
 .score-summary { display: flex; align-items: center; gap: 1rem; margin-top: 0.5rem; }
 .performance-badge { color: white; font-size: 0.8rem; padding: 3px 10px; border-radius: 12px; }
-.card-actions { text-align: right; }
-.details-btn { background: var(--primary-color); }
+.card-actions { display: flex; justify-content: flex-end; gap: 1rem; }
+.details-btn { background: var(--accent-color); }
+.details-btn:hover { background: #d35400; }
+.word-btn { background: var(--word-blue); }
+.word-btn:hover { background: #206694; }
 .no-evaluations { text-align: center; padding: 3rem; }
 
-/* --- Modal for Details --- */
-.modal {
-    display: none; position: fixed; z-index: 1001; left: 0; top: 0;
-    width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5);
-    align-items: center; justify-content: center;
-}
-.modal-content {
-    background-color: #fefefe; margin: auto; padding: 2rem; border-radius: var(--border-radius);
-    width: 90%; max-width: 800px; max-height: 90vh; display: flex; flex-direction: column;
-}
+.modal { display: none; position: fixed; z-index: 1001; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
+.modal-content { background-color: #fefefe; margin: auto; padding: 2rem; border-radius: var(--border-radius); width: 90%; max-width: 800px; max-height: 90vh; display: flex; flex-direction: column; }
 .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd; padding-bottom: 1rem; }
 .modal-body { flex-grow: 1; overflow-y: auto; padding-top: 1rem; }
 .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; background: var(--secondary-color); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; }
@@ -228,11 +168,7 @@ legend.category-header {
 .comments-details h6 { margin: 0 0 0.5rem 0; display: flex; align-items: center; gap: 0.5rem; color: var(--primary-color); }
 .comments-details p { margin: 0; padding-left: 1.5rem; border-left: 2px solid #eee; }
 
-/* --- Responsive Design --- */
-@media (max-width: 992px) {
-    .comments-section { grid-template-columns: 1fr; }
-}
-
+@media (max-width: 992px) { .comments-section { grid-template-columns: 1fr; } }
 @media (max-width: 768px) {
     body { padding: 1rem; }
     .criteria-table .table-header { display: none; }
@@ -240,15 +176,9 @@ legend.category-header {
         grid-template-columns: 1fr; gap: 0.5rem; text-align: center;
         padding: 1rem; border: 1px solid #eee; border-radius: 8px; margin-bottom: 0.5rem;
     }
-    .criteria-text, .max-points, .calculated-score {
-        display: flex;
-        justify-content: space-between;
-        width: 100%;
-        padding-inline: 1rem;
-    }
-    .criteria-text::before, .max-points::before, .calculated-score::before { font-weight: bold; }
-    .criteria-text::before { content: 'Critère: '; }
-    .max-points::before { content: 'Points Max: '; }
-    .calculated-score::before { content: 'Score: '; }
+    .criteria-text, .max-points, .calculated-score { display: flex; justify-content: space-between; width: 100%; padding-inline: 1rem; }
+    .criteria-text::before { font-weight: bold; content: 'Critère: '; }
+    .max-points::before { font-weight: bold; content: 'Points Max: '; }
+    .calculated-score::before { font-weight: bold; content: 'Score: '; }
     .rating-controls { justify-content: center; margin-top: .5rem; }
 }
