@@ -5,13 +5,13 @@
  */
 
 export default function handler(req, res) {
-  // Enable CORS for all origins
+  // Activer CORS pour toutes les origines (important pour les API serverless)
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
   res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
 
-  // Handle preflight requests
+  // Gérer les requêtes "preflight" OPTIONS
   if (req.method === 'OPTIONS') {
     res.status(200).end();
     return;
@@ -19,20 +19,18 @@ export default function handler(req, res) {
 
   const { method, url } = req;
 
-  // API Status endpoint
+  // Endpoint d'information de l'API
   if (method === 'GET' && url === '/api/') {
     return res.status(200).json({
       status: 'success',
       message: 'Professional Teacher Evaluation System API',
       version: '2.0.0',
       features: [
-        'Client-side evaluation database',
+        'Client-side evaluation database (localStorage)',
         '100-point academic assessment system',
-        'Word document generation',
+        'Word document generation with detailed tables',
         'Bilingual support (EN/FR)',
-        'School branding system',
-        'Performance level calculation',
-        'Comprehensive reporting'
+        'Enhanced teacher and coordinator dashboards'
       ],
       endpoints: {
         '/api/health': 'API health check',
@@ -41,7 +39,7 @@ export default function handler(req, res) {
     });
   }
 
-  // Health check endpoint
+  // Endpoint de vérification de santé
   if (method === 'GET' && url === '/api/health') {
     return res.status(200).json({
       status: 'healthy',
@@ -51,7 +49,7 @@ export default function handler(req, res) {
     });
   }
 
-  // Default response for undefined routes
+  // Réponse par défaut pour les routes non définies
   return res.status(404).json({
     error: 'Endpoint not found',
     message: 'This is a client-side application. All evaluation data is stored locally in the browser.',
