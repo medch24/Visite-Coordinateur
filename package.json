@@ -1,6 +1,6 @@
 {
-  "name": "teacher-evaluation-system",
-  "version": "1.0.0",
+  "name": "academic-teacher-evaluation-system",
+  "version": "2.0.0",
   "description": "Professional Teacher Evaluation System with 100-point assessment, Word generation, and bilingual support",
   "scripts": {
     "dev": "vercel dev",
@@ -24,6 +24,6 @@
     "javascript",
     "bilingual"
   ],
-  "author": "Educational Excellence Institute",
+  "author": "Academic Excellence Institute",
   "license": "MIT"
 }
