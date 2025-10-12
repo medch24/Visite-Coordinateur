@@ -21,7 +21,9 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('[data-lang-en], [data-lang-fr]').forEach(el => {
             const text = el.dataset[lang === 'fr' ? 'langFr' : 'langEn'] || '';
             const icon = el.querySelector('i');
-            if (icon) {
+            if (el.tagName === 'TITLE') {
+                document.title = text;
+            } else if (icon) {
                 let span = el.querySelector('span');
                 if (!span) {
                     span = document.createElement('span');
@@ -175,7 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
         for(const category in criteria) {
             const cat = criteria[category];
             formHTML += `<fieldset class="criteria-section">
-                <legend class="category-header"><span class="category-title" data-lang-en="${cat.title_en}" data-lang-fr="${cat.title_fr}"></span><span class="category-points"><span class="current-score" data-category="${category}">0</span>/${cat.maxPoints} pts</span></legend>
+                <legend class="category-header"><span class="category-title" data-lang-en="${cat.title_en}" data-lang-fr="${cat.title_fr}"></span><span class="category-points"><span class="current-score">0</span>/${cat.maxPoints} pts</span></legend>
                 <div class="criteria-table"><div class="table-header"><div class="criteria-col" data-lang-en="Criteria" data-lang-fr="Critères"></div><div class="points-col" data-lang-en="Points" data-lang-fr="Points"></div><div class="rating-col" data-lang-en="Rating" data-lang-fr="Éval."></div><div class="score-col">Score</div></div>`;
             cat.items.forEach(item => {
                 formHTML += `<div class="criteria-row"><div class="criteria-text" data-lang-en="${item.text_en}" data-lang-fr="${item.text_fr}"></div><div class="max-points">${item.points}</div><div class="rating-controls">${[1,2,3,4,5].map(n => `<input type="radio" id="c${criteriaIndex}-${n}" name="crit${criteriaIndex}" value="${n}" data-max-points="${item.points}" required><label for="c${criteriaIndex}-${n}">${n}</label>`).join('')}</div><div class="calculated-score" data-criteria="${criteriaIndex}">0</div></div>`;
@@ -196,12 +198,12 @@ document.addEventListener('DOMContentLoaded', () => {
         setLanguage(state.currentLang);
 
         const form = container.querySelector('#eval-form');
-        form.addEventListener('change', () => calculateScores(form, criteria));
+        form.addEventListener('change', () => calculateScores(form));
         form.addEventListener('submit', (e) => {
             e.preventDefault();
             if (form.querySelectorAll('input[type="radio"]:checked').length < criteriaIndex) { alert(state.currentLang === 'fr' ? 'Veuillez noter tous les critères.' : 'Please rate all criteria.'); return; }
             const formData = new FormData(e.target);
-            const scores = calculateScores(form, criteria);
+            const scores = calculateScores(form);
             const rawCriteria = Array.from(form.querySelectorAll('input[type="radio"]:checked')).reduce((acc, r) => ({...acc, [r.name]: {rating: parseInt(r.value)}}), {});
             EVALUATIONS_DATABASE.push({
                 id: Date.now().toString(), teacherName, coordinatorName: state.currentUser.username,
@@ -287,12 +289,13 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('details-modal').style.display = 'flex';
     };
 
+    // CORRECTION FINALE : Utilisation de window.docx pour accéder à la librairie
     window.generateTeacherWordReport = async (evalId) => {
         try {
             const data = EVALUATIONS_DATABASE.find(ev => ev.id === evalId);
             if (!data) throw new Error("Évaluation non trouvée !");
             
-            const { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableCell, TableRow, WidthType, AlignmentType } = docx;
+            const { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableCell, TableRow, WidthType, AlignmentType } = window.docx;
             
             let critIndex = 0;
             const tableRows = Object.values(data.criteriaDetails || {}).flatMap(cat => {
@@ -379,8 +382,8 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     const getCriteria = () => ({ preparation: { title_en: "PREPARATION AND PLANNING", title_fr: "PRÉPARATION ET PLANIFICATION", maxPoints: 25, items: [{ text_en: "Lesson plans with clear objectives", text_fr: "Plans de cours avec objectifs clairs", points: 5 }, { text_en: "Knowledge of curriculum", text_fr: "Connaissance du curriculum", points: 5 }, { text_en: "Appropriate materials", text_fr: "Matériaux appropriés", points: 5 }, { text_en: "Differentiated instruction", text_fr: "Enseignement différencié", points: 5 }, { text_en: "Assessments aligned with objectives", text_fr: "Évaluations alignées aux objectifs", points: 5 } ]}, activities: { title_en: "TEACHING ACTIVITIES", title_fr: "ACTIVITÉS D'ENSEIGNEMENT", maxPoints: 30, items: [{ text_en: "Clear and structured lessons", text_fr: "Leçons claires et structurées", points: 6 }, { text_en: "Varied teaching strategies", text_fr: "Stratégies d'enseignement variées", points: 6 }, { text_en: "Appropriate use of technology", text_fr: "Usage approprié de la technologie", points: 6 }, { text_en: "Promotes critical thinking", text_fr: "Favorise la pensée critique", points: 6 }, { text_en: "Timely and constructive feedback", text_fr: "Feedback opportun et constructif", points: 6 } ]}, classroomControl: { title_en: "CLASSROOM MANAGEMENT", title_fr: "GESTION DE CLASSE", maxPoints: 20, items: [{ text_en: "Conducive learning environment", text_fr: "Environnement d'apprentissage propice", points: 5 }, { text_en: "Effective student behavior management", text_fr: "Gestion efficace du comportement", points: 5 }, { text_en: "Efficient use of time", text_fr: "Utilisation efficace du temps", points: 5 }, { text_en: "Handles disruptions professionally", text_fr: "Gère les perturbations", points: 5 } ]}, personalCriteria: { title_en: "PROFESSIONAL QUALITIES", title_fr: "QUALITÉS PROFESSIONNELLES", maxPoints: 25, items: [{ text_en: "Professional appearance", text_fr: "Apparence professionnelle", points: 5 }, { text_en: "Punctuality and reliability", text_fr: "Ponctualité et fiabilité", points: 5 }, { text_en: "Effective communication", text_fr: "Communication efficace", points: 5 }, { text_en: "Continuous professional development", text_fr: "Développement professionnel continu", points: 5 }, { text_en: "Dedication to student success", text_fr: "Dévouement au succès des étudiants", points: 5 } ]} });
 
+    // --- Initialisation ---
     loadDb();
-    setLanguage('fr');
     const savedCreds = localStorage.getItem('teacherEvalCredentials');
     if (savedCreds) {
         const { username, password } = JSON.parse(savedCreds);
@@ -388,4 +391,5 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('password').value = password;
         document.getElementById('remember-me').checked = true;
     }
+    setLanguage('fr');
 });
