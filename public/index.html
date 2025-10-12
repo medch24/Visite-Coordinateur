@@ -6,8 +6,6 @@
     <title>Les Écoles Internationales Alkawthar - Système d'Évaluation</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/7.5.0/docx.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 </head>
 <body>
 
@@ -21,10 +19,7 @@
                 <button id="lang-en" class="lang-btn"><i class="fas fa-globe"></i> EN</button>
                 <button id="lang-fr" class="lang-btn active"><i class="fas fa-globe"></i> FR</button>
             </div>
-            <!-- Bouton Paramètres Supprimé -->
         </div>
-        
-        <!-- Panneau Paramètres Supprimé -->
 
         <div id="login-page" class="page active">
             <div class="card">
@@ -76,7 +71,9 @@
         </div>
     </div>
 
-    <!-- Le JavaScript est maintenant dans un fichier séparé -->
+    <!-- CORRECTION : Scripts déplacés à la fin du body et dans le bon ordre -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/7.5.0/docx.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
