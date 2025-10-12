@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- État Global et Éléments du DOM ---
     const state = { currentUser: null, currentLang: 'fr' };
     const pages = {
         login: document.getElementById('login-page'),
@@ -8,7 +7,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     let EVALUATIONS_DATABASE = [];
 
-    // --- Fonctions de base (BDD, Langue) ---
     const saveDb = () => localStorage.setItem('evaluationsDatabase', JSON.stringify(EVALUATIONS_DATABASE));
     const loadDb = () => {
         const data = localStorage.getItem('evaluationsDatabase');
@@ -21,9 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('[data-lang-en], [data-lang-fr]').forEach(el => {
             const text = el.dataset[lang === 'fr' ? 'langFr' : 'langEn'] || '';
             const icon = el.querySelector('i');
-            if (el.tagName === 'TITLE') {
-                document.title = text;
-            } else if (icon) {
+            if (icon) {
                 let span = el.querySelector('span');
                 if (!span) {
                     span = document.createElement('span');
@@ -61,7 +57,6 @@ document.addEventListener('DOMContentLoaded', () => {
         ...['Morched', 'Kamel', 'Abas', 'Zine', 'Youssef', 'Oumarou', 'Tonga', 'Sylvano', 'Sami', 'Mohamed Ali', 'Aichetou', 'Inas', 'Anwar', 'Souha', 'Amal', 'Shanouja', 'Jana', 'Hiba', 'Rouba', 'Rayan', 'Imane', 'Nesrine', 'Fatima', 'Samar', 'Romana', 'Nour'].map(name => ({ username: name, password: name, role: 'teacher' }))
     ];
 
-    // --- Gestion des Événements ---
     document.getElementById('lang-en').addEventListener('click', () => changeAndRerenderLanguage('en'));
     document.getElementById('lang-fr').addEventListener('click', () => changeAndRerenderLanguage('fr'));
     
@@ -107,7 +102,6 @@ document.addEventListener('DOMContentLoaded', () => {
     modal.querySelector('#close-modal-btn').addEventListener('click', () => modal.style.display = 'none');
     modal.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
 
-    // --- Rendu des Interfaces ---
     const renderCoordinatorUI = () => {
         document.getElementById('coordinator-welcome').textContent = `${state.currentLang === 'fr' ? 'Bienvenue' : 'Welcome'}, ${state.currentUser.username}`;
         const teacherSelect = document.getElementById('teacher-select');
@@ -289,19 +283,23 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('details-modal').style.display = 'flex';
     };
 
-    // CORRECTION FINALE : Utilisation de window.docx pour accéder à la librairie
     window.generateTeacherWordReport = async (evalId) => {
+        // CORRECTION FINALE : Vérifier si la librairie est chargée et l'utiliser SANS 'window.'
+        if (typeof docx === 'undefined' || typeof saveAs === 'undefined') {
+            console.error("Erreur critique : Les librairies docx ou FileSaver ne sont pas chargées.");
+            alert("Erreur critique : Une librairie nécessaire n'a pas pu être chargée. Veuillez rafraîchir la page et réessayer.");
+            return;
+        }
+
         try {
             const data = EVALUATIONS_DATABASE.find(ev => ev.id === evalId);
             if (!data) throw new Error("Évaluation non trouvée !");
             
-            const { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableCell, TableRow, WidthType, AlignmentType } = window.docx;
+            const { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableCell, TableRow, WidthType, AlignmentType } = docx;
             
             let critIndex = 0;
             const tableRows = Object.values(data.criteriaDetails || {}).flatMap(cat => {
-                const categoryRows = [
-                    new TableRow({ children: [new TableCell({ children: [new Paragraph({ text: cat[`title_${state.currentLang}`] || '', bold: true })], columnSpan: 3, shading: { fill: "EAECEE" } })] }),
-                ];
+                const categoryRows = [ new TableRow({ children: [new TableCell({ children: [new Paragraph({ text: cat[`title_${state.currentLang}`] || '', bold: true })], columnSpan: 3, shading: { fill: "EAECEE" } })] }) ];
                 const itemRows = (cat.items || []).map(item => {
                     const rating = (data.rawCriteria && data.rawCriteria[`crit${critIndex}`]) ? data.rawCriteria[`crit${critIndex}`].rating : 0;
                     critIndex++;
@@ -326,26 +324,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         new Paragraph({ children: [new TextRun({ text: `SCORE TOTAL: ${data.grandTotal || 0}/100`, bold: true, size: 28 })] }),
                         new Paragraph({ text: '' }),
                         new Paragraph({ text: 'TABLEAU DÉTAILLÉ DES NOTES', heading: HeadingLevel.HEADING_2 }),
-                        new Table({
-                            width: { size: 100, type: WidthType.PERCENTAGE },
-                            rows: [
-                                new TableRow({ children: [
-                                    new TableCell({ children: [new Paragraph({ text: 'Critère', bold: true })] }),
-                                    new TableCell({ children: [new Paragraph({ text: 'Note (1-5)', bold: true })] }),
-                                    new TableCell({ children: [new Paragraph({ text: 'Score', bold: true })] })
-                                ]}),
-                                ...tableRows
-                            ]
-                        }),
-                        new Paragraph({ text: '' }),
-                        new Paragraph({ text: 'FORCES OBSERVÉES', heading: HeadingLevel.HEADING_2 }),
-                        new Paragraph({ text: data.comments.strengths || '' }),
-                        new Paragraph({ text: '' }),
-                        new Paragraph({ text: 'AXES D\'AMÉLIORATION', heading: HeadingLevel.HEADING_2 }),
-                        new Paragraph({ text: data.comments.toImprove || '' }),
-                        new Paragraph({ text: '' }),
-                        new Paragraph({ text: 'RECOMMANDATIONS', heading: HeadingLevel.HEADING_2 }),
-                        new Paragraph({ text: data.comments.recommendations || '' }),
+                        new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: [ new TableRow({ children: [ new TableCell({ children: [new Paragraph({text: 'Critère', bold: true})] }), new TableCell({ children: [new Paragraph({text: 'Note (1-5)', bold: true})] }), new TableCell({ children: [new Paragraph({text: 'Score', bold: true})] })]}), ...tableRows ] }),
+                        new Paragraph({ text: '' }), new Paragraph({ text: 'FORCES OBSERVÉES', heading: HeadingLevel.HEADING_2 }), new Paragraph({ text: data.comments.strengths || '' }),
+                        new Paragraph({ text: '' }), new Paragraph({ text: 'AXES D\'AMÉLIORATION', heading: HeadingLevel.HEADING_2 }), new Paragraph({ text: data.comments.toImprove || '' }),
+                        new Paragraph({ text: '' }), new Paragraph({ text: 'RECOMMANDATIONS', heading: HeadingLevel.HEADING_2 }), new Paragraph({ text: data.comments.recommendations || '' }),
                     ]
                 }]
             });
@@ -382,7 +364,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     const getCriteria = () => ({ preparation: { title_en: "PREPARATION AND PLANNING", title_fr: "PRÉPARATION ET PLANIFICATION", maxPoints: 25, items: [{ text_en: "Lesson plans with clear objectives", text_fr: "Plans de cours avec objectifs clairs", points: 5 }, { text_en: "Knowledge of curriculum", text_fr: "Connaissance du curriculum", points: 5 }, { text_en: "Appropriate materials", text_fr: "Matériaux appropriés", points: 5 }, { text_en: "Differentiated instruction", text_fr: "Enseignement différencié", points: 5 }, { text_en: "Assessments aligned with objectives", text_fr: "Évaluations alignées aux objectifs", points: 5 } ]}, activities: { title_en: "TEACHING ACTIVITIES", title_fr: "ACTIVITÉS D'ENSEIGNEMENT", maxPoints: 30, items: [{ text_en: "Clear and structured lessons", text_fr: "Leçons claires et structurées", points: 6 }, { text_en: "Varied teaching strategies", text_fr: "Stratégies d'enseignement variées", points: 6 }, { text_en: "Appropriate use of technology", text_fr: "Usage approprié de la technologie", points: 6 }, { text_en: "Promotes critical thinking", text_fr: "Favorise la pensée critique", points: 6 }, { text_en: "Timely and constructive feedback", text_fr: "Feedback opportun et constructif", points: 6 } ]}, classroomControl: { title_en: "CLASSROOM MANAGEMENT", title_fr: "GESTION DE CLASSE", maxPoints: 20, items: [{ text_en: "Conducive learning environment", text_fr: "Environnement d'apprentissage propice", points: 5 }, { text_en: "Effective student behavior management", text_fr: "Gestion efficace du comportement", points: 5 }, { text_en: "Efficient use of time", text_fr: "Utilisation efficace du temps", points: 5 }, { text_en: "Handles disruptions professionally", text_fr: "Gère les perturbations", points: 5 } ]}, personalCriteria: { title_en: "PROFESSIONAL QUALITIES", title_fr: "QUALITÉS PROFESSIONNELLES", maxPoints: 25, items: [{ text_en: "Professional appearance", text_fr: "Apparence professionnelle", points: 5 }, { text_en: "Punctuality and reliability", text_fr: "Ponctualité et fiabilité", points: 5 }, { text_en: "Effective communication", text_fr: "Communication efficace", points: 5 }, { text_en: "Continuous professional development", text_fr: "Développement professionnel continu", points: 5 }, { text_en: "Dedication to student success", text_fr: "Dévouement au succès des étudiants", points: 5 } ]} });
 
-    // --- Initialisation ---
     loadDb();
     const savedCreds = localStorage.getItem('teacherEvalCredentials');
     if (savedCreds) {
