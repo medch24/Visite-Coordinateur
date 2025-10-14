@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const state = { currentUser: null, currentLang: 'fr' };
     const pages = {
         login: document.getElementById('login-page'),
@@ -6,11 +6,40 @@ document.addEventListener('DOMContentLoaded', () => {
         teacher: document.getElementById('teacher-dashboard')
     };
     let EVALUATIONS_DATABASE = [];
+    let isOnline = navigator.onLine;
+    let syncPending = false;
 
-    const saveDb = () => localStorage.setItem('evaluationsDatabase', JSON.stringify(EVALUATIONS_DATABASE));
-    const loadDb = () => {
-        const data = localStorage.getItem('evaluationsDatabase');
-        if (data) EVALUATIONS_DATABASE = JSON.parse(data);
+    // API Configuration
+    const API_BASE = '/api';
+    
+    // Fonctions de gestion des données avec MongoDB via le gestionnaire
+    const saveDb = async () => {
+        // Utilisation du gestionnaire de base de données pour la compatibilité localStorage + MongoDB
+        localStorage.setItem('evaluationsDatabase', JSON.stringify(EVALUATIONS_DATABASE));
+    };
+    
+    const loadDb = async () => {
+        // Attendre que dbManager soit prêt
+        let retries = 0;
+        while (!window.dbManager && retries < 50) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+            retries++;
+        }
+        
+        try {
+            if (window.dbManager) {
+                // Utiliser le gestionnaire de base de données pour charger les évaluations
+                EVALUATIONS_DATABASE = await window.dbManager.loadEvaluations();
+            } else {
+                throw new Error('dbManager not available');
+            }
+        } catch (error) {
+            console.warn('Erreur lors du chargement via dbManager, fallback localStorage:', error);
+            const data = localStorage.getItem('evaluationsDatabase');
+            if (data) {
+                EVALUATIONS_DATABASE = JSON.parse(data);
+            }
+        }
     };
 
     const setLanguage = (lang) => {
@@ -193,21 +222,60 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const form = container.querySelector('#eval-form');
         form.addEventListener('change', () => calculateScores(form));
-        form.addEventListener('submit', (e) => {
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
             if (form.querySelectorAll('input[type="radio"]:checked').length < criteriaIndex) { alert(state.currentLang === 'fr' ? 'Veuillez noter tous les critères.' : 'Please rate all criteria.'); return; }
             const formData = new FormData(e.target);
             const scores = calculateScores(form);
             const rawCriteria = Array.from(form.querySelectorAll('input[type="radio"]:checked')).reduce((acc, r) => ({...acc, [r.name]: {rating: parseInt(r.value)}}), {});
-            EVALUATIONS_DATABASE.push({
-                id: Date.now().toString(), teacherName, coordinatorName: state.currentUser.username,
-                class: formData.get('class'), subject: formData.get('subject'), sessionNumber: formData.get('sessionNumber'), visitDate: formData.get('visitDate'),
-                criteriaDetails: getCriteria(), grandTotal: scores.grandTotal,
-                comments: { strengths: formData.get('strengths'), toImprove: formData.get('toImprove'), recommendations: formData.get('recommendations') },
-                date: new Date().toISOString(), rawCriteria
-            });
-            saveDb();
-            alert(state.currentLang === 'fr' ? 'Évaluation enregistrée !' : 'Evaluation saved!');
+            const newEvaluation = {
+                id: Date.now().toString(), 
+                teacherName, 
+                coordinatorName: state.currentUser.username,
+                class: formData.get('class'), 
+                subject: formData.get('subject'), 
+                sessionNumber: formData.get('sessionNumber'), 
+                visitDate: formData.get('visitDate'),
+                criteriaDetails: getCriteria(), 
+                grandTotal: scores.grandTotal,
+                comments: { 
+                    strengths: formData.get('strengths'), 
+                    toImprove: formData.get('toImprove'), 
+                    recommendations: formData.get('recommendations') 
+                },
+                date: new Date().toISOString(), 
+                rawCriteria
+            };
+            
+            // Sauvegarder avec le gestionnaire de base de données (MongoDB + localStorage)
+            try {
+                if (window.dbManager) {
+                    const saveResult = await window.dbManager.saveEvaluation(newEvaluation);
+                    EVALUATIONS_DATABASE.push(newEvaluation);
+                    
+                    let message = state.currentLang === 'fr' ? 'Évaluation enregistrée avec succès!' : 'Evaluation saved successfully!';
+                    
+                    if (saveResult.source === 'mongodb') {
+                        message += state.currentLang === 'fr' ? ' (Sauvegardé en base de données)' : ' (Saved to database)';
+                    } else if (saveResult.offline) {
+                        message += state.currentLang === 'fr' ? ' (Mode hors ligne - sera synchronisé)' : ' (Offline mode - will sync later)';
+                    } else if (saveResult.queued) {
+                        message += state.currentLang === 'fr' ? ' (En attente de synchronisation)' : ' (Queued for synchronization)';
+                    }
+                    
+                    alert(message);
+                } else {
+                    // Fallback si dbManager n'est pas disponible
+                    EVALUATIONS_DATABASE.push(newEvaluation);
+                    await saveDb();
+                    alert(state.currentLang === 'fr' ? 'Évaluation enregistrée localement!' : 'Evaluation saved locally!');
+                }
+            } catch (error) {
+                console.error('Erreur lors de la sauvegarde:', error);
+                EVALUATIONS_DATABASE.push(newEvaluation);
+                await saveDb();
+                alert(state.currentLang === 'fr' ? 'Évaluation sauvegardée localement (erreur de synchronisation)' : 'Evaluation saved locally (sync error)');
+            }
             document.getElementById('teacher-select').value = '';
             container.innerHTML = '';
             document.getElementById('previous-evaluations-container').innerHTML = '';
@@ -341,16 +409,37 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    window.deleteEvaluation = (evalId) => {
+    window.deleteEvaluation = async (evalId) => {
         const confirmText = state.currentLang === 'fr' ? 'Êtes-vous sûr de vouloir supprimer cette évaluation ?' : 'Are you sure you want to delete this evaluation?';
         if (confirm(confirmText)) {
             const index = EVALUATIONS_DATABASE.findIndex(ev => ev.id === evalId);
             if (index > -1) {
                 const teacherName = EVALUATIONS_DATABASE[index].teacherName;
-                EVALUATIONS_DATABASE.splice(index, 1);
-                saveDb();
-                renderPreviousEvaluations(teacherName);
-                renderEvaluationForm(teacherName);
+                
+                // Supprimer avec le gestionnaire de base de données
+                try {
+                    if (window.dbManager) {
+                        await window.dbManager.deleteEvaluation(evalId);
+                        EVALUATIONS_DATABASE.splice(index, 1);
+                        // Actualiser l'affichage après suppression
+                        await loadDb(); // Recharger les données
+                        renderPreviousEvaluations(teacherName);
+                        renderEvaluationForm(teacherName);
+                    } else {
+                        // Fallback si dbManager n'est pas disponible
+                        EVALUATIONS_DATABASE.splice(index, 1);
+                        await saveDb();
+                        renderPreviousEvaluations(teacherName);
+                        renderEvaluationForm(teacherName);
+                    }
+                } catch (error) {
+                    console.error('Erreur lors de la suppression:', error);
+                    // Fallback: suppression locale uniquement
+                    EVALUATIONS_DATABASE.splice(index, 1);
+                    await saveDb();
+                    renderPreviousEvaluations(teacherName);
+                    renderEvaluationForm(teacherName);
+                }
             }
         }
     }
@@ -364,7 +453,22 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     const getCriteria = () => ({ preparation: { title_en: "PREPARATION AND PLANNING", title_fr: "PRÉPARATION ET PLANIFICATION", maxPoints: 25, items: [{ text_en: "Lesson plans with clear objectives", text_fr: "Plans de cours avec objectifs clairs", points: 5 }, { text_en: "Knowledge of curriculum", text_fr: "Connaissance du curriculum", points: 5 }, { text_en: "Appropriate materials", text_fr: "Matériaux appropriés", points: 5 }, { text_en: "Differentiated instruction", text_fr: "Enseignement différencié", points: 5 }, { text_en: "Assessments aligned with objectives", text_fr: "Évaluations alignées aux objectifs", points: 5 } ]}, activities: { title_en: "TEACHING ACTIVITIES", title_fr: "ACTIVITÉS D'ENSEIGNEMENT", maxPoints: 30, items: [{ text_en: "Clear and structured lessons", text_fr: "Leçons claires et structurées", points: 6 }, { text_en: "Varied teaching strategies", text_fr: "Stratégies d'enseignement variées", points: 6 }, { text_en: "Appropriate use of technology", text_fr: "Usage approprié de la technologie", points: 6 }, { text_en: "Promotes critical thinking", text_fr: "Favorise la pensée critique", points: 6 }, { text_en: "Timely and constructive feedback", text_fr: "Feedback opportun et constructif", points: 6 } ]}, classroomControl: { title_en: "CLASSROOM MANAGEMENT", title_fr: "GESTION DE CLASSE", maxPoints: 20, items: [{ text_en: "Conducive learning environment", text_fr: "Environnement d'apprentissage propice", points: 5 }, { text_en: "Effective student behavior management", text_fr: "Gestion efficace du comportement", points: 5 }, { text_en: "Efficient use of time", text_fr: "Utilisation efficace du temps", points: 5 }, { text_en: "Handles disruptions professionally", text_fr: "Gère les perturbations", points: 5 } ]}, personalCriteria: { title_en: "PROFESSIONAL QUALITIES", title_fr: "QUALITÉS PROFESSIONNELLES", maxPoints: 25, items: [{ text_en: "Professional appearance", text_fr: "Apparence professionnelle", points: 5 }, { text_en: "Punctuality and reliability", text_fr: "Ponctualité et fiabilité", points: 5 }, { text_en: "Effective communication", text_fr: "Communication efficace", points: 5 }, { text_en: "Continuous professional development", text_fr: "Développement professionnel continu", points: 5 }, { text_en: "Dedication to student success", text_fr: "Dévouement au succès des étudiants", points: 5 } ]} });
 
-    loadDb();
+    // Initialisation avec chargement des données et statut de synchronisation
+    loadDb().then(() => {
+        console.log('✅ Système initialisé:', EVALUATIONS_DATABASE.length, 'évaluations chargées');
+        
+        // Afficher le statut de synchronisation si dbManager est disponible
+        if (window.dbManager) {
+            const syncStatus = window.dbManager.getSyncStatus();
+            console.log('📊 Statut de synchronisation:', syncStatus);
+            
+            if (syncStatus.queueLength > 0) {
+                console.log(`⏳ ${syncStatus.queueLength} opération(s) en attente de synchronisation`);
+            }
+        }
+    }).catch(error => {
+        console.error('❌ Erreur lors du chargement des données:', error);
+    });
     const savedCreds = localStorage.getItem('teacherEvalCredentials');
     if (savedCreds) {
         const { username, password } = JSON.parse(savedCreds);
