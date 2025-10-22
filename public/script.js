@@ -806,10 +806,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                             new TableCell({
                                 children: [
                                     new Paragraph({
-                                        text: cat[`title_${state.currentLang}`] || '',
-                                        bold: true,
-                                        color: 'FFFFFF',
-                                        size: 24,
+                                        children: [
+                                            new TextRun({
+                                                text: cat[`title_${state.currentLang}`] || '',
+                                                bold: true,
+                                                color: 'FFFFFF',
+                                                size: 24
+                                            })
+                                        ],
                                         spacing: { before: 150, after: 150 }
                                     })
                                 ],
@@ -833,7 +837,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                             new TableCell({
                                 children: [
                                     new Paragraph({
-                                        text: item[`text_${state.currentLang}`] || '',
+                                        children: [
+                                            new TextRun({
+                                                text: item[`text_${state.currentLang}`] || ''
+                                            })
+                                        ],
                                         spacing: { before: 80, after: 80 }
                                     })
                                 ],
@@ -843,7 +851,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                             new TableCell({
                                 children: [
                                     new Paragraph({
-                                        text: `${item.points}`,
+                                        children: [
+                                            new TextRun({
+                                                text: `${item.points}`
+                                            })
+                                        ],
                                         alignment: AlignmentType.CENTER,
                                         spacing: { before: 80, after: 80 }
                                     })
@@ -855,9 +867,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                             new TableCell({
                                 children: [
                                     new Paragraph({
-                                        text: rating.toString(),
+                                        children: [
+                                            new TextRun({
+                                                text: rating.toString(),
+                                                bold: true
+                                            })
+                                        ],
                                         alignment: AlignmentType.CENTER,
-                                        bold: true,
                                         spacing: { before: 80, after: 80 }
                                     })
                                 ],
@@ -868,9 +884,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                             new TableCell({
                                 children: [
                                     new Paragraph({
-                                        text: `${score}`,
+                                        children: [
+                                            new TextRun({
+                                                text: `${score}`,
+                                                bold: true
+                                            })
+                                        ],
                                         alignment: AlignmentType.CENTER,
-                                        bold: true,
                                         spacing: { before: 80, after: 80 }
                                     })
                                 ],
@@ -895,19 +915,32 @@ document.addEventListener('DOMContentLoaded', async () => {
                     children: [
                         // En-tête principal avec logo symbolique
                         new Paragraph({
-                            text: "🎓",
+                            children: [
+                                new TextRun({ text: "🎓" })
+                            ],
                             alignment: AlignmentType.CENTER,
                             spacing: { after: 100 }
                         }),
                         new Paragraph({
-                            text: "ÉCOLE INTERNATIONALE ALKAWTHAR",
+                            children: [
+                                new TextRun({
+                                    text: "ÉCOLE INTERNATIONALE ALKAWTHAR",
+                                    bold: true,
+                                    size: 32
+                                })
+                            ],
                             heading: HeadingLevel.HEADING_1,
                             alignment: AlignmentType.CENTER,
-                            spacing: { after: 100 },
-                            bold: true
+                            spacing: { after: 100 }
                         }),
                         new Paragraph({
-                            text: state.currentLang === 'fr' ? "RAPPORT D'ÉVALUATION PÉDAGOGIQUE" : "TEACHER EVALUATION REPORT",
+                            children: [
+                                new TextRun({
+                                    text: state.currentLang === 'fr' ? "RAPPORT D'ÉVALUATION PÉDAGOGIQUE" : "TEACHER EVALUATION REPORT",
+                                    bold: true,
+                                    size: 28
+                                })
+                            ],
                             heading: HeadingLevel.HEADING_1,
                             alignment: AlignmentType.CENTER,
                             spacing: { after: 300 },
@@ -916,10 +949,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                         
                         // Ligne de séparation
                         new Paragraph({
-                            text: "━".repeat(60),
+                            children: [
+                                new TextRun({
+                                    text: "━".repeat(60),
+                                    color: "005A9E"
+                                })
+                            ],
                             alignment: AlignmentType.CENTER,
-                            spacing: { after: 300 },
-                            color: "005A9E"
+                            spacing: { after: 300 }
                         }),
                         
                         // Informations générales
@@ -1010,10 +1047,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                         
                         // Score total avec badge de performance (amélioration visuelle)
                         new Paragraph({
-                            text: "━".repeat(60),
+                            children: [
+                                new TextRun({
+                                    text: "━".repeat(60),
+                                    color: "005A9E"
+                                })
+                            ],
                             alignment: AlignmentType.CENTER,
-                            spacing: { after: 200 },
-                            color: "005A9E"
+                            spacing: { after: 200 }
                         }),
                         new Paragraph({
                             children: [
@@ -1055,15 +1096,25 @@ document.addEventListener('DOMContentLoaded', async () => {
                             shading: { fill: "F8F9FA" }
                         }),
                         new Paragraph({
-                            text: "━".repeat(60),
+                            children: [
+                                new TextRun({
+                                    text: "━".repeat(60),
+                                    color: "005A9E"
+                                })
+                            ],
                             alignment: AlignmentType.CENTER,
-                            spacing: { after: 400 },
-                            color: "005A9E"
+                            spacing: { after: 400 }
                         }),
                         
                         // Tableau récapitulatif par catégorie
                         new Paragraph({
-                            text: state.currentLang === 'fr' ? '📈 RÉSUMÉ PAR CATÉGORIE' : '📈 SUMMARY BY CATEGORY',
+                            children: [
+                                new TextRun({
+                                    text: state.currentLang === 'fr' ? '📈 RÉSUMÉ PAR CATÉGORIE' : '📈 SUMMARY BY CATEGORY',
+                                    bold: true,
+                                    size: 28
+                                })
+                            ],
                             heading: HeadingLevel.HEADING_2,
                             spacing: { before: 300, after: 200 }
                         }),
@@ -1083,32 +1134,52 @@ document.addEventListener('DOMContentLoaded', async () => {
                                     children: [
                                         new TableCell({
                                             children: [new Paragraph({ 
-                                                text: state.currentLang === 'fr' ? 'Catégorie' : 'Category', 
-                                                bold: true,
+                                                children: [
+                                                    new TextRun({
+                                                        text: state.currentLang === 'fr' ? 'Catégorie' : 'Category',
+                                                        bold: true,
+                                                        color: 'FFFFFF'
+                                                    })
+                                                ],
                                                 alignment: AlignmentType.CENTER
                                             })],
                                             shading: { fill: "005A9E" }
                                         }),
                                         new TableCell({
                                             children: [new Paragraph({ 
-                                                text: state.currentLang === 'fr' ? 'Score Obtenu' : 'Score Obtained', 
-                                                bold: true,
+                                                children: [
+                                                    new TextRun({
+                                                        text: state.currentLang === 'fr' ? 'Score Obtenu' : 'Score Obtained',
+                                                        bold: true,
+                                                        color: 'FFFFFF'
+                                                    })
+                                                ],
                                                 alignment: AlignmentType.CENTER
                                             })],
                                             shading: { fill: "005A9E" }
                                         }),
                                         new TableCell({
                                             children: [new Paragraph({ 
-                                                text: state.currentLang === 'fr' ? 'Maximum' : 'Maximum', 
-                                                bold: true,
+                                                children: [
+                                                    new TextRun({
+                                                        text: state.currentLang === 'fr' ? 'Maximum' : 'Maximum',
+                                                        bold: true,
+                                                        color: 'FFFFFF'
+                                                    })
+                                                ],
                                                 alignment: AlignmentType.CENTER
                                             })],
                                             shading: { fill: "005A9E" }
                                         }),
                                         new TableCell({
                                             children: [new Paragraph({ 
-                                                text: '%', 
-                                                bold: true,
+                                                children: [
+                                                    new TextRun({
+                                                        text: '%',
+                                                        bold: true,
+                                                        color: 'FFFFFF'
+                                                    })
+                                                ],
                                                 alignment: AlignmentType.CENTER
                                             })],
                                             shading: { fill: "005A9E" }
@@ -1118,28 +1189,42 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 ...categorySummary.map(cat => new TableRow({
                                     children: [
                                         new TableCell({
-                                            children: [new Paragraph({ text: cat.title, bold: true })],
+                                            children: [new Paragraph({ 
+                                                children: [
+                                                    new TextRun({ text: cat.title, bold: true })
+                                                ]
+                                            })],
                                             shading: { fill: "F8F9FA" }
                                         }),
                                         new TableCell({
                                             children: [new Paragraph({ 
-                                                text: cat.total.toString(), 
-                                                alignment: AlignmentType.CENTER,
-                                                bold: true
+                                                children: [
+                                                    new TextRun({
+                                                        text: cat.total.toString(),
+                                                        bold: true
+                                                    })
+                                                ],
+                                                alignment: AlignmentType.CENTER
                                             })],
                                             shading: { fill: cat.total >= cat.max * 0.8 ? "D5F4E6" : "FEF5E7" }
                                         }),
                                         new TableCell({
                                             children: [new Paragraph({ 
-                                                text: cat.max.toString(), 
+                                                children: [
+                                                    new TextRun({ text: cat.max.toString() })
+                                                ],
                                                 alignment: AlignmentType.CENTER 
                                             })]
                                         }),
                                         new TableCell({
                                             children: [new Paragraph({ 
-                                                text: Math.round((cat.total / cat.max) * 100) + '%', 
-                                                alignment: AlignmentType.CENTER,
-                                                bold: true
+                                                children: [
+                                                    new TextRun({
+                                                        text: Math.round((cat.total / cat.max) * 100) + '%',
+                                                        bold: true
+                                                    })
+                                                ],
+                                                alignment: AlignmentType.CENTER
                                             })],
                                             shading: { fill: cat.total >= cat.max * 0.8 ? "D5F4E6" : "FEF5E7" }
                                         })
@@ -1241,7 +1326,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                         
                         // Commentaires (design amélioré avec icônes et boîtes colorées)
                         new Paragraph({
-                            text: state.currentLang === 'fr' ? '⭐ FORCES OBSERVÉES' : '⭐ OBSERVED STRENGTHS',
+                            children: [
+                                new TextRun({
+                                    text: state.currentLang === 'fr' ? '⭐ FORCES OBSERVÉES' : '⭐ OBSERVED STRENGTHS',
+                                    bold: true,
+                                    size: 28
+                                })
+                            ],
                             heading: HeadingLevel.HEADING_2,
                             spacing: { before: 500, after: 200 },
                             shading: { fill: "D5F4E6" }
@@ -1256,7 +1347,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                         }),
                         
                         new Paragraph({
-                            text: state.currentLang === 'fr' ? '📈 AXES D\'AMÉLIORATION' : '📈 AREAS FOR IMPROVEMENT',
+                            children: [
+                                new TextRun({
+                                    text: state.currentLang === 'fr' ? '📈 AXES D\'AMÉLIORATION' : '📈 AREAS FOR IMPROVEMENT',
+                                    bold: true,
+                                    size: 28
+                                })
+                            ],
                             heading: HeadingLevel.HEADING_2,
                             spacing: { before: 400, after: 200 },
                             shading: { fill: "FEF5E7" }
@@ -1271,7 +1368,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                         }),
                         
                         new Paragraph({
-                            text: state.currentLang === 'fr' ? '💡 RECOMMANDATIONS' : '💡 RECOMMENDATIONS',
+                            children: [
+                                new TextRun({
+                                    text: state.currentLang === 'fr' ? '💡 RECOMMANDATIONS' : '💡 RECOMMENDATIONS',
+                                    bold: true,
+                                    size: 28
+                                })
+                            ],
                             heading: HeadingLevel.HEADING_2,
                             spacing: { before: 400, after: 200 },
                             shading: { fill: "EBF5FB" }
@@ -1288,10 +1391,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                         // Pied de page professionnel
                         new Paragraph({ text: '', spacing: { before: 600 } }),
                         new Paragraph({
-                            text: "━".repeat(60),
+                            children: [
+                                new TextRun({
+                                    text: "━".repeat(60),
+                                    color: "005A9E"
+                                })
+                            ],
                             alignment: AlignmentType.CENTER,
-                            spacing: { after: 200 },
-                            color: "005A9E"
+                            spacing: { after: 200 }
                         }),
                         new Paragraph({
                             children: [
@@ -1319,13 +1426,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                             spacing: { after: 100 }
                         }),
                         new Paragraph({
-                            text: state.currentLang === 'fr' 
-                                ? '© École Internationale Alkawthar - Système d\'Évaluation des Enseignants' 
-                                : '© École Internationale Alkawthar - Teacher Evaluation System',
-                            alignment: AlignmentType.CENTER,
-                            italics: true,
-                            size: 18,
-                            color: "7F8C8D"
+                            children: [
+                                new TextRun({
+                                    text: state.currentLang === 'fr' 
+                                        ? '© École Internationale Alkawthar - Système d\'Évaluation des Enseignants' 
+                                        : '© École Internationale Alkawthar - Teacher Evaluation System',
+                                    italics: true,
+                                    size: 18,
+                                    color: "7F8C8D"
+                                })
+                            ],
+                            alignment: AlignmentType.CENTER
                         })
                     ]
                 }]
