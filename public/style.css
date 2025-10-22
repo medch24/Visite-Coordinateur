@@ -168,6 +168,18 @@ legend.category-header { width: auto; font-size: 1.1rem; font-weight: 700; color
 .comments-details h6 { margin: 0 0 0.5rem 0; display: flex; align-items: center; gap: 0.5rem; color: var(--primary-color); }
 .comments-details p { margin: 0; padding-left: 1.5rem; border-left: 2px solid #eee; }
 
+/* Animations pour notifications */
+@keyframes slideIn {
+    from { transform: translateX(400px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideOut {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(400px); opacity: 0; }
+}
+
+/* Media queries pour responsive */
 @media (max-width: 992px) { .comments-section { grid-template-columns: 1fr; } }
 @media (max-width: 768px) {
     body { padding: 1rem; }

@@ -2,6 +2,7 @@
  * Professional Teacher Evaluation System - Serverless API with MongoDB
  * Vercel Serverless Function for handling evaluation data
  * Supports 100-point evaluation system with automatic MongoDB storage
+ * Version 4.0 - Optimized for direct MongoDB connection and fast loading
  */
 
 import { MongoClient } from 'mongodb';
@@ -10,7 +11,7 @@ import { MongoClient } from 'mongodb';
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://username:password@cluster.mongodb.net/teacher-evaluation?retryWrites=true&w=majority';
 const DB_NAME = 'teacher_evaluation_system';
 
-// Cache pour la connexion MongoDB
+// Cache pour la connexion MongoDB (optimisé pour les fonctions serverless)
 let cachedClient = null;
 let cachedDb = null;
 
@@ -19,9 +20,19 @@ async function connectToDatabase() {
     return { client: cachedClient, db: cachedDb };
   }
 
-  const client = new MongoClient(MONGODB_URI);
+  const client = new MongoClient(MONGODB_URI, {
+    maxPoolSize: 10,
+    serverSelectionTimeoutMS: 5000,
+    socketTimeoutMS: 45000,
+  });
+  
   await client.connect();
   const db = client.db(DB_NAME);
+
+  // Créer des index pour améliorer les performances
+  const evaluationsCollection = db.collection('evaluations');
+  await evaluationsCollection.createIndex({ teacherName: 1, date: -1 });
+  await evaluationsCollection.createIndex({ id: 1 }, { unique: true });
 
   cachedClient = client;
   cachedDb = db;
@@ -89,17 +100,25 @@ export default async function handler(req, res) {
       const { db } = await connectToDatabase();
       const evaluationsCollection = db.collection('evaluations');
 
-      // GET toutes les évaluations ou par enseignant
+      // GET toutes les évaluations ou par enseignant (optimisé)
       if (method === 'GET') {
-        const { teacherName } = req.query;
-        const query = teacherName ? { teacherName } : {};
-        const evaluations = await evaluationsCollection.find(query)
+        const { teacherName, coordinatorName } = req.query;
+        
+        let query = {};
+        if (teacherName) query.teacherName = teacherName;
+        if (coordinatorName) query.coordinatorName = coordinatorName;
+        
+        const evaluations = await evaluationsCollection
+          .find(query)
           .sort({ date: -1 })
+          .limit(100) // Limiter à 100 évaluations les plus récentes
           .toArray();
         
         return res.status(200).json({
           success: true,
-          data: evaluations
+          count: evaluations.length,
+          data: evaluations,
+          timestamp: new Date().toISOString()
         });
       }
 
