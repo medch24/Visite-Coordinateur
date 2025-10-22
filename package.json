@@ -7,7 +7,10 @@
     "build": "echo 'Static build complete'",
     "start": "vercel dev"
   },
-  "dependencies": {},
+  "dependencies": {
+    "mongodb": "^6.2.0",
+    "cors": "^2.8.5"
+  },
   "devDependencies": {},
   "engines": {
     "node": ">=16.x"
