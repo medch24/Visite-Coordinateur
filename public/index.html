@@ -3,77 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Les Écoles Internationales Alkawthar - Système d'Évaluation</title>
+    <title data-lang-en="Teacher Evaluation System" data-lang-fr="Système d'Évaluation des Enseignants">Système d'Évaluation des Enseignants</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Intégration de Font Awesome pour les icônes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
-    <div class="container">
+<div class="container">
+    <header class="header-controls">
         <div class="school-logo">
-            <img src="https://lh3.googleusercontent.com/d/1lQ3Babrs3Wgv4rakVmkK0oCWcM0cTKPK" alt="School Logo" />
+            <img src="https://alkawthar-school.com/wp-content/uploads/2023/11/cropped-logoooo-1.png" alt="École Internationale Alkawthar">
         </div>
+        <div class="lang-switcher">
+            <button id="lang-en" class="lang-btn">EN</button>
+            <button id="lang-fr" class="lang-btn active">FR</button>
+        </div>
+    </header>
 
-        <div class="header-controls">
-            <div class="language-switcher">
-                <button id="lang-en" class="lang-btn"><i class="fas fa-globe"></i> EN</button>
-                <button id="lang-fr" class="lang-btn active"><i class="fas fa-globe"></i> FR</button>
-            </div>
-        </div>
-
-        <div id="login-page" class="page active">
-            <div class="card">
-                <h1 data-lang-en="Login" data-lang-fr="Connexion">Connexion</h1>
-                <form id="login-form">
-                    <input type="text" id="username" placeholder-fr="Nom d'utilisateur" placeholder-en="Username" required>
-                    <div class="password-container">
-                        <input type="password" id="password" placeholder-fr="Mot de passe" placeholder-en="Password" required>
-                        <button type="button" id="toggle-password" class="password-toggle"><i class="fas fa-eye"></i></button>
-                    </div>
-                    <div class="checkbox-container">
-                        <input type="checkbox" id="remember-me">
-                        <label for="remember-me" data-lang-en="Remember me" data-lang-fr="Rester connecté">Rester connecté</label>
-                    </div>
-                    <button type="submit" data-lang-en="Login" data-lang-fr="Se connecter">Se connecter</button>
-                </form>
-                <p id="login-error" class="error-message"></p>
-                <div class="login-help"><p data-lang-en="Contact your admin for credentials." data-lang-fr="Contactez votre administrateur pour les identifiants.">Contactez votre administrateur pour les identifiants.</p></div>
-            </div>
-        </div>
-
-        <div id="coordinator-dashboard" class="page">
-            <h1 data-lang-en="Coordinator Dashboard" data-lang-fr="Tableau de Bord Coordinateur">Tableau de Bord Coordinateur</h1>
-            <h2 id="coordinator-welcome"></h2>
-            <div class="card">
-                <h3 data-lang-en="Select a teacher to evaluate:" data-lang-fr="Sélectionnez un enseignant à évaluer :">Sélectionnez un enseignant à évaluer :</h3>
-                <select id="teacher-select"></select>
-            </div>
-            <div id="previous-evaluations-container"></div>
-            <div id="evaluation-form-container"></div>
-            <button id="logout-btn"><i class="fas fa-sign-out-alt"></i> <span data-lang-en="Logout" data-lang-fr="Déconnexion">Déconnexion</span></button>
-        </div>
-
-        <div id="teacher-dashboard" class="page">
-            <h1 data-lang-en="Teacher Dashboard" data-lang-fr="Tableau de Bord Enseignant">Tableau de Bord Enseignant</h1>
-            <h2 id="teacher-welcome"></h2>
-            <div id="evaluation-reports"></div>
-            <button id="logout-btn-teacher"><i class="fas fa-sign-out-alt"></i> <span data-lang-en="Logout" data-lang-fr="Déconnexion">Déconnexion</span></button>
-        </div>
-        
-        <div id="details-modal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2 data-lang-en="Evaluation Details" data-lang-fr="Détails de l'Évaluation">Détails de l'Évaluation</h2>
-                    <button id="close-modal-btn" class="close-btn"><i class="fas fa-times"></i></button>
+    <!-- Page de Connexion -->
+    <main id="login-page" class="page active">
+        <div class="card">
+            <h1 data-lang-en="Login" data-lang-fr="Connexion">Connexion</h1>
+            <form id="login-form">
+                <input type="text" id="username" placeholder-fr="Nom d'utilisateur" placeholder-en="Username" required>
+                <div class="password-container">
+                    <input type="password" id="password" placeholder-fr="Mot de passe" placeholder-en="Password" required>
+                    <button type="button" id="toggle-password" class="password-toggle"><i class="fas fa-eye"></i></button>
                 </div>
-                <div class="modal-body" id="modal-body-content"></div>
+                 <div class="checkbox-container">
+                    <input type="checkbox" id="remember-me">
+                    <label for="remember-me" data-lang-en="Remember me" data-lang-fr="Se souvenir de moi">Se souvenir de moi</label>
+                </div>
+                <button type="submit" data-lang-en="Login" data-lang-fr="Se connecter">Se connecter</button>
+                <p id="login-error" class="error-message"></p>
+            </form>
+            <div class="login-help">
+                <p data-lang-en="Contact support for assistance." data-lang-fr="Contactez le support pour obtenir de l'aide.">Contactez le support pour obtenir de l'aide.</p>
             </div>
+        </div>
+    </main>
+
+    <!-- Tableau de Bord Coordinateur -->
+    <section id="coordinator-dashboard" class="page">
+        <h2 id="coordinator-welcome"></h2>
+        <button id="logout-btn"><i class="fas fa-sign-out-alt"></i> <span data-lang-en="Logout" data-lang-fr="Déconnexion"></span></button>
+        <div class="card">
+            <h3 data-lang-en="Select a teacher to evaluate:" data-lang-fr="Sélectionnez un enseignant à évaluer :"></h3>
+            <select id="teacher-select">
+                <option value="">---</option>
+            </select>
+        </div>
+        <div id="previous-evaluations-container"></div>
+        <div id="evaluation-form-container"></div>
+    </section>
+
+    <!-- Tableau de Bord Enseignant -->
+    <section id="teacher-dashboard" class="page">
+        <h2 id="teacher-welcome"></h2>
+        <button id="logout-btn-teacher"><i class="fas fa-sign-out-alt"></i> <span data-lang-en="Logout" data-lang-fr="Déconnexion"></span></button>
+        <div id="evaluation-reports"></div>
+    </section>
+
+    <!-- Modal pour les détails -->
+    <div id="details-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 data-lang-en="Evaluation Details" data-lang-fr="Détails de l'Évaluation"></h3>
+                <button id="close-modal-btn" class="close-btn">&times;</button>
+            </div>
+            <div id="modal-body-content" class="modal-body"></div>
         </div>
     </div>
+</div>
 
-    <!-- Scripts pour génération Word - Versions stables -->
-    <script src="https://unpkg.com/docx@8.5.0/build/index.js"></script>
-    <script src="https://unpkg.com/file-saver@2.0.5/dist/FileSaver.min.js"></script>
-    <script src="script.js"></script>
+<!-- ============================================= -->
+<!-- CHARGEMENT DES BIBLIOTHÈQUES POUR LE FICHIER WORD -->
+<!-- Ajout des scripts locaux pour la fiabilité -->
+<script src="libs/docx.js"></script>
+<script src="libs/FileSaver.min.js"></script>
+<!-- ============================================= -->
+
+<script src="script.js"></script>
+
 </body>
 </html>
