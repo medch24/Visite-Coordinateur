@@ -1,8 +1,8 @@
 /**
  * Professional Teacher Evaluation System - Serverless API with MongoDB
  * Vercel Serverless Function for handling evaluation data
- * Conversion to CommonJS (require/module.exports) for better Vercel stability.
- * Version 4.2.0 - Stable Routing and DB Connection
+ * **Utilisation de l'extension .cjs pour forcer le mode CommonJS sur Vercel.**
+ * Version 4.3.0 - Module Stable et Routage corrigé
  */
 
 // Utilisation de require pour CommonJS
@@ -98,7 +98,7 @@ async function handler(req, res) {
       return res.status(200).json({
         status: 'success',
         message: 'Professional Teacher Evaluation System API with MongoDB',
-        version: '4.2.0',
+        version: '4.3.0',
         features: [
           'Automatic MongoDB storage',
           '100-point academic assessment system',
