@@ -22,13 +22,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // ===== GESTION MONGODB DIRECTE (SANS LOCALSTORAGE) =====
     const MongoDB = {
-        async request(endpoint, options = {}) {
-            try {
-                // S'assurer que les requêtes API vont vers le bon endpoint Vercel
-                const fetchUrl = `${API_BASE}${endpoint}`;
-                console.log(`FETCH ${options.method || 'GET'}: ${fetchUrl}`);
-                
-                const response = await fetch(fetchUrl, {
+    async request(endpoint, options = {}) {
+        try {
+            // S'assurer que les requêtes API vont vers le bon endpoint Vercel
+            // Ajouter /api si l'endpoint ne commence pas par /api
+            const fullEndpoint = endpoint.startsWith('/api') ? endpoint : `/api${endpoint}`;
+            const fetchUrl = fullEndpoint; 
+            
+            console.log(`FETCH ${options.method || 'GET'}: ${fetchUrl}`);
+            
+            const response = await fetch(fetchUrl, {
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json',
