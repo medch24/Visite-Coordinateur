@@ -25,7 +25,14 @@ Un système professionnel d'évaluation des enseignants avec stockage automatiqu
 - **📊 Rapports de performance** avec niveaux de performance colorés
 - **🎯 Évaluations détaillées** avec forces, améliorations et recommandations
 
-## 📖 Configuration MongoDB
+## 📖 Configuration MongoDB (Connexion Directe)
+
+### ⚠️ IMPORTANT : Connexion Directe Obligatoire
+
+Ce système utilise **UNIQUEMENT MongoDB** pour le stockage des données. 
+**Aucun stockage local (localStorage) n'est utilisé** pour les évaluations.
+
+Toutes les données sont enregistrées directement dans MongoDB et accessibles depuis n'importe quel ordinateur.
 
 ### 1. Configuration MongoDB Atlas (Recommandé)
 
@@ -37,37 +44,64 @@ Un système professionnel d'évaluation des enseignants avec stockage automatiqu
    - Nommez votre cluster
 
 3. **Configurer l'accès** :
-   - Créez un utilisateur de base de données
-   - Autorisez l'accès depuis toutes les IPs (0.0.0.0/0) pour Vercel
-   - Ou ajoutez les IPs spécifiques de Vercel si préféré
+   - Créez un utilisateur de base de données avec mot de passe
+   - **IMPORTANT**: Autorisez l'accès depuis toutes les IPs (0.0.0.0/0)
+     - Dans "Network Access", cliquez "Add IP Address"
+     - Choisissez "Allow Access from Anywhere"
+   - Ou ajoutez les IPs spécifiques de Vercel
 
 4. **Obtenir la chaîne de connexion** :
    - Cliquez sur "Connect"
    - Choisissez "Connect your application"
+   - Driver: Node.js, Version: 4.1 or later
    - Copiez la chaîne de connexion MongoDB
 
-### 2. Configuration Vercel
+### 2. Configuration Vercel (Déploiement Production)
 
 1. **Variables d'environnement** :
-   - Dans votre projet Vercel, allez dans Settings > Environment Variables
-   - Ajoutez : `MONGODB_URI` = votre chaîne de connexion MongoDB
+   - Dans votre projet Vercel, allez dans `Settings` > `Environment Variables`
+   - Ajoutez la variable : `MONGODB_URI`
+   - Valeur : Votre chaîne de connexion MongoDB complète
 
 2. **Format de la chaîne de connexion** :
    ```
-   mongodb+srv://username:password@cluster.mongodb.net/teacher_evaluation_system?retryWrites=true&w=majority
+   mongodb+srv://username:password@cluster.mongodb.net/?retryWrites=true&w=majority&appName=YourApp
    ```
 
 ### 3. Configuration Locale (Développement)
 
-1. **Copiez le fichier d'exemple** :
+1. **Créez le fichier `.env.local`** :
    ```bash
-   cp .env.local.example .env.local
+   echo 'MONGODB_URI=mongodb+srv://votre_utilisateur:votre_password@cluster.mongodb.net/?retryWrites=true&w=majority&appName=Coordinateur' > .env.local
    ```
 
-2. **Modifiez `.env.local`** avec vos propres valeurs :
-   ```env
-   MONGODB_URI=mongodb+srv://your_username:your_password@your_cluster.mongodb.net/teacher_evaluation_system?retryWrites=true&w=majority
+2. **Ou copiez l'exemple** :
+   ```bash
+   cp .env.local.example .env.local
+   # Puis éditez .env.local avec vos propres valeurs
    ```
+
+### 4. Vérification de la Connexion
+
+Pour tester la connexion MongoDB :
+
+```bash
+npm run test:mongodb
+```
+
+Vous devriez voir :
+```
+✅ Connexion établie !
+✅ Ping réussi !
+📝 Nombre d'évaluations: X
+```
+
+### 🔒 Sécurité
+
+- **Ne jamais** committer le fichier `.env.local` dans Git
+- Utilisez des mots de passe forts pour MongoDB
+- Limitez les IPs autorisées en production si possible
+- Le fichier `.env.local` est déjà dans `.gitignore`
 
 ## 🛠️ Installation et Déploiement
 
@@ -134,10 +168,13 @@ Tous les enseignants utilisent leur prénom comme nom d'utilisateur ET mot de pa
 
 ## 🔧 Fonctionnement Technique
 
-### Système Hybride de Stockage
-- **En ligne** : Sauvegarde automatique en MongoDB Atlas
-- **Hors ligne** : Fallback vers localStorage du navigateur
-- **Synchronisation** : Réconciliation automatique lors de la reconnexion
+### ⚡ Connexion Directe MongoDB (Sans localStorage)
+- **Stockage unique** : Toutes les données sont enregistrées **UNIQUEMENT** dans MongoDB
+- **Pas de localStorage** : Aucune donnée d'évaluation en cache local
+- **Accès multi-appareils** : Connexion depuis n'importe quel ordinateur = mêmes données
+- **Temps réel** : Les données sont immédiatement visibles partout
+- **Sécurité** : Données centralisées et sauvegardées dans le cloud MongoDB
+- **⚠️ Connexion requise** : Une connexion internet active est nécessaire
 
 ### Génération de Documents Word
 - Utilise la librairie `docx` pour créer des documents .docx natifs

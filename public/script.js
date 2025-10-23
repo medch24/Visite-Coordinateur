@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let EVALUATIONS_DATABASE = [];
     const API_BASE = '/api';
 
-    // ===== GESTION MONGODB DIRECTE =====
+    // ===== GESTION MONGODB DIRECTE (SANS LOCALSTORAGE) =====
     const MongoDB = {
         async request(endpoint, options = {}) {
             try {
@@ -34,7 +34,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 });
                 
                 if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    const errorText = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
                 }
                 
                 return await response.json();
@@ -50,6 +51,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     ? `/evaluations?teacherName=${encodeURIComponent(teacherName)}`
                     : '/evaluations';
                 
+                console.log('🔄 Chargement depuis MongoDB:', endpoint);
                 const result = await this.request(endpoint);
                 
                 if (result.success && result.data) {
@@ -59,54 +61,56 @@ document.addEventListener('DOMContentLoaded', async () => {
                 
                 return [];
             } catch (error) {
-                console.warn('⚠️ Erreur chargement MongoDB, fallback localStorage');
-                const localData = JSON.parse(localStorage.getItem('evaluationsDatabase') || '[]');
-                return teacherName 
-                    ? localData.filter(e => e.teacherName === teacherName)
-                    : localData;
+                console.error('❌ ERREUR: Impossible de charger depuis MongoDB', error);
+                alert(state.currentLang === 'fr' 
+                    ? '❌ Erreur: Impossible de se connecter à la base de données MongoDB. Vérifiez votre connexion internet et la configuration MongoDB.' 
+                    : '❌ Error: Cannot connect to MongoDB database. Check your internet connection and MongoDB configuration.');
+                return [];
             }
         },
 
         async saveEvaluation(evaluation) {
-            // Sauvegarder localement d'abord
-            const localData = JSON.parse(localStorage.getItem('evaluationsDatabase') || '[]');
-            localData.push(evaluation);
-            localStorage.setItem('evaluationsDatabase', JSON.stringify(localData));
-
-            // Envoyer à MongoDB
             try {
+                console.log('💾 Sauvegarde directe dans MongoDB...', evaluation);
                 const result = await this.request('/evaluations', {
                     method: 'POST',
                     body: JSON.stringify(evaluation)
                 });
                 
                 if (result.success) {
-                    console.log('✅ Évaluation sauvegardée en MongoDB');
-                    return { success: true, source: 'mongodb' };
+                    console.log('✅ Évaluation sauvegardée en MongoDB avec succès');
+                    return { success: true, source: 'mongodb', data: result.data };
                 }
+                
+                throw new Error('Échec de la sauvegarde');
             } catch (error) {
-                console.warn('⚠️ Sauvegarde MongoDB échouée, données en localStorage');
-                return { success: true, source: 'localStorage' };
+                console.error('❌ ERREUR: Sauvegarde MongoDB échouée', error);
+                alert(state.currentLang === 'fr' 
+                    ? '❌ Erreur: Impossible de sauvegarder dans MongoDB. Vérifiez votre connexion.' 
+                    : '❌ Error: Cannot save to MongoDB. Check your connection.');
+                throw error;
             }
         },
 
         async deleteEvaluation(evaluationId) {
-            // Supprimer localement d'abord
-            const localData = JSON.parse(localStorage.getItem('evaluationsDatabase') || '[]');
-            const updatedData = localData.filter(e => e.id !== evaluationId);
-            localStorage.setItem('evaluationsDatabase', JSON.stringify(updatedData));
-
-            // Supprimer de MongoDB
             try {
+                console.log('🗑️ Suppression depuis MongoDB...', evaluationId);
                 const result = await this.request(`/evaluations/${evaluationId}`, {
                     method: 'DELETE'
                 });
                 
                 if (result.success) {
                     console.log('✅ Évaluation supprimée de MongoDB');
+                    return { success: true };
                 }
+                
+                throw new Error('Échec de la suppression');
             } catch (error) {
-                console.warn('⚠️ Suppression MongoDB échouée');
+                console.error('❌ ERREUR: Suppression MongoDB échouée', error);
+                alert(state.currentLang === 'fr' 
+                    ? '❌ Erreur: Impossible de supprimer de MongoDB. Vérifiez votre connexion.' 
+                    : '❌ Error: Cannot delete from MongoDB. Check your connection.');
+                throw error;
             }
         }
     };
