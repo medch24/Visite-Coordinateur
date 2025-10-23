@@ -9,8 +9,8 @@
 const { MongoClient } = require('mongodb');
 
 // Configuration MongoDB - Connexion directe sans intermédiaire
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://cherifmed2030:Mmedch86@visites.ve4ifcb.mongodb.net/?retryWrites=true&w=majority&appName=Visites';
-const DB_NAME = 'visites'; // Nom de la base de données
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://cherifmed2030:Mmedch86@coordinateur.djbgo2q.mongodb.net/?retryWrites=true&w=majority&appName=Coordinateur';
+const DB_NAME = 'coordinateur'; // Nom de la base de données
 
 // Cache pour la connexion MongoDB (optimisé pour les fonctions serverless)
 let cachedClient = null;
