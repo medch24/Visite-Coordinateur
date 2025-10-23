@@ -118,14 +118,14 @@ input[readonly] { background-color: #f0f0f0; cursor: not-allowed; }
 fieldset { border: 1px solid #ddd; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; }
 legend.category-header { width: auto; font-size: 1.1rem; font-weight: 700; color: var(--primary-color); padding-inline: .5rem; }
 .category-header {display: flex; justify-content: space-between; align-items: center;}
-.criteria-table .table-header { display: grid; grid-template-columns: 4fr 1fr 2fr 1fr; font-weight: bold; padding-bottom: 0.5rem; border-bottom: 1px solid #ccc; }
-.criteria-row { display: grid; grid-template-columns: 4fr 1fr 2fr 1fr; align-items: center; padding: 1rem 0; border-bottom: 1px solid #f0f0f0; }
+.criteria-table .table-header { display: grid; grid-template-columns: 4fr 2fr 1fr; font-weight: bold; padding-bottom: 0.5rem; border-bottom: 1px solid #ccc; }
+.criteria-row { display: grid; grid-template-columns: 4fr 2fr 1fr; align-items: center; padding: 1rem 0; border-bottom: 1px solid #f0f0f0; }
 .rating-controls { display: flex; justify-content: center; gap: 5px; }
 .rating-controls input[type="radio"] { display: none; }
 .rating-controls label { width: 30px; height: 30px; line-height: 30px; text-align: center; border: 1px solid #ccc; border-radius: 50%; cursor: pointer; transition: all 0.2s ease; }
 .rating-controls label:hover { background: #e0e0e0; }
 .rating-controls input:checked + label { background: var(--primary-color); color: white; border-color: var(--primary-color); transform: scale(1.1); }
-.calculated-score, .max-points { text-align: center; font-weight: bold; }
+.calculated-score { text-align: center; font-weight: bold; }
 .evaluation-summary { text-align: center; margin: 2rem 0; }
 .total-score-section { background: var(--secondary-color); padding: 1.5rem; border-radius: var(--border-radius); display: inline-flex; flex-direction: column; align-items: center; }
 .score-display .total-number { font-size: 3rem; font-weight: 700; color: var(--primary-color); }
@@ -188,9 +188,8 @@ legend.category-header { width: auto; font-size: 1.1rem; font-weight: 700; color
         grid-template-columns: 1fr; gap: 0.5rem; text-align: center;
         padding: 1rem; border: 1px solid #eee; border-radius: 8px; margin-bottom: 0.5rem;
     }
-    .criteria-text, .max-points, .calculated-score { display: flex; justify-content: space-between; width: 100%; padding-inline: 1rem; }
+    .criteria-text, .calculated-score { display: flex; justify-content: space-between; width: 100%; padding-inline: 1rem; }
     .criteria-text::before { font-weight: bold; content: 'Critère: '; }
-    .max-points::before { font-weight: bold; content: 'Points Max: '; }
     .calculated-score::before { font-weight: bold; content: 'Score: '; }
     .rating-controls { justify-content: center; margin-top: .5rem; }
 }

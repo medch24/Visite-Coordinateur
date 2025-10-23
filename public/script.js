@@ -456,7 +456,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <div class="criteria-table">
                         <div class="table-header">
                             <div class="criteria-col" data-lang-en="Criteria" data-lang-fr="Critères"></div>
-                            <div class="points-col" data-lang-en="Points" data-lang-fr="Points"></div>
                             <div class="rating-col" data-lang-en="Rating" data-lang-fr="Éval."></div>
                             <div class="score-col">Score</div>
                         </div>
@@ -468,7 +467,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <div class="criteria-text" 
                              data-lang-en="${item.text_en}" 
                              data-lang-fr="${item.text_fr}"></div>
-                        <div class="max-points">${item.points}</div>
                         <div class="rating-controls">
                             ${[1, 2, 3, 4, 5].map(n => `
                                 <input type="radio" 
