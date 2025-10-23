@@ -1616,24 +1616,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         activities: {
             title_en: "TEACHING ACTIVITIES",
             title_fr: "ACTIVITÉS D'ENSEIGNEMENT",
-            maxPoints: 30,
+            maxPoints: 25,
             items: [
-                { text_en: "Clear and structured lessons", text_fr: "Leçons claires et structurées", points: 6 },
-                { text_en: "Varied teaching strategies", text_fr: "Stratégies d'enseignement variées", points: 6 },
-                { text_en: "Appropriate use of technology", text_fr: "Usage approprié de la technologie", points: 6 },
-                { text_en: "Promotes critical thinking", text_fr: "Favorise la pensée critique", points: 6 },
-                { text_en: "Timely and constructive feedback", text_fr: "Feedback opportun et constructif", points: 6 }
+                { text_en: "Clear and structured lessons", text_fr: "Leçons claires et structurées", points: 5 },
+                { text_en: "Varied teaching strategies", text_fr: "Stratégies d'enseignement variées", points: 5 },
+                { text_en: "Appropriate use of technology", text_fr: "Usage approprié de la technologie", points: 5 },
+                { text_en: "Promotes critical thinking", text_fr: "Favorise la pensée critique", points: 5 },
+                { text_en: "Timely and constructive feedback", text_fr: "Feedback opportun et constructif", points: 5 }
             ]
         },
         classroomControl: {
             title_en: "CLASSROOM MANAGEMENT",
             title_fr: "GESTION DE CLASSE",
-            maxPoints: 20,
+            maxPoints: 25,
             items: [
                 { text_en: "Conducive learning environment", text_fr: "Environnement d'apprentissage propice", points: 5 },
                 { text_en: "Effective student behavior management", text_fr: "Gestion efficace du comportement", points: 5 },
                 { text_en: "Efficient use of time", text_fr: "Utilisation efficace du temps", points: 5 },
-                { text_en: "Handles disruptions professionally", text_fr: "Gère les perturbations professionnellement", points: 5 }
+                { text_en: "Handles disruptions professionally", text_fr: "Gère les perturbations professionnellement", points: 5 },
+                { text_en: "Organized classroom and resources", text_fr: "Classe et ressources organisées", points: 5 }
             ]
         },
         personalCriteria: {
