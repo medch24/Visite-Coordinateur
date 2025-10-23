@@ -1652,32 +1652,44 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ===== INITIALISATION (LOGIQUE AJUSTÉE) =====
     const init = async () => {
         setLanguage('fr');
-
-        try {
-            // Tentative de charger les données pour vérifier l'API/DB au démarrage (sans cibler un enseignant)
-            EVALUATIONS_DATABASE = await MongoDB.loadEvaluations();
-            console.log('✅ Système initialisé:', EVALUATIONS_DATABASE.length, 'évaluations chargées');
-
-            // Auto-connexion si credentials sauvegardés
-            const savedCreds = localStorage.getItem('teacherEvalCredentials');
-            if (savedCreds) {
-                const { username, password } = JSON.parse(savedCreds);
-                document.getElementById('username').value = username;
-                document.getElementById('password').value = password;
-                document.getElementById('remember-me').checked = true;
-                
-                const user = USERS_DATABASE.find(u => u.username === username && u.password === password);
-                if (user) {
-                    state.currentUser = user;
-                    // Le chargement des évaluations précédentes sera fait par renderCoordinatorUI/renderTeacherUI
-                    user.role === 'coordinator' ? renderCoordinatorUI() : renderTeacherUI();
-                    showPage(user.role === 'coordinator' ? 'coordinator' : 'teacher');
-                }
-            }
+        let autoLoggedIn = false;
+        
+        // 1. Tenter l'auto-connexion
+        const savedCreds = localStorage.getItem('teacherEvalCredentials');
+        if (savedCreds) {
+            const { username, password } = JSON.parse(savedCreds);
+            document.getElementById('username').value = username;
+            document.getElementById('password').value = password;
+            document.getElementById('remember-me').checked = true;
             
+            const user = USERS_DATABASE.find(u => u.username === username && u.password === password);
+            if (user) {
+                state.currentUser = user;
+                user.role === 'coordinator' ? renderCoordinatorUI() : renderTeacherUI();
+                showPage(user.role === 'coordinator' ? 'coordinator' : 'teacher');
+                autoLoggedIn = true;
+            } else {
+                 // Si les identifiants sont locaux mais ne correspondent plus (changement de mot de passe), les supprimer
+                localStorage.removeItem('teacherEvalCredentials');
+            }
+        }
+        
+        // 2. Charger les évaluations initiales (seulement si connecté ou pour le check API général)
+        // Ceci va également remplir le champ d'erreur de connexion si le 404 persiste.
+        try {
+            EVALUATIONS_DATABASE = await MongoDB.loadEvaluations(state.currentUser ? state.currentUser.username : null);
+            console.log('✅ Système initialisé:', EVALUATIONS_DATABASE.length, 'évaluations chargées');
+            if (document.getElementById('login-error').textContent.includes('MongoDB')) {
+                 document.getElementById('login-error').textContent = ''; // Clear error if load was successful
+            }
         } catch (error) {
-            console.error('❌ Erreur lors de l\'initialisation:', error);
-            // Si init échoue (souvent à cause de loadEvaluations), l'erreur est déjà affichée dans login-error
+            console.error('❌ Erreur lors du chargement initial:', error);
+            // L'erreur est déjà propagée à login-error par MongoDB.loadEvaluations
+        }
+        
+        // Assurez-vous d'être sur la page de connexion si l'auto-connexion a échoué
+        if (!state.currentUser) {
+            showPage('login');
         }
     };
 
