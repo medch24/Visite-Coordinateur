@@ -1,11 +1,12 @@
 /**
  * Professional Teacher Evaluation System - Serverless API with MongoDB
  * Vercel Serverless Function for handling evaluation data
- * Supports 100-point evaluation system with automatic MongoDB storage
- * Version 4.0 - Optimized for direct MongoDB connection and fast loading
+ * Conversion to CommonJS (require/module.exports) for better Vercel stability.
+ * Version 4.2.0 - Stable Routing and DB Connection
  */
 
-import { MongoClient } from 'mongodb';
+// Utilisation de require pour CommonJS
+const { MongoClient } = require('mongodb');
 
 // Configuration MongoDB - Connexion directe sans intermédiaire
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://cherifmed2030:Mmedch86@coordinateur.djbgo2q.mongodb.net/?retryWrites=true&w=majority&appName=Coordinateur';
@@ -22,8 +23,7 @@ async function connectToDatabase() {
     return { client: cachedClient, db: cachedDb };
   }
 
-  // Vérifier l'URI pour éviter de tenter la connexion avec une valeur non définie
-  if (!MONGODB_URI || MONGODB_URI === 'YOUR_MONGODB_URI_HERE') {
+  if (!MONGODB_URI || MONGODB_URI.includes('YOUR_MONGODB_URI_HERE')) {
     throw new Error('MONGODB_URI non configurée.');
   }
 
@@ -31,9 +31,10 @@ async function connectToDatabase() {
   console.log('📍 URI:', MONGODB_URI.replace(/:[^:@]+@/, ':****@')); // Masquer le mot de passe
   console.log('📂 Database:', DB_NAME);
 
+  // Configuration du client MongoClient
   const client = new MongoClient(MONGODB_URI, {
     maxPoolSize: 10,
-    serverSelectionTimeoutMS: 10000, // 10 secondes
+    serverSelectionTimeoutMS: 10000,
     socketTimeoutMS: 45000,
     retryWrites: true,
     retryReads: true,
@@ -46,11 +47,9 @@ async function connectToDatabase() {
     
     const db = client.db(DB_NAME);
     
-    // Tester la connexion
     await db.admin().ping();
     console.log('✅ Ping MongoDB réussi');
 
-    // Créer des index pour améliorer les performances
     const evaluationsCollection = db.collection('evaluations');
     
     try {
@@ -58,7 +57,6 @@ async function connectToDatabase() {
       await evaluationsCollection.createIndex({ id: 1 }, { unique: true });
       console.log('✅ Index MongoDB créés');
     } catch (indexError) {
-      // Ignorer l'erreur si l'index existe déjà
       if (!indexError.message.includes('already exists')) {
          console.error('❌ ERREUR création index:', indexError.message);
       } else {
@@ -74,18 +72,17 @@ async function connectToDatabase() {
     
   } catch (error) {
     console.error('❌ ERREUR connexion MongoDB:', error.message);
-    throw new Error(`Impossible de se connecter à MongoDB: ${error.message}`);
+    throw new Error(`Impossible de se connecter à MongoDB: ${error.message}. Vérifiez votre URI et les paramètres de sécurité (IP Whitelist).`);
   }
 }
 
-export default async function handler(req, res) {
-  // Activer CORS pour toutes les origines (important pour les API serverless)
+async function handler(req, res) {
+  // Activer CORS pour toutes les origines
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
   res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
 
-  // Gérer les requêtes "preflight" OPTIONS
   if (req.method === 'OPTIONS') {
     res.status(200).end();
     return;
@@ -93,16 +90,15 @@ export default async function handler(req, res) {
 
   const { method } = req;
   const url = req.url || '';
-  // Utiliser le chemin relatif à la fonction (ex: '/evaluations' au lieu de '/api/evaluations')
   const path = url.split('?')[0];
 
   try {
-    // Endpoint d'information de l'API: '/api/' -> '/'
+    // Endpoint d'information de l'API: '/'
     if (method === 'GET' && (path === '/' || path === '/api')) {
       return res.status(200).json({
         status: 'success',
         message: 'Professional Teacher Evaluation System API with MongoDB',
-        version: '4.1.0',
+        version: '4.2.0',
         features: [
           'Automatic MongoDB storage',
           '100-point academic assessment system',
@@ -121,7 +117,7 @@ export default async function handler(req, res) {
       });
     }
 
-    // Endpoint de vérification de santé: '/api/health' -> '/health'
+    // Endpoint de vérification de santé: '/health'
     if (method === 'GET' && path === '/health') {
       const { db } = await connectToDatabase();
       await db.admin().ping();
@@ -135,7 +131,7 @@ export default async function handler(req, res) {
       });
     }
 
-    // Endpoints pour les évaluations: '/api/evaluations' -> '/evaluations'
+    // Endpoints pour les évaluations: '/evaluations'
     if (path.startsWith('/evaluations')) {
       const { db } = await connectToDatabase();
       const evaluationsCollection = db.collection('evaluations');
@@ -151,7 +147,7 @@ export default async function handler(req, res) {
         const evaluations = await evaluationsCollection
           .find(query)
           .sort({ date: -1 })
-          .limit(100) // Limiter à 100 évaluations les plus récentes
+          .limit(100)
           .toArray();
         
         return res.status(200).json({
@@ -182,7 +178,6 @@ export default async function handler(req, res) {
 
       // Gestion d'une évaluation spécifique par ID: '/evaluations/:id'
       const pathParts = path.split('/');
-      // Le chemin est '/evaluations/:id', donc 3 parties: ['', 'evaluations', ':id']
       if (pathParts.length === 3 && pathParts[1] === 'evaluations') {
         const evaluationId = pathParts[2];
 
@@ -209,7 +204,7 @@ export default async function handler(req, res) {
             ...req.body,
             updatedAt: new Date()
           };
-          delete updateData.id; // Ne pas modifier l'ID
+          delete updateData.id;
 
           const result = await evaluationsCollection.updateOne(
             { id: evaluationId },
@@ -248,14 +243,13 @@ export default async function handler(req, res) {
       }
     }
 
-    // Endpoint pour les utilisateurs: '/api/users' -> '/users'
+    // Endpoint pour les utilisateurs: '/users'
     if (method === 'GET' && path === '/users') {
-      // Retourner la liste des utilisateurs (peut être stockée en base plus tard)
       const users = [
-        { username: 'Mohamed', role: 'coordinator', assignedTeachers: ['Morched', 'Kamel', 'Abas', 'Zine', 'Youssef', 'Oumarou', 'Tonga', 'Sylvano', 'Sami', 'Mohamed Ali'] },
-        { username: 'Zohra', role: 'coordinator', assignedTeachers: ['Aichetou', 'Inas', 'Anwar', 'Souha', 'Amal', 'Shanouja', 'Jana', 'Hiba'] },
-        { username: 'Rasha', role: 'coordinator', assignedTeachers: ['Amal', 'Rouba', 'Rayan', 'Imane', 'Nesrine', 'Fatima', 'Samar', 'Romana', 'Nour'] },
-        ...['Morched', 'Kamel', 'Abas', 'Zine', 'Youssef', 'Oumarou', 'Tonga', 'Sylvano', 'Sami', 'Mohamed Ali', 'Aichetou', 'Inas', 'Anwar', 'Souha', 'Amal', 'Shanouja', 'Jana', 'Hiba', 'Rouba', 'Rayan', 'Imane', 'Nesrine', 'Fatima', 'Samar', 'Romana', 'Nour'].map(name => ({ username: name, role: 'teacher' }))
+        { username: 'Mohamed', password: 'Mohamed@86', role: 'coordinator', assignedTeachers: ['Morched', 'Kamel', 'Abas', 'Zine', 'Youssef', 'Oumarou', 'Tonga', 'Sylvano', 'Sami', 'Mohamed Ali'] },
+        { username: 'Zohra', password: 'Zohra@40', role: 'coordinator', assignedTeachers: ['Aichetou', 'Inas', 'Anwar', 'Souha', 'Amal', 'Shanouja', 'Jana', 'Hiba'] },
+        { username: 'Rasha', password: 'Rasha@26', role: 'coordinator', assignedTeachers: ['Amal', 'Rouba', 'Rayan', 'Imane', 'Nesrine', 'Fatima', 'Samar', 'Romana', 'Nour'] },
+        ...['Morched', 'Kamel', 'Abas', 'Zine', 'Youssef', 'Oumarou', 'Tonga', 'Sylvano', 'Sami', 'Mohamed Ali', 'Aichetou', 'Inas', 'Anwar', 'Souha', 'Amal', 'Shanouja', 'Jana', 'Hiba', 'Rouba', 'Rayan', 'Imane', 'Nesrine', 'Fatima', 'Samar', 'Romana', 'Nour'].map(name => ({ username: name, role: 'teacher', password: name }))
       ];
 
       return res.status(200).json({
@@ -264,14 +258,13 @@ export default async function handler(req, res) {
       });
     }
 
-    // Endpoint pour synchroniser les données localStorage vers MongoDB: '/api/sync-data' -> '/sync-data'
+    // Endpoint pour synchroniser les données localStorage vers MongoDB: '/sync-data'
     if (method === 'POST' && path === '/sync-data') {
       const { db } = await connectToDatabase();
       const evaluationsCollection = db.collection('evaluations');
       const { evaluations } = req.body;
 
       if (evaluations && Array.isArray(evaluations)) {
-        // Synchroniser les évaluations du localStorage vers MongoDB
         const operations = evaluations.map(eval => ({
           updateOne: {
             filter: { id: eval.id },
@@ -317,7 +310,6 @@ export default async function handler(req, res) {
     console.error('❌ API Error:', error);
     console.error('Stack:', error.stack);
     
-    // Message d'erreur détaillé
     const errorMessage = error.message || 'Erreur serveur interne';
     const isMongoError = errorMessage.includes('MongoDB') || errorMessage.includes('connect');
     
@@ -330,3 +322,6 @@ export default async function handler(req, res) {
     });
   }
 }
+
+// Export CommonJS
+module.exports = handler;
