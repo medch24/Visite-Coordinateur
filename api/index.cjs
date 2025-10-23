@@ -163,7 +163,7 @@ async function handler(req, res) {
         const evaluationData = {
           ...req.body,
           id: req.body.id || Date.now().toString(),
-          date: new Date().toISOString(),
+          date: req.body.date || new Date().toISOString(),
           createdAt: new Date()
         };
 
