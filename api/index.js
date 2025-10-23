@@ -22,6 +22,11 @@ async function connectToDatabase() {
     return { client: cachedClient, db: cachedDb };
   }
 
+  // Vérifier l'URI pour éviter de tenter la connexion avec une valeur non définie
+  if (!MONGODB_URI || MONGODB_URI === 'YOUR_MONGODB_URI_HERE') {
+    throw new Error('MONGODB_URI non configurée.');
+  }
+
   console.log('🔄 Création nouvelle connexion MongoDB...');
   console.log('📍 URI:', MONGODB_URI.replace(/:[^:@]+@/, ':****@')); // Masquer le mot de passe
   console.log('📂 Database:', DB_NAME);
@@ -53,7 +58,12 @@ async function connectToDatabase() {
       await evaluationsCollection.createIndex({ id: 1 }, { unique: true });
       console.log('✅ Index MongoDB créés');
     } catch (indexError) {
-      console.log('ℹ️ Index déjà existants:', indexError.message);
+      // Ignorer l'erreur si l'index existe déjà
+      if (!indexError.message.includes('already exists')) {
+         console.error('❌ ERREUR création index:', indexError.message);
+      } else {
+         console.log('ℹ️ Index déjà existants:', indexError.message);
+      }
     }
 
     cachedClient = client;
@@ -83,14 +93,16 @@ export default async function handler(req, res) {
 
   const { method } = req;
   const url = req.url || '';
+  // Utiliser le chemin relatif à la fonction (ex: '/evaluations' au lieu de '/api/evaluations')
+  const path = url.split('?')[0];
 
   try {
-    // Endpoint d'information de l'API
-    if (method === 'GET' && url === '/api/') {
+    // Endpoint d'information de l'API: '/api/' -> '/'
+    if (method === 'GET' && (path === '/' || path === '/api')) {
       return res.status(200).json({
         status: 'success',
         message: 'Professional Teacher Evaluation System API with MongoDB',
-        version: '3.0.0',
+        version: '4.1.0',
         features: [
           'Automatic MongoDB storage',
           '100-point academic assessment system',
@@ -100,17 +112,17 @@ export default async function handler(req, res) {
           'Real-time data synchronization'
         ],
         endpoints: {
-          '/api/health': 'API health check',
-          '/api/evaluations': 'GET/POST evaluations',
-          '/api/evaluations/:id': 'GET/PUT/DELETE specific evaluation',
-          '/api/users': 'GET user data',
-          '/api/': 'API information'
+          '/health': 'API health check',
+          '/evaluations': 'GET/POST evaluations',
+          '/evaluations/:id': 'GET/PUT/DELETE specific evaluation',
+          '/users': 'GET user data',
+          '/': 'API information'
         }
       });
     }
 
-    // Endpoint de vérification de santé
-    if (method === 'GET' && url === '/api/health') {
+    // Endpoint de vérification de santé: '/api/health' -> '/health'
+    if (method === 'GET' && path === '/health') {
       const { db } = await connectToDatabase();
       await db.admin().ping();
       
@@ -123,13 +135,13 @@ export default async function handler(req, res) {
       });
     }
 
-    // Endpoints pour les évaluations
-    if (url.startsWith('/api/evaluations')) {
+    // Endpoints pour les évaluations: '/api/evaluations' -> '/evaluations'
+    if (path.startsWith('/evaluations')) {
       const { db } = await connectToDatabase();
       const evaluationsCollection = db.collection('evaluations');
 
-      // GET toutes les évaluations ou par enseignant (optimisé)
-      if (method === 'GET') {
+      // GET toutes les évaluations ou par enseignant (optimisé): '/evaluations'
+      if (method === 'GET' && path === '/evaluations') {
         const { teacherName, coordinatorName } = req.query;
         
         let query = {};
@@ -150,11 +162,11 @@ export default async function handler(req, res) {
         });
       }
 
-      // POST nouvelle évaluation
-      if (method === 'POST') {
+      // POST nouvelle évaluation: '/evaluations'
+      if (method === 'POST' && path === '/evaluations') {
         const evaluationData = {
           ...req.body,
-          id: Date.now().toString(),
+          id: req.body.id || Date.now().toString(),
           date: new Date().toISOString(),
           createdAt: new Date()
         };
@@ -168,10 +180,11 @@ export default async function handler(req, res) {
         });
       }
 
-      // Gestion d'une évaluation spécifique par ID
-      const pathParts = url.split('/');
-      if (pathParts.length === 4) {
-        const evaluationId = pathParts[3];
+      // Gestion d'une évaluation spécifique par ID: '/evaluations/:id'
+      const pathParts = path.split('/');
+      // Le chemin est '/evaluations/:id', donc 3 parties: ['', 'evaluations', ':id']
+      if (pathParts.length === 3 && pathParts[1] === 'evaluations') {
+        const evaluationId = pathParts[2];
 
         // GET évaluation par ID
         if (method === 'GET') {
@@ -196,6 +209,7 @@ export default async function handler(req, res) {
             ...req.body,
             updatedAt: new Date()
           };
+          delete updateData.id; // Ne pas modifier l'ID
 
           const result = await evaluationsCollection.updateOne(
             { id: evaluationId },
@@ -234,8 +248,8 @@ export default async function handler(req, res) {
       }
     }
 
-    // Endpoint pour les utilisateurs
-    if (method === 'GET' && url === '/api/users') {
+    // Endpoint pour les utilisateurs: '/api/users' -> '/users'
+    if (method === 'GET' && path === '/users') {
       // Retourner la liste des utilisateurs (peut être stockée en base plus tard)
       const users = [
         { username: 'Mohamed', role: 'coordinator', assignedTeachers: ['Morched', 'Kamel', 'Abas', 'Zine', 'Youssef', 'Oumarou', 'Tonga', 'Sylvano', 'Sami', 'Mohamed Ali'] },
@@ -250,8 +264,8 @@ export default async function handler(req, res) {
       });
     }
 
-    // Endpoint pour synchroniser les données localStorage vers MongoDB
-    if (method === 'POST' && url === '/api/sync-data') {
+    // Endpoint pour synchroniser les données localStorage vers MongoDB: '/api/sync-data' -> '/sync-data'
+    if (method === 'POST' && path === '/sync-data') {
       const { db } = await connectToDatabase();
       const evaluationsCollection = db.collection('evaluations');
       const { evaluations } = req.body;
@@ -288,14 +302,14 @@ export default async function handler(req, res) {
     // Réponse par défaut pour les routes non définies
     return res.status(404).json({
       error: 'Endpoint not found',
-      message: 'Professional Teacher Evaluation System API with MongoDB',
+      message: `Endpoint ${method} ${url} not recognized.`,
       availableEndpoints: [
-        '/api/',
-        '/api/health',
-        '/api/evaluations',
-        '/api/evaluations/:id',
-        '/api/users',
-        '/api/sync-data'
+        '/',
+        '/health',
+        '/evaluations',
+        '/evaluations/:id',
+        '/users',
+        '/sync-data'
       ]
     });
 
@@ -311,7 +325,7 @@ export default async function handler(req, res) {
       success: false,
       error: 'Internal server error',
       message: errorMessage,
-      details: isMongoError ? 'Vérifiez la configuration MongoDB et la connexion réseau' : undefined,
+      details: isMongoError ? 'Vérifiez la configuration MongoDB (URI, IP Whitelist) et la connexion réseau.' : undefined,
       timestamp: new Date().toISOString()
     });
   }
