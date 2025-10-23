@@ -9,8 +9,8 @@
 const { MongoClient } = require('mongodb');
 
 // Configuration MongoDB - Connexion directe sans intermédiaire
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://cherifmed2030:Mmedch86@coordinateur.djbgo2q.mongodb.net/?retryWrites=true&w=majority&appName=Coordinateur';
-const DB_NAME = 'coordinateur'; // Nom de la base de données
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://cherifmed2030:Mmedch86@visites.ve4ifcb.mongodb.net/?retryWrites=true&w=majority&appName=Visites';
+const DB_NAME = 'visites'; // Nom de la base de données
 
 // Cache pour la connexion MongoDB (optimisé pour les fonctions serverless)
 let cachedClient = null;
@@ -90,11 +90,15 @@ async function handler(req, res) {
 
   const { method } = req;
   const url = req.url || '';
-  const path = url.split('?')[0];
+  // Normaliser le path en retirant le préfixe /api si présent
+  let path = url.split('?')[0];
+  if (path.startsWith('/api')) {
+    path = path.substring(4) || '/';
+  }
 
   try {
     // Endpoint d'information de l'API: '/'
-    if (method === 'GET' && (path === '/' || path === '/api')) {
+    if (method === 'GET' && path === '/') {
       return res.status(200).json({
         status: 'success',
         message: 'Professional Teacher Evaluation System API with MongoDB',
