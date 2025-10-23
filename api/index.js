@@ -7,37 +7,65 @@
 
 import { MongoClient } from 'mongodb';
 
-// Configuration MongoDB
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://username:password@cluster.mongodb.net/teacher-evaluation?retryWrites=true&w=majority';
-const DB_NAME = 'teacher_evaluation_system';
+// Configuration MongoDB - Connexion directe sans intermédiaire
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://cherifmed2030:Mmedch86@coordinateur.djbgo2q.mongodb.net/?retryWrites=true&w=majority&appName=Coordinateur';
+const DB_NAME = 'coordinateur'; // Nom de la base de données
 
 // Cache pour la connexion MongoDB (optimisé pour les fonctions serverless)
 let cachedClient = null;
 let cachedDb = null;
 
 async function connectToDatabase() {
+  // Retourner la connexion cachée si elle existe
   if (cachedClient && cachedDb) {
+    console.log('✅ Utilisation connexion MongoDB cachée');
     return { client: cachedClient, db: cachedDb };
   }
 
+  console.log('🔄 Création nouvelle connexion MongoDB...');
+  console.log('📍 URI:', MONGODB_URI.replace(/:[^:@]+@/, ':****@')); // Masquer le mot de passe
+  console.log('📂 Database:', DB_NAME);
+
   const client = new MongoClient(MONGODB_URI, {
     maxPoolSize: 10,
-    serverSelectionTimeoutMS: 5000,
+    serverSelectionTimeoutMS: 10000, // 10 secondes
     socketTimeoutMS: 45000,
+    retryWrites: true,
+    retryReads: true,
+    w: 'majority'
   });
   
-  await client.connect();
-  const db = client.db(DB_NAME);
+  try {
+    await client.connect();
+    console.log('✅ Connexion MongoDB établie avec succès');
+    
+    const db = client.db(DB_NAME);
+    
+    // Tester la connexion
+    await db.admin().ping();
+    console.log('✅ Ping MongoDB réussi');
 
-  // Créer des index pour améliorer les performances
-  const evaluationsCollection = db.collection('evaluations');
-  await evaluationsCollection.createIndex({ teacherName: 1, date: -1 });
-  await evaluationsCollection.createIndex({ id: 1 }, { unique: true });
+    // Créer des index pour améliorer les performances
+    const evaluationsCollection = db.collection('evaluations');
+    
+    try {
+      await evaluationsCollection.createIndex({ teacherName: 1, date: -1 });
+      await evaluationsCollection.createIndex({ id: 1 }, { unique: true });
+      console.log('✅ Index MongoDB créés');
+    } catch (indexError) {
+      console.log('ℹ️ Index déjà existants:', indexError.message);
+    }
 
-  cachedClient = client;
-  cachedDb = db;
+    cachedClient = client;
+    cachedDb = db;
 
-  return { client, db };
+    console.log('✅ Base de données prête:', DB_NAME);
+    return { client, db };
+    
+  } catch (error) {
+    console.error('❌ ERREUR connexion MongoDB:', error.message);
+    throw new Error(`Impossible de se connecter à MongoDB: ${error.message}`);
+  }
 }
 
 export default async function handler(req, res) {
@@ -272,11 +300,19 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('API Error:', error);
+    console.error('❌ API Error:', error);
+    console.error('Stack:', error.stack);
+    
+    // Message d'erreur détaillé
+    const errorMessage = error.message || 'Erreur serveur interne';
+    const isMongoError = errorMessage.includes('MongoDB') || errorMessage.includes('connect');
+    
     return res.status(500).json({
       success: false,
       error: 'Internal server error',
-      message: error.message
+      message: errorMessage,
+      details: isMongoError ? 'Vérifiez la configuration MongoDB et la connexion réseau' : undefined,
+      timestamp: new Date().toISOString()
     });
   }
 }

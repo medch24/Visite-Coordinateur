@@ -1,11 +1,13 @@
 {
   "name": "academic-teacher-evaluation-system",
-  "version": "2.0.0",
-  "description": "Professional Teacher Evaluation System with 100-point assessment, Word generation, and bilingual support",
+  "version": "5.1.0",
+  "type": "module",
+  "description": "Professional Teacher Evaluation System with 100-point assessment, Word generation, and bilingual support - Direct MongoDB connection",
   "scripts": {
     "dev": "vercel dev",
     "build": "echo 'Static build complete'",
-    "start": "vercel dev"
+    "start": "vercel dev",
+    "test:mongodb": "node test-mongodb.js"
   },
   "dependencies": {
     "mongodb": "^6.2.0",
