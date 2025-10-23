@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
     
     let EVALUATIONS_DATABASE = [];
-    const API_BASE = '/api';
+   const API_BASE = ''; // NOUVEAU
 
     // ===== GESTION MONGODB DIRECTE (SANS LOCALSTORAGE) =====
     const MongoDB = {
