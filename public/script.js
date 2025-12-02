@@ -11,6 +11,56 @@ document.addEventListener('DOMContentLoaded', async () => {
         isOnline: navigator.onLine
     };
     
+    // ===== TRADUCTIONS CENTRALISÉES =====
+    const translations = {
+        loading: { fr: '⏳ Chargement des évaluations...', en: '⏳ Loading evaluations...', ar: '⏳ جاري تحميل التقييمات...' },
+        noEvaluations: { fr: 'Aucune évaluation précédente pour cet enseignant.', en: 'No previous evaluations for this teacher.', ar: 'لا توجد تقييمات سابقة لهذا المعلم.' },
+        previousEvaluations: { fr: 'Évaluations Précédentes', en: 'Previous Evaluations', ar: 'التقييمات السابقة' },
+        class: { fr: 'Classe', en: 'Class', ar: 'الصف' },
+        subject: { fr: 'Matière', en: 'Subject', ar: 'المادة' },
+        score: { fr: 'Score', en: 'Score', ar: 'النتيجة' },
+        view: { fr: 'Voir', en: 'View', ar: 'عرض' },
+        word: { fr: 'Word', en: 'Word', ar: 'ملف' },
+        delete: { fr: 'Supprimer', en: 'Delete', ar: 'حذف' },
+        viewDetails: { fr: 'Voir les détails', en: 'View details', ar: 'عرض التفاصيل' },
+        downloadWord: { fr: 'Télécharger Word', en: 'Download Word', ar: 'تحميل ملف وورد' },
+        loadError: { fr: '⚠️ Erreur de chargement des évaluations', en: '⚠️ Error loading evaluations', ar: '⚠️ خطأ في تحميل التقييمات' },
+        mongoError: { fr: 'Erreur: Impossible de se connecter à la base de données MongoDB', en: 'Error: Cannot connect to MongoDB database', ar: 'خطأ: تعذر الاتصال بقاعدة بيانات MongoDB' },
+        mongoLoadError: { fr: 'Erreur: Impossible de charger les évaluations depuis MongoDB. Vérifiez votre connexion.', en: 'Error: Cannot load evaluations from MongoDB. Check your connection.', ar: 'خطأ: تعذر تحميل التقييمات من MongoDB. تحقق من اتصالك.' },
+        mongoSaveError: { fr: 'Erreur: Impossible de sauvegarder dans MongoDB. Vérifiez votre connexion.', en: 'Error: Cannot save to MongoDB. Check your connection.', ar: 'خطأ: تعذر الحفظ في MongoDB. تحقق من اتصالك.' },
+        mongoDeleteError: { fr: 'Erreur: Impossible de supprimer de MongoDB. Vérifiez votre connexion.', en: 'Error: Cannot delete from MongoDB. Check your connection.', ar: 'خطأ: تعذر الحذف من MongoDB. تحقق من اتصالك.' },
+        rateAllCriteria: { fr: 'Veuillez noter tous les critères.', en: 'Please rate all criteria.', ar: 'يرجى تقييم جميع المعايير.' },
+        saveSuccess: { fr: 'Évaluation enregistrée avec succès!', en: 'Evaluation saved successfully!', ar: 'تم حفظ التقييم بنجاح!' },
+        savedToDatabase: { fr: '(Sauvegardé en base de données)', en: '(Saved to database)', ar: '(تم الحفظ في قاعدة البيانات)' },
+        localSave: { fr: '(Sauvegarde locale)', en: '(Local save)', ar: '(حفظ محلي)' },
+        confirmDelete: { fr: 'Êtes-vous sûr de vouloir supprimer cette évaluation ?', en: 'Are you sure you want to delete this evaluation?', ar: 'هل أنت متأكد من حذف هذا التقييم؟' },
+        deleteSuccess: { fr: 'Évaluation supprimée avec succès!', en: 'Evaluation deleted successfully!', ar: 'تم حذف التقييم بنجاح!' },
+        newEvaluationFor: { fr: 'Nouvelle Évaluation pour', en: 'New Evaluation for', ar: 'تقييم جديد لـ' },
+        visitNumber: { fr: 'Numéro de Visite', en: 'Visit Number', ar: 'رقم الزيارة' },
+        visitDate: { fr: 'Date de Visite', en: 'Visit Date', ar: 'تاريخ الزيارة' },
+        session: { fr: 'Séance (1-8)', en: 'Session (1-8)', ar: 'الحصة (1-8)' },
+        criteria: { fr: 'Critères', en: 'Criteria', ar: 'المعايير' },
+        rating: { fr: 'Éval.', en: 'Rating', ar: 'التقييم' },
+        strengths: { fr: 'Forces', en: 'Strengths', ar: 'نقاط القوة' },
+        improvements: { fr: 'Améliorations', en: 'Improvements', ar: 'التحسينات' },
+        recommendations: { fr: 'Recommandations', en: 'Recommendations', ar: 'التوصيات' },
+        saveEvaluation: { fr: 'Enregistrer', en: 'Save Evaluation', ar: 'حفظ التقييم' },
+        teacher: { fr: 'Enseignant', en: 'Teacher', ar: 'المعلم' },
+        evaluator: { fr: 'Évaluateur', en: 'Evaluator', ar: 'المُقيّم' },
+        sessionNum: { fr: 'Séance N°', en: 'Session #', ar: 'الحصة رقم' },
+        totalScore: { fr: 'SCORE TOTAL :', en: 'TOTAL SCORE:', ar: 'المجموع الكلي:' },
+        level: { fr: 'Niveau :', en: 'Level:', ar: 'المستوى:' },
+        summaryByCategory: { fr: 'RÉSUMÉ PAR CATÉGORIE', en: 'SUMMARY BY CATEGORY', ar: 'ملخص حسب الفئة' },
+        category: { fr: 'Catégorie', en: 'Category', ar: 'الفئة' },
+        obtained: { fr: 'Obtenu', en: 'Obtained', ar: 'الحاصل عليها' },
+        maximum: { fr: 'Maximum', en: 'Maximum', ar: 'الحد الأقصى' },
+        detailedEvaluation: { fr: 'ÉVALUATION DÉTAILLÉE', en: 'DETAILED EVALUATION', ar: 'التقييم التفصيلي' },
+        maxPoints: { fr: 'Pts Max', en: 'Max Pts', ar: 'أقصى نقاط' },
+        chooseTeacher: { fr: '--- Choisir un enseignant ---', en: '--- Choose a teacher ---', ar: '--- اختر معلمًا ---' }
+    };
+    
+    const t = (key) => translations[key] ? translations[key][state.currentLang] || translations[key].fr : key;
+    
     const pages = {
         login: document.getElementById('login-page'),
         coordinator: document.getElementById('coordinator-dashboard'),
@@ -157,9 +207,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const setLanguage = (lang) => {
         state.currentLang = lang;
         document.documentElement.lang = lang;
+        document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
         
-        document.querySelectorAll('[data-lang-en], [data-lang-fr]').forEach(el => {
-            const text = el.dataset[lang === 'fr' ? 'langFr' : 'langEn'] || '';
+        document.querySelectorAll('[data-lang-en], [data-lang-fr], [data-lang-ar]').forEach(el => {
+            const text = el.dataset[lang === 'fr' ? 'langFr' : (lang === 'ar' ? 'langAr' : 'langEn')] || '';
             const icon = el.querySelector('i');
             if (icon) {
                 let span = el.querySelector('span');
@@ -173,12 +224,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
         
-        document.querySelectorAll('[placeholder-fr], [placeholder-en]').forEach(el => {
-            el.placeholder = el.getAttribute(lang === 'fr' ? 'placeholder-fr' : 'placeholder-en');
+        document.querySelectorAll('[placeholder-fr], [placeholder-en], [placeholder-ar]').forEach(el => {
+            el.placeholder = el.getAttribute(lang === 'fr' ? 'placeholder-fr' : (lang === 'ar' ? 'placeholder-ar' : 'placeholder-en'));
         });
         
         document.getElementById('lang-en').classList.toggle('active', lang === 'en');
         document.getElementById('lang-fr').classList.toggle('active', lang === 'fr');
+        document.getElementById('lang-ar').classList.toggle('active', lang === 'ar');
     };
 
     const changeAndRerenderLanguage = (lang) => {
@@ -194,7 +246,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // Nous allons ignorer la traduction pour l'erreur MongoDB pour conserver les détails de l'erreur HTTP si elle a été capturée
                 // Sinon, mettre à jour le message "identifiants invalides"
             } else if (loginError.textContent) {
-                loginError.textContent = lang === 'fr' ? 'Identifiants invalides.' : 'Invalid credentials.';
+                loginError.textContent = lang === 'fr' ? 'Identifiants invalides.' : (lang === 'ar' ? 'بيانات الاعتماد غير صحيحة.' : 'Invalid credentials.');
             }
         }
     };
@@ -218,6 +270,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ===== ÉVÉNEMENTS UI =====
     document.getElementById('lang-en').addEventListener('click', () => changeAndRerenderLanguage('en'));
     document.getElementById('lang-fr').addEventListener('click', () => changeAndRerenderLanguage('fr'));
+    document.getElementById('lang-ar').addEventListener('click', () => changeAndRerenderLanguage('ar'));
     
     document.getElementById('toggle-password').addEventListener('click', function() {
         const input = document.getElementById('password');
@@ -248,7 +301,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             showPage(user.role === 'coordinator' ? 'coordinator' : 'teacher');
         } else {
             document.getElementById('login-error').textContent = 
-                state.currentLang === 'fr' ? 'Identifiants invalides.' : 'Invalid credentials.';
+                state.currentLang === 'fr' ? 'Identifiants invalides.' : (state.currentLang === 'ar' ? 'بيانات الاعتماد غير صحيحة.' : 'Invalid credentials.');
         }
     });
 
@@ -310,7 +363,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ===== ÉVALUATIONS PRÉCÉDENTES (AMÉLIORÉ) =====
     const renderPreviousEvaluations = async (teacherName) => {
         const container = document.getElementById('previous-evaluations-container');
-        container.innerHTML = '<div class="card"><p style="text-align:center;">⏳ Chargement des évaluations...</p></div>';
+        container.innerHTML = `<div class="card"><p style="text-align:center;">${t('loading')}</p></div>`;
         
         try {
             // Charger depuis MongoDB
@@ -324,7 +377,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (sortedEvals.length === 0) {
                 container.innerHTML = `<div class="card no-evaluations">
                     <h3 data-lang-en="No previous evaluations for this teacher." 
-                        data-lang-fr="Aucune évaluation précédente pour cet enseignant."></h3>
+                        data-lang-fr="Aucune évaluation précédente pour cet enseignant."
+                        data-lang-ar="لا توجد تقييمات سابقة لهذا المعلم."></h3>
                 </div>`;
                 setLanguage(state.currentLang);
                 return;
@@ -335,7 +389,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <h3>
                         <i class="fas fa-history"></i>
                         <span data-lang-en="Previous Evaluations (${sortedEvals.length})" 
-                              data-lang-fr="Évaluations Précédentes (${sortedEvals.length})"></span>
+                              data-lang-fr="Évaluations Précédentes (${sortedEvals.length})"
+                              data-lang-ar="التقييمات السابقة (${sortedEvals.length})"></span>
                     </h3>
                     <ul class="previous-eval-list">
                         ${sortedEvals.map(ev => `
@@ -349,20 +404,20 @@ document.addEventListener('DOMContentLoaded', async () => {
                                     <span class="eval-subject">
                                         <b>${state.currentLang === 'fr' ? 'Matière' : 'Subject'}:</b> ${ev.subject || 'N/A'}
                                     </span>
-                                    <span><b>Score:</b> ${ev.grandTotal}/100</span>
+                                    <span><b>${t('score')}:</b> ${ev.grandTotal}/100</span>
                                 </div>
                                 <div class="eval-actions">
-                                    <button class="view-btn" title="${state.currentLang === 'fr' ? 'Voir les détails' : 'View details'}">
+                                    <button class="view-btn" title="${t('viewDetails')}">
                                         <i class="fas fa-eye"></i> 
-                                        <span data-lang-en="View" data-lang-fr="Voir"></span>
+                                        <span data-lang-en="View" data-lang-fr="Voir" data-lang-ar="عرض"></span>
                                     </button>
-                                    <button class="word-btn" title="${state.currentLang === 'fr' ? 'Télécharger Word' : 'Download Word'}">
+                                    <button class="word-btn" title="${t('downloadWord')}">
                                         <i class="fas fa-file-word"></i> 
-                                        <span data-lang-en="Word" data-lang-fr="Word"></span>
+                                        <span data-lang-en="Word" data-lang-fr="Word" data-lang-ar="ملف"></span>
                                     </button>
-                                    <button class="delete-btn" title="${state.currentLang === 'fr' ? 'Supprimer' : 'Delete'}">
+                                    <button class="delete-btn" title="${t('delete')}">
                                         <i class="fas fa-trash"></i> 
-                                        <span data-lang-en="Delete" data-lang-fr="Supprimer"></span>
+                                        <span data-lang-en="Delete" data-lang-fr="Supprimer" data-lang-ar="حذف"></span>
                                     </button>
                                 </div>
                             </li>
@@ -547,1155 +602,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             e.preventDefault();
             
             if (form.querySelectorAll('input[type="radio"]:checked').length < criteriaIndex) {
-                alert(state.currentLang === 'fr' ? 'Veuillez noter tous les critères.' : 'Please rate all criteria.');
+                alert(state.currentLang === 'fr' ? 'Veuilconst scores = calculateSces.' : 'Please rate all criteria.');
                 return;
             }
             
             const formData = new FormData(e.target);
-            const scores = calculateScores(form);
-            const rawCriteria = Array.from(form.querySelectorAll('input[type="radio"]:checked'))
-                .reduce((acc, r) => ({
-                    ...acc, 
-                    [r.name]: { rating: parseInt(r.value) }
-                }), {});
-            
-            const newEvaluation = {
-                id: Date.now().toString(),
-                teacherName,
-                coordinatorName: state.currentUser.username,
-                class: formData.get('class'),
-                subject: formData.get('subject'),
-                sessionNumber: formData.get('sessionNumber'),
-                visitDate: formData.get('visitDate'),
-                criteriaDetails: getCriteria(),
-                grandTotal: scores.grandTotal,
-                comments: {
-                    strengths: formData.get('strengths'),
-                    toImprove: formData.get('toImprove'),
-                    recommendations: formData.get('recommendations')
-                },
-                date: new Date().toISOString(),
-                rawCriteria
-            };
-            
-            try {
-                const result = await MongoDB.saveEvaluation(newEvaluation);
-                EVALUATIONS_DATABASE.push(newEvaluation);
-                
-                let message = state.currentLang === 'fr' 
-                    ? 'Évaluation enregistrée avec succès!' 
-                    : 'Evaluation saved successfully!';
-                
-                if (result.source === 'mongodb') {
-                    message += state.currentLang === 'fr' 
-                        ? ' (Sauvegardé en base de données)' 
-                        : ' (Saved to database)';
-                } else {
-                    message += state.currentLang === 'fr' 
-                        ? ' (Sauvegarde locale)' 
-                        : ' (Local save)';
-                }
-                
-                alert(message);
-                
-                // Réinitialiser l'interface
-                document.getElementById('teacher-select').value = '';
-                container.innerHTML = '';
-                document.getElementById('previous-evaluations-container').innerHTML = '';
-            } catch (error) {
-                console.error('Erreur lors de la sauvegarde:', error);
-                alert(state.currentLang === 'fr' 
-                    ? 'Erreur lors de la sauvegarde' 
-                    : 'Save error');
-            }
-        });
-    };
-
-    // ===== CALCUL DES SCORES =====
-    const calculateScores = (form) => {
-        let grandTotal = 0;
-        const radios = form.querySelectorAll('input[type="radio"]:checked');
-        
-        radios.forEach(r => {
-            const score = Math.round((parseInt(r.value) / 5) * parseInt(r.dataset.maxPoints));
-            grandTotal += score;
-            
-            // Mettre à jour le score individuel
-            const scoreDisplay = form.querySelector(`.calculated-score[data-criteria="${r.name.replace('crit', '')}"]`);
-            if (scoreDisplay) {
-                scoreDisplay.textContent = score;
-            }
-        });
-        
-        // Mettre à jour les scores par catégorie
-        form.querySelectorAll('.criteria-section').forEach(section => {
-            const categoryRadios = section.querySelectorAll('input[type="radio"]:checked');
-            let categoryScore = 0;
-            
-            categoryRadios.forEach(r => {
-                categoryScore += Math.round((parseInt(r.value) / 5) * parseInt(r.dataset.maxPoints));
-            });
-            
-            const scoreSpan = section.querySelector('.current-score');
-            if (scoreSpan) {
-                scoreSpan.textContent = categoryScore;
-            }
-        });
-        
-        const perf = getPerformanceLevel(grandTotal);
-        form.querySelector('#grand-total-display').textContent = grandTotal;
-        
-        const levelEl = form.querySelector('#performance-level');
-        levelEl.textContent = perf[`label_${state.currentLang}`];
-        levelEl.className = `performance-level ${perf.class}`;
-        
-        return { grandTotal };
-    };
-
-    // ===== INTERFACE ENSEIGNANT (AMÉLIORÉ) =====
-    const renderTeacherUI = async () => {
-        document.getElementById('teacher-welcome').textContent = 
-            `${state.currentLang === 'fr' ? 'Bienvenue' : 'Welcome'}, ${state.currentUser.username}`;
-        
-        const container = document.getElementById('evaluation-reports');
-        container.innerHTML = '<div class="card"><p style="text-align:center;">⏳ Chargement des évaluations...</p></div>';
-        
-        try {
-            // Charger depuis MongoDB
-            const evals = await MongoDB.loadEvaluations(state.currentUser.username);
-            EVALUATIONS_DATABASE = evals;
-            
-            const sortedEvals = evals
-                .filter(ev => ev.teacherName === state.currentUser.username)
-                .sort((a, b) => new Date(b.date) - new Date(a.date));
-            
-            if (sortedEvals.length === 0) {
-                container.innerHTML = `
-                    <div class="card no-evaluations">
-                        <h3 data-lang-en="No evaluations available" 
-                            data-lang-fr="Aucune évaluation disponible"></h3>
-                    </div>
-                `;
-                setLanguage(state.currentLang);
-                return;
-            }
-            
-            container.innerHTML = sortedEvals.map((ev, index) => {
-                const perf = getPerformanceLevel(ev.grandTotal);
-                return `
-                    <div class="evaluation-card ${index === 0 ? 'latest' : ''}">
-                        <div class="card-header">
-                            <div class="eval-date">
-                                <i class="fas fa-calendar-check"></i> 
-                                ${new Date(ev.date).toLocaleDateString(state.currentLang === 'fr' ? 'fr-FR' : 'en-US', { 
-                                    year: 'numeric', 
-                                    month: 'long', 
-                                    day: 'numeric' 
-                                })}
-                                ${index === 0 ? `
-                                    <span class="latest-badge">
-                                        ${state.currentLang === 'fr' ? 'RÉCENT' : 'LATEST'}
-                                    </span>
-                                ` : ''}
-                            </div>
-                            <div class="eval-meta">
-                                <span><b>${state.currentLang === 'fr' ? 'Évaluateur' : 'Evaluator'}:</b> ${ev.coordinatorName}</span>
-                                <span><b>${state.currentLang === 'fr' ? 'Classe' : 'Class'}:</b> ${ev.class || 'N/A'}</span>
-                                <span><b>${state.currentLang === 'fr' ? 'Matière' : 'Subject'}:</b> ${ev.subject || 'N/A'}</span>
-                            </div>
-                        </div>
-                        <div class="card-content">
-                            <div class="overall-progress">
-                                <div class="progress-bar-container">
-                                    <div class="progress-bar-fill" 
-                                         style="width: ${ev.grandTotal}%; background-color: ${perf.color};"></div>
-                                </div>
-                                <div class="score-summary">
-                                    <span class="score-number">${ev.grandTotal}</span>
-                                    <span class="score-max">/100</span>
-                                    <span class="performance-badge" style="background-color: ${perf.color}">
-                                        ${perf[`label_${state.currentLang}`]}
-                                    </span>
-                                </div>
-                            </div>
-                            <div class="card-actions">
-                                <button class="details-btn" onclick="window.showEvaluationDetails('${ev.id}')">
-                                    <i class="fas fa-search-plus"></i> 
-                                    <span data-lang-en="View Details" data-lang-fr="Voir Détails"></span>
-                                </button>
-                                <button class="word-btn" onclick="window.generateTeacherWordReport('${ev.id}')">
-                                    <i class="fas fa-file-word"></i> 
-                                    <span data-lang-en="Download Word" data-lang-fr="Télécharger Word"></span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-            
-            setLanguage(state.currentLang);
-        } catch (error) {
-            console.error('Erreur chargement évaluations:', error);
-            container.innerHTML = `
-                <div class="card">
-                    <p style="color: var(--danger-color); text-align: center;">
-                        ⚠️ ${state.currentLang === 'fr' ? 'Erreur de chargement' : 'Loading error'}
-                    </p>
-                </div>
-            `;
-        }
-    };
-
-    // ===== MODAL DÉTAILS =====
-    window.showEvaluationDetails = (evalId) => {
-        const ev = EVALUATIONS_DATABASE.find(e => e.id === evalId);
-        if (!ev) return;
-        
-        let critIndex = 0;
-        
-        document.getElementById('modal-body-content').innerHTML = `
-            <div class="detail-grid">
-                <div><strong>${state.currentLang === 'fr' ? 'Date' : 'Date'}:</strong> 
-                    ${new Date(ev.date).toLocaleDateString(state.currentLang === 'fr' ? 'fr-FR' : 'en-US')}</div>
-                <div><strong>${state.currentLang === 'fr' ? 'Classe' : 'Class'}:</strong> ${ev.class || 'N/A'}</div>
-                <div><strong>${state.currentLang === 'fr' ? 'Matière' : 'Subject'}:</strong> ${ev.subject || 'N/A'}</div>
-                <div><strong>${state.currentLang === 'fr' ? 'Séance N°' : 'Session #'}:</strong> ${ev.sessionNumber || 'N/A'}</div>
-                <div><strong>${state.currentLang === 'fr' ? 'Évaluateur' : 'Evaluator'}:</strong> ${ev.coordinatorName}</div>
-                <div><strong>Score Total:</strong> <span style="font-size: 1.2em; color: var(--primary-color);">${ev.grandTotal}/100</span></div>
-            </div>
-            
-            <h4>${state.currentLang === 'fr' ? 'Tableau des Scores' : 'Scores Table'}</h4>
-            <div class="criteria-table-details">
-                ${Object.values(ev.criteriaDetails).map(cat => `
-                    <div class="category-detail-header">${cat[`title_${state.currentLang}`]}</div>
-                    ${cat.items.map(item => {
-                        const rating = (ev.rawCriteria && ev.rawCriteria[`crit${critIndex}`]) 
-                            ? ev.rawCriteria[`crit${critIndex}`].rating 
-                            : 'N/A';
-                        const score = (rating !== 'N/A') 
-                            ? Math.round((rating / 5) * item.points) 
-                            : 'N/A';
-                        critIndex++;
-                        return `
-                            <div class="criteria-detail-row">
-                                <div class="criteria-detail-text">${item[`text_${state.currentLang}`]}</div>
-                                <div class="criteria-detail-rating">
-                                    ${state.currentLang === 'fr' ? 'Note' : 'Rating'}: <strong>${rating}/5</strong>
-                                </div>
-                                <div class="criteria-detail-score">Score: <strong>${score}/${item.points}</strong></div>
-                            </div>
-                        `;
-                    }).join('')}
-                `).join('')}
-            </div>
-            
-            <h4>${state.currentLang === 'fr' ? 'Commentaires' : 'Comments'}</h4>
-            <div class="comments-details">
-                <div class="comment-item">
-                    <h6><i class="fas fa-star"></i> ${state.currentLang === 'fr' ? 'Forces' : 'Strengths'}</h6>
-                    <p>${ev.comments.strengths || ''}</p>
-                </div>
-                <div class="comment-item">
-                    <h6><i class="fas fa-arrow-up"></i> ${state.currentLang === 'fr' ? 'Améliorations' : 'Improvements'}</h6>
-                    <p>${ev.comments.toImprove || ''}</p>
-                </div>
-                <div class="comment-item">
-                    <h6><i class="fas fa-lightbulb"></i> ${state.currentLang === 'fr' ? 'Recommandations' : 'Recommendations'}</h6>
-                    <p>${ev.comments.recommendations || ''}</p>
-                </div>
-            </div>
-        `;
-        
-        document.getElementById('details-modal').style.display = 'flex';
-    };
-
-    // ===== GÉNÉRATION WORD PROFESSIONNELLE AMÉLIORÉE (LOGIQUE CORRIGÉE) =====
-    window.generateTeacherWordReport = async (evalId) => {
-        if (typeof docx === 'undefined' || typeof saveAs === 'undefined') {
-            console.error("Erreur: Les librairies docx ou FileSaver ne sont pas chargées.");
-            alert("Erreur: Une librairie nécessaire n'a pu être chargée. Veuillez rafraîchir la page.");
-            return;
-        }
-
-        try {
-            const data = EVALUATIONS_DATABASE.find(ev => ev.id === evalId);
-            if (!data) throw new Error("Évaluation non trouvée !");
-            
-            const { 
-                Document, Packer, Paragraph, TextRun, HeadingLevel, Table, 
-                TableCell, TableRow, WidthType, AlignmentType, BorderStyle 
-            } = docx;
-            
-            const perf = getPerformanceLevel(data.grandTotal);
-            
-            // Créer un tableau de synthèse par catégorie (CORRECTION LOGIQUE)
-            const categorySummary = [];
-            let critIndexSummary = 0; // Index global pour accéder à data.rawCriteria (crit0, crit1, ...)
-            
-            Object.values(data.criteriaDetails || {}).forEach(cat => {
-                let categoryTotal = 0;
-                
-                cat.items.forEach(item => { // Itérer sur chaque item de la catégorie
-                    const rating = (data.rawCriteria && data.rawCriteria[`crit${critIndexSummary}`]) 
-                        ? data.rawCriteria[`crit${critIndexSummary}`].rating 
-                        : 0;
-                    
-                    // Calculer le score de l'item
-                    const score = Math.round((rating / 5) * item.points); 
-                    
-                    categoryTotal += score;
-                    critIndexSummary++; // Incrémenter l'index global pour le critère suivant
-                });
-                
-                categorySummary.push({
-                    title: cat[`title_${state.currentLang}`],
-                    total: categoryTotal,
-                    max: cat.maxPoints
-                });
-            });
-            // FIN DE LA CORRECTION LOGIQUE
-            
-            let critIndex = 0;
-            const tableRows = Object.values(data.criteriaDetails || {}).flatMap(cat => {
-                const categoryRows = [
-                    new TableRow({
-                        children: [
-                            new TableCell({
-                                children: [
-                                    new Paragraph({
-                                        children: [
-                                            new TextRun({
-                                                text: cat[`title_${state.currentLang}`] || '',
-                                                bold: true,
-                                                color: 'FFFFFF',
-                                                size: 24
-                                            })
-                                        ],
-                                        spacing: { before: 150, after: 150 }
-                                    })
-                                ],
-                                columnSpan: 4,
-                                shading: { fill: "005A9E" },
-                                margins: { top: 150, bottom: 150, left: 150, right: 150 }
-                            })
-                        ]
-                    })
-                ];
-                
-                const itemRows = (cat.items || []).map(item => {
-                    const rating = (data.rawCriteria && data.rawCriteria[`crit${critIndex}`]) 
-                        ? data.rawCriteria[`crit${critIndex}`].rating 
-                        : 0;
-                    const score = Math.round((rating / 5) * item.points);
-                    critIndex++;
-                    
-                    return new TableRow({
-                        children: [
-                            new TableCell({
-                                children: [
-                                    new Paragraph({
-                                        children: [
-                                            new TextRun({
-                                                text: item[`text_${state.currentLang}`] || ''
-                                            })
-                                        ],
-                                        spacing: { before: 80, after: 80 }
-                                    })
-                                ],
-                                width: { size: 50, type: WidthType.PERCENTAGE },
-                                margins: { top: 80, bottom: 80, left: 80, right: 80 }
-                            }),
-                            new TableCell({
-                                children: [
-                                    new Paragraph({
-                                        children: [
-                                            new TextRun({
-                                                text: `${item.points}`
-                                            })
-                                        ],
-                                        alignment: AlignmentType.CENTER,
-                                        spacing: { before: 80, after: 80 }
-                                    })
-                                ],
-                                width: { size: 15, type: WidthType.PERCENTAGE },
-                                shading: { fill: "ECF0F1" },
-                                margins: { top: 80, bottom: 80, left: 80, right: 80 }
-                            }),
-                            new TableCell({
-                                children: [
-                                    new Paragraph({
-                                        children: [
-                                            new TextRun({
-                                                text: rating.toString(),
-                                                bold: true
-                                            })
-                                        ],
-                                        alignment: AlignmentType.CENTER,
-                                        spacing: { before: 80, after: 80 }
-                                    })
-                                ],
-                                width: { size: 15, type: WidthType.PERCENTAGE },
-                                shading: { fill: "E8F8F5" },
-                                margins: { top: 80, bottom: 80, left: 80, right: 80 }
-                            }),
-                            new TableCell({
-                                children: [
-                                    new Paragraph({
-                                        children: [
-                                            new TextRun({
-                                                text: `${score}`,
-                                                bold: true
-                                            })
-                                        ],
-                                        alignment: AlignmentType.CENTER,
-                                        spacing: { before: 80, after: 80 }
-                                    })
-                                ],
-                                width: { size: 20, type: WidthType.PERCENTAGE },
-                                shading: { fill: score >= item.points * 0.8 ? "D5F4E6" : "FADBD8" },
-                                margins: { top: 80, bottom: 80, left: 80, right: 80 }
-                            })
-                        ]
-                    });
-                });
-                
-                return categoryRows.concat(itemRows);
-            });
-            
-            const doc = new Document({
-                sections: [{
-                    properties: {
-                        page: {
-                            margin: { top: 1440, bottom: 1440, left: 1440, right: 1440 }
-                        }
-                    },
-                    children: [
-                        // En-tête principal avec logo symbolique
-                        new Paragraph({
-                            children: [
-                                new TextRun({ text: "🎓" })
-                            ],
-                            alignment: AlignmentType.CENTER,
-                            spacing: { after: 100 }
-                        }),
-                        new Paragraph({
-                            children: [
-                                new TextRun({
-                                    text: "ÉCOLE INTERNATIONALE ALKAWTHAR",
-                                    bold: true,
-                                    size: 32
-                                })
-                            ],
-                            heading: HeadingLevel.HEADING_1,
-                            alignment: AlignmentType.CENTER,
-                            spacing: { after: 100 }
-                        }),
-                        new Paragraph({
-                            children: [
-                                new TextRun({
-                                    text: state.currentLang === 'fr' ? "RAPPORT D'ÉVALUATION PÉDAGOGIQUE" : "TEACHER EVALUATION REPORT",
-                                    bold: true,
-                                    size: 28
-                                })
-                            ],
-                            heading: HeadingLevel.HEADING_1,
-                            alignment: AlignmentType.CENTER,
-                            spacing: { after: 300 },
-                            shading: { fill: "F0F4F8" }
-                        }),
-                        
-                        // Ligne de séparation
-                        new Paragraph({
-                            children: [
-                                new TextRun({
-                                    text: "━".repeat(60),
-                                    color: "005A9E"
-                                })
-                            ],
-                            alignment: AlignmentType.CENTER,
-                            spacing: { after: 300 }
-                        }),
-                        
-                        // Informations générales
-                        new Paragraph({
-                            children: [
-                                new TextRun({ 
-                                    text: state.currentLang === 'fr' ? 'Enseignant : ' : 'Teacher: ', 
-                                    bold: true, 
-                                    size: 24 
-                                }),
-                                new TextRun({ 
-                                    text: data.teacherName || '', 
-                                    size: 24 
-                                })
-                            ],
-                            spacing: { after: 200 }
-                        }),
-                        new Paragraph({
-                            children: [
-                                new TextRun({ 
-                                    text: state.currentLang === 'fr' ? 'Évaluateur : ' : 'Evaluator: ', 
-                                    bold: true, 
-                                    size: 24 
-                                }),
-                                new TextRun({ 
-                                    text: data.coordinatorName || '', 
-                                    size: 24 
-                                })
-                            ],
-                            spacing: { after: 200 }
-                        }),
-                        new Paragraph({
-                            children: [
-                                new TextRun({ 
-                                    text: state.currentLang === 'fr' ? 'Date de visite : ' : 'Visit Date: ', 
-                                    bold: true, 
-                                    size: 24 
-                                }),
-                                new TextRun({ 
-                                    text: data.visitDate || '', 
-                                    size: 24 
-                                })
-                            ],
-                            spacing: { after: 200 }
-                        }),
-                        new Paragraph({
-                            children: [
-                                new TextRun({ 
-                                    text: state.currentLang === 'fr' ? 'Classe : ' : 'Class: ', 
-                                    bold: true, 
-                                    size: 24 
-                                }),
-                                new TextRun({ 
-                                    text: data.class || 'N/A', 
-                                    size: 24 
-                                })
-                            ],
-                            spacing: { after: 200 }
-                        }),
-                        new Paragraph({
-                            children: [
-                                new TextRun({ 
-                                    text: state.currentLang === 'fr' ? 'Matière : ' : 'Subject: ', 
-                                    bold: true, 
-                                    size: 24 
-                                }),
-                                new TextRun({ 
-                                    text: data.subject || 'N/A', 
-                                    size: 24 
-                                })
-                            ],
-                            spacing: { after: 200 }
-                        }),
-                        new Paragraph({
-                            children: [
-                                new TextRun({ 
-                                    text: state.currentLang === 'fr' ? 'Séance N° : ' : 'Session #: ', 
-                                    bold: true, 
-                                    size: 24 
-                                }),
-                                new TextRun({ 
-                                    text: data.sessionNumber || 'N/A', 
-                                    size: 24 
-                                })
-                            ],
-                            spacing: { after: 400 }
-                        }),
-                        
-                        // Score total avec badge de performance (amélioration visuelle)
-                        new Paragraph({
-                            children: [
-                                new TextRun({
-                                    text: "━".repeat(60),
-                                    color: "005A9E"
-                                })
-                            ],
-                            alignment: AlignmentType.CENTER,
-                            spacing: { after: 200 }
-                        }),
-                        new Paragraph({
-                            children: [
-                                new TextRun({
-                                    text: `📊 ${state.currentLang === 'fr' ? 'SCORE TOTAL : ' : 'TOTAL SCORE: '}`,
-                                    bold: true,
-                                    size: 36
-                                }),
-                                new TextRun({
-                                    text: `${data.grandTotal || 0}/100`,
-                                    bold: true,
-                                    size: 48,
-                                    color: perf.color.replace('#', '')
-                                })
-                            ],
-                            alignment: AlignmentType.CENTER,
-                            spacing: { after: 200 },
-                            border: {
-                                top: { style: BorderStyle.DOUBLE, size: 6, color: perf.color.replace('#', '') },
-                                bottom: { style: BorderStyle.DOUBLE, size: 6, color: perf.color.replace('#', '') }
-                            }
-                        }),
-                        new Paragraph({
-                            children: [
-                                new TextRun({
-                                    text: `✨ ${state.currentLang === 'fr' ? 'Niveau : ' : 'Level: '}`,
-                                    bold: true,
-                                    size: 28
-                                }),
-                                new TextRun({
-                                    text: perf[`label_${state.currentLang}`].toUpperCase(),
-                                    bold: true,
-                                    size: 32,
-                                    color: perf.color.replace('#', '')
-                                })
-                            ],
-                            alignment: AlignmentType.CENTER,
-                            spacing: { after: 300 },
-                            shading: { fill: "F8F9FA" }
-                        }),
-                        new Paragraph({
-                            children: [
-                                new TextRun({
-                                    text: "━".repeat(60),
-                                    color: "005A9E"
-                                })
-                            ],
-                            alignment: AlignmentType.CENTER,
-                            spacing: { after: 400 }
-                        }),
-                        
-                        // Tableau récapitulatif par catégorie
-                        new Paragraph({
-                            children: [
-                                new TextRun({
-                                    text: state.currentLang === 'fr' ? '📈 RÉSUMÉ PAR CATÉGORIE' : '📈 SUMMARY BY CATEGORY',
-                                    bold: true,
-                                    size: 28
-                                })
-                            ],
-                            heading: HeadingLevel.HEADING_2,
-                            spacing: { before: 300, after: 200 }
-                        }),
-                        
-                        new Table({
-                            width: { size: 100, type: WidthType.PERCENTAGE },
-                            borders: {
-                                top: { style: BorderStyle.SINGLE, size: 2, color: "005A9E" },
-                                bottom: { style: BorderStyle.SINGLE, size: 2, color: "005A9E" },
-                                left: { style: BorderStyle.SINGLE, size: 2, color: "005A9E" },
-                                right: { style: BorderStyle.SINGLE, size: 2, color: "005A9E" },
-                                insideHorizontal: { style: BorderStyle.SINGLE, size: 1, color: "CCCCCC" },
-                                insideVertical: { style: BorderStyle.SINGLE, size: 1, color: "CCCCCC" }
-                            },
-                            rows: [
-                                new TableRow({
-                                    children: [
-                                        new TableCell({
-                                            children: [new Paragraph({ 
-                                                children: [
-                                                    new TextRun({
-                                                        text: state.currentLang === 'fr' ? 'Catégorie' : 'Category',
-                                                        bold: true,
-                                                        color: 'FFFFFF'
-                                                    })
-                                                ],
-                                                alignment: AlignmentType.CENTER
-                                            })],
-                                            shading: { fill: "005A9E" }
-                                        }),
-                                        new TableCell({
-                                            children: [new Paragraph({ 
-                                                children: [
-                                                    new TextRun({
-                                                        text: state.currentLang === 'fr' ? 'Score Obtenu' : 'Score Obtained',
-                                                        bold: true,
-                                                        color: 'FFFFFF'
-                                                    })
-                                                ],
-                                                alignment: AlignmentType.CENTER
-                                            })],
-                                            shading: { fill: "005A9E" }
-                                        }),
-                                        new TableCell({
-                                            children: [new Paragraph({ 
-                                                children: [
-                                                    new TextRun({
-                                                        text: state.currentLang === 'fr' ? 'Maximum' : 'Maximum',
-                                                        bold: true,
-                                                        color: 'FFFFFF'
-                                                    })
-                                                ],
-                                                alignment: AlignmentType.CENTER
-                                            })],
-                                            shading: { fill: "005A9E" }
-                                        }),
-                                        new TableCell({
-                                            children: [new Paragraph({ 
-                                                children: [
-                                                    new TextRun({
-                                                        text: '%',
-                                                        bold: true,
-                                                        color: 'FFFFFF'
-                                                    })
-                                                ],
-                                                alignment: AlignmentType.CENTER
-                                            })],
-                                            shading: { fill: "005A9E" }
-                                        })
-                                    ]
-                                }),
-                                ...categorySummary.map(cat => new TableRow({
-                                    children: [
-                                        new TableCell({
-                                            children: [new Paragraph({ 
-                                                children: [
-                                                    new TextRun({ text: cat.title, bold: true })
-                                                ]
-                                            })],
-                                            shading: { fill: "F8F9FA" }
-                                        }),
-                                        new TableCell({
-                                            children: [new Paragraph({ 
-                                                children: [
-                                                    new TextRun({
-                                                        text: cat.total.toString(),
-                                                        bold: true
-                                                    })
-                                                ],
-                                                alignment: AlignmentType.CENTER
-                                            })],
-                                            shading: { fill: cat.total >= cat.max * 0.8 ? "D5F4E6" : "FEF5E7" }
-                                        }),
-                                        new TableCell({
-                                            children: [new Paragraph({ 
-                                                children: [
-                                                    new TextRun({ text: cat.max.toString() })
-                                                ],
-                                                alignment: AlignmentType.CENTER 
-                                            })]
-                                        }),
-                                        new TableCell({
-                                            children: [new Paragraph({ 
-                                                children: [
-                                                    new TextRun({
-                                                        text: Math.round((cat.total / cat.max) * 100) + '%',
-                                                        bold: true
-                                                    })
-                                                ],
-                                                alignment: AlignmentType.CENTER
-                                            })],
-                                            shading: { fill: cat.total >= cat.max * 0.8 ? "D5F4E6" : "FEF5E7" }
-                                        })
-                                    ]
-                                }))
-                            ]
-                        }),
-                        
-                        new Paragraph({ text: '', spacing: { after: 400 } }),
-                        
-                        // Tableau détaillé (design amélioré)
-                        new Paragraph({
-                            text: state.currentLang === 'fr' ? '📋 TABLEAU DÉTAILLÉ DES NOTES' : '📋 DETAILED SCORES TABLE',
-                            heading: HeadingLevel.HEADING_2,
-                            spacing: { before: 400, after: 200 }
-                        }),
-                        
-                        new Table({
-                            width: { size: 100, type: WidthType.PERCENTAGE },
-                            borders: {
-                                top: { style: BorderStyle.DOUBLE, size: 3, color: "005A9E" },
-                                bottom: { style: BorderStyle.DOUBLE, size: 3, color: "005A9E" },
-                                left: { style: BorderStyle.SINGLE, size: 2, color: "005A9E" },
-                                right: { style: BorderStyle.SINGLE, size: 2, color: "005A9E" },
-                                insideHorizontal: { style: BorderStyle.SINGLE, size: 1, color: "BDC3C7" },
-                                insideVertical: { style: BorderStyle.SINGLE, size: 1, color: "BDC3C7" }
-                            },
-                            rows: [
-                                new TableRow({
-                                    children: [
-                                        new TableCell({
-                                            children: [
-                                                new Paragraph({
-                                                    children: [new TextRun({
-                                                        text: state.currentLang === 'fr' ? 'Critère d\'Évaluation' : 'Evaluation Criteria',
-                                                        bold: true,
-                                                        color: 'FFFFFF',
-                                                        size: 22
-                                                    })],
-                                                    alignment: AlignmentType.CENTER
-                                                })
-                                            ],
-                                            shading: { fill: "005A9E" },
-                                            margins: { top: 120, bottom: 120, left: 120, right: 120 }
-                                        }),
-                                        new TableCell({
-                                            children: [
-                                                new Paragraph({
-                                                    children: [new TextRun({
-                                                        text: state.currentLang === 'fr' ? 'Max' : 'Max',
-                                                        bold: true,
-                                                        color: 'FFFFFF',
-                                                        size: 22
-                                                    })],
-                                                    alignment: AlignmentType.CENTER
-                                                })
-                                            ],
-                                            shading: { fill: "005A9E" },
-                                            margins: { top: 120, bottom: 120, left: 120, right: 120 }
-                                        }),
-                                        new TableCell({
-                                            children: [
-                                                new Paragraph({
-                                                    children: [new TextRun({
-                                                        text: state.currentLang === 'fr' ? 'Note' : 'Rating',
-                                                        bold: true,
-                                                        color: 'FFFFFF',
-                                                        size: 22
-                                                    })],
-                                                    alignment: AlignmentType.CENTER
-                                                })
-                                            ],
-                                            shading: { fill: "005A9E" },
-                                            margins: { top: 120, bottom: 120, left: 120, right: 120 }
-                                        }),
-                                        new TableCell({
-                                            children: [
-                                                new Paragraph({
-                                                    children: [new TextRun({
-                                                        text: state.currentLang === 'fr' ? 'Score' : 'Score',
-                                                        bold: true,
-                                                        color: 'FFFFFF',
-                                                        size: 22
-                                                    })],
-                                                    alignment: AlignmentType.CENTER
-                                                })
-                                            ],
-                                            shading: { fill: "005A9E" },
-                                            margins: { top: 120, bottom: 120, left: 120, right: 120 }
-                                        })
-                                    ],
-                                    tableHeader: true
-                                }),
-                                ...tableRows
-                            ]
-                        }),
-                        
-                        new Paragraph({ text: '', spacing: { after: 400 } }),
-                        
-                        // Commentaires (design amélioré avec icônes et boîtes colorées)
-                        new Paragraph({
-                            children: [
-                                new TextRun({
-                                    text: state.currentLang === 'fr' ? '⭐ FORCES OBSERVÉES' : '⭐ OBSERVED STRENGTHS',
-                                    bold: true,
-                                    size: 28
-                                })
-                            ],
-                            heading: HeadingLevel.HEADING_2,
-                            spacing: { before: 500, after: 200 },
-                            shading: { fill: "D5F4E6" }
-                        }),
-                        new Paragraph({
-                            text: data.comments.strengths || (state.currentLang === 'fr' ? 'Aucun commentaire' : 'No comments'),
-                            spacing: { after: 400, before: 100 },
-                            indent: { left: 720 },
-                            border: {
-                                left: { style: BorderStyle.SINGLE, size: 6, color: "27AE60" }
-                            }
-                        }),
-                        
-                        new Paragraph({
-                            children: [
-                                new TextRun({
-                                    text: state.currentLang === 'fr' ? '📈 AXES D\'AMÉLIORATION' : '📈 AREAS FOR IMPROVEMENT',
-                                    bold: true,
-                                    size: 28
-                                })
-                            ],
-                            heading: HeadingLevel.HEADING_2,
-                            spacing: { before: 400, after: 200 },
-                            shading: { fill: "FEF5E7" }
-                        }),
-                        new Paragraph({
-                            text: data.comments.toImprove || (state.currentLang === 'fr' ? 'Aucun commentaire' : 'No comments'),
-                            spacing: { after: 400, before: 100 },
-                            indent: { left: 720 },
-                            border: {
-                                left: { style: BorderStyle.SINGLE, size: 6, color: "F39C12" }
-                            }
-                        }),
-                        
-                        new Paragraph({
-                            children: [
-                                new TextRun({
-                                    text: state.currentLang === 'fr' ? '💡 RECOMMANDATIONS' : '💡 RECOMMENDATIONS',
-                                    bold: true,
-                                    size: 28
-                                })
-                            ],
-                            heading: HeadingLevel.HEADING_2,
-                            spacing: { before: 400, after: 200 },
-                            shading: { fill: "EBF5FB" }
-                        }),
-                        new Paragraph({
-                            text: data.comments.recommendations || (state.currentLang === 'fr' ? 'Aucun commentaire' : 'No comments'),
-                            spacing: { after: 400, before: 100 },
-                            indent: { left: 720 },
-                            border: {
-                                left: { style: BorderStyle.SINGLE, size: 6, color: "3498DB" }
-                            }
-                        }),
-                        
-                        // Pied de page professionnel
-                        new Paragraph({ text: '', spacing: { before: 600 } }),
-                        new Paragraph({
-                            children: [
-                                new TextRun({
-                                    text: "━".repeat(60),
-                                    color: "005A9E"
-                                })
-                            ],
-                            alignment: AlignmentType.CENTER,
-                            spacing: { after: 200 }
-                        }),
-                        new Paragraph({
-                            children: [
-                                new TextRun({
-                                    text: '📅 ',
-                                    size: 20
-                                }),
-                                new TextRun({
-                                    text: state.currentLang === 'fr' 
-                                        ? `Document généré le ${new Date().toLocaleDateString('fr-FR', { 
-                                            year: 'numeric', 
-                                            month: 'long', 
-                                            day: 'numeric' 
-                                        })}` 
-                                        : `Document generated on ${new Date().toLocaleDateString('en-US', { 
-                                            year: 'numeric', 
-                                            month: 'long', 
-                                            day: 'numeric' 
-                                        })}`,
-                                    italics: true,
-                                    size: 20
-                                })
-                            ],
-                            alignment: AlignmentType.CENTER,
-                            spacing: { after: 100 }
-                        }),
-                        new Paragraph({
-                            children: [
-                                new TextRun({
-                                    text: state.currentLang === 'fr' 
-                                        ? '© École Internationale Alkawthar - Système d\'Évaluation des Enseignants' 
-                                        : '© École Internationale Alkawthar - Teacher Evaluation System',
-                                    italics: true,
-                                    size: 18,
-                                    color: "7F8C8D"
-                                })
-                            ],
-                            alignment: AlignmentType.CENTER
-                        })
-                    ]
-                }]
-            });
-            
-            const blob = await Packer.toBlob(doc);
-            const fileName = `Evaluation_${data.teacherName.replace(/\s+/g, '_')}_${data.visitDate || new Date().toISOString().split('T')[0]}.docx`;
-            saveAs(blob, fileName);
-            
-            console.log('✅ Document Word professionnel généré avec succès:', fileName);
-            
-            // Notification visuelle
-            const notification = document.createElement('div');
-            notification.style.cssText = `
-                position: fixed; top: 20px; right: 20px; 
-                background: #27AE60; color: white; padding: 1rem 2rem; 
-                border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-                z-index: 9999; animation: slideIn 0.5s ease;
-            `;
-            notification.innerHTML = `<i class="fas fa-check-circle"></i> ${state.currentLang === 'fr' ? 'Document téléchargé avec succès!' : 'Document downloaded successfully!'}`;
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.style.animation = 'slideOut 0.5s ease';
-                setTimeout(() => notification.remove(), 500);
-            }, 3000);
-
-        } catch (error) {
-            console.error("Erreur détaillée de la génération Word:", error);
-            alert(state.currentLang === 'fr' 
-                ? "Erreur: Impossible de générer le document Word. Consultez la console." 
-                : "Error: Could not generate Word document. Check console.");
-        }
-    };
-
-    // ===== SUPPRESSION =====
-    window.deleteEvaluation = async (evalId) => {
-        const confirmText = state.currentLang === 'fr' 
-            ? 'Êtes-vous sûr de vouloir supprimer cette évaluation ?' 
-            : 'Are you sure you want to delete this evaluation?';
-        
-        if (confirm(confirmText)) {
-            const index = EVALUATIONS_DATABASE.findIndex(ev => ev.id === evalId);
-            
-            if (index > -1) {
-                const teacherName = EVALUATIONS_DATABASE[index].teacherName;
-                
-                try {
-                    await MongoDB.deleteEvaluation(evalId);
-                    EVALUATIONS_DATABASE.splice(index, 1);
-                    
-                    // Rafraîchir l'affichage
-                    await renderPreviousEvaluations(teacherName);
-                    
-                    // Si le formulaire était affiché pour cet enseignant, le ré-afficher pour mettre à jour le numéro de visite
-                    const currentTeacher = document.getElementById('teacher-select').value;
-                    if (currentTeacher === teacherName) {
-                        renderEvaluationForm(teacherName);
-                    }
-                    
-                    alert(state.currentLang === 'fr' 
-                        ? 'Évaluation supprimée avec succès' 
-                        : 'Evaluation deleted successfully');
-                } catch (error) {
-                    console.error('Erreur lors de la suppression:', error);
-                    alert(state.currentLang === 'fr' 
-                        ? 'Erreur lors de la suppression' 
-                        : 'Delete error');
-                }
-            }
-        }
-    };
-
-    // ===== NIVEAUX DE PERFORMANCE =====
-    const getPerformanceLevel = (score) => {
-        if (score >= 90) return { 
-            label_en: "Excellent", 
-            label_fr: "Excellent", 
-            class: "excellent", 
-            color: "#27ae60" 
-        };
-        if (score >= 80) return { 
-            label_en: "Very Good", 
-            label_fr: "Très Bien", 
-            class: "very-good", 
-            color: "#2ecc71" 
-        };
-        if (score >= 70) return { 
-            label_en: "Good", 
-            label_fr: "Bien", 
-            class: "good", 
-            color: "#f39c12" 
-        };
-        if (score >= 60) return { 
-            label_en: "Satisfactory", 
-            label_fr: "Satisfaisant", 
-            class: "satisfactory", 
-            color: "#e67e22" 
-        };
-        return { 
-            label_en: "Needs Improvement", 
-            label_fr: "À améliorer", 
-            class: "needs-improvement", 
-            color: "#e74c3c" 
-        };
-    };
-
-    // ===== CRITÈRES D'ÉVALUATION =====
-    const getCriteria = () => ({
-        preparation: {
-            title_en: "PREPARATION AND PLANNING",
-            title_fr: "PRÉPARATION ET PLANIFICATION",
-            maxPoints: 25,
-            items: [
-                { text_en: "Lesson plans with clear objectives", text_fr: "Plans de cours avec objectifs clairs", points: 5 },
-                { text_en: "Knowledge of curriculum", text_fr: "Connaissance du curriculum", points: 5 },
-                { text_en: "Appropriate materials", text_fr: "Matériaux appropriés", points: 5 },
-                { text_en: "Differentiated instruction", text_fr: "Enseignement différencié", points: 5 },
-                { text_en: "Assessments aligned with objectives", text_fr: "Évaluations alignées aux objectifs", points: 5 }
-            ]
-        },
-        activities: {
-            title_en: "TEACHING ACTIVITIES",
-            title_fr: "ACTIVITÉS D'ENSEIGNEMENT",
-            maxPoints: 25,
-            items: [
-                { text_en: "Clear and structured lessons", text_fr: "Leçons claires et structurées", points: 5 },
-                { text_en: "Varied teaching strategies", text_fr: "Stratégies d'enseignement variées", points: 5 },
-                { text_en: "Appropriate use of technology", text_fr: "Usage approprié de la technologie", points: 5 },
-                { text_en: "Promotes critical thinking", text_fr: "Favorise la pensée critique", points: 5 },
-                { text_en: "Timely and constructive feedback", text_fr: "Feedback opportun et constructif", points: 5 }
-            ]
-        },
-        classroomControl: {
-            title_en: "CLASSROOM MANAGEMENT",
-            title_fr: "GESTION DE CLASSE",
-            maxPoints: 25,
-            items: [
-                { text_en: "Conducive learning environment", text_fr: "Environnement d'apprentissage propice", points: 5 },
-                { text_en: "Effective student behavior management", text_fr: "Gestion efficace du comportement", points: 5 },
-                { text_en: "Efficient use of time", text_fr: "Utilisation efficace du temps", points: 5 },
-                { text_en: "Handles disruptions professionally", text_fr: "Gère les perturbations professionnellement", points: 5 },
-                { text_en: "Organized classroom and resources", text_fr: "Classe et ressources organisées", points: 5 }
-            ]
-        },
-        personalCriteria: {
-            title_en: "PROFESSIONAL QUALITIES",
-            title_fr: "QUALITÉS PROFESSIONNELLES",
-            maxPoints: 25,
-            items: [
-                { text_en: "Professional appearance", text_fr: "Apparence professionnelle", points: 5 },
-                { text_en: "Punctual and reliable", text_fr: "Ponctuel et fiable", points: 5 },
-                { text_en: "Positive relationships with students", text_fr: "Relations positives avec les élèves", points: 5 },
-                { text_en: "Collaboration with colleagues", text_fr: "Collaboration avec les collègues", points: 5 },
-                { text_en: "Commitment to growth", text_fr: "Engagement envers le développement", points: 5 }
-            ]
-        }
-    });
-
-    // ===== INITIALISATION (LOGIQUE AJUSTÉE) =====
-    const init = async () => {
-        setLanguage('fr');
-        let autoLoggedIn = false;
-        
-        // 1. Tenter l'auto-connexion
-        const savedCreds = localStorage.getItem('teacherEvalCredentials');
-        if (savedCreds) {
-            const { username, password } = JSON.parse(savedCreds);
-            document.getElementById('username').value = username;
-            document.getElementById('password').value = password;
-            document.getElementById('remember-me').checked = true;
-            
-            const user = USERS_DATABASE.find(u => u.username === username && u.password === password);
-            if (user) {
-                state.currentUser = user;
-                user.role === 'coordinator' ? renderCoordinatorUI() : renderTeacherUI();
-                showPage(user.role === 'coordinator' ? 'coordinator' : 'teacher');
-                autoLoggedIn = true;
-            } else {
-                 // Si les identifiants sont locaux mais ne correspondent plus (changement de mot de passe), les supprimer
-                localStorage.removeItem('teacherEvalCredentials');
-            }
-        }
-        
-        // 2. Charger les évaluations initiales (seulement si connecté ou pour le check API général)
-        // Ceci va également remplir le champ d'erreur de connexion si le 404 persiste.
-        try {
-            EVALUATIONS_DATABASE = await MongoDB.loadEvaluations(state.currentUser ? state.currentUser.username : null);
-            console.log('✅ Système initialisé:', EVALUATIONS_DATABASE.length, 'évaluations chargées');
-            if (document.getElementById('login-error').textContent.includes('MongoDB')) {
-                 document.getElementById('login-error').textContent = ''; // Clear error if load was successful
-            }
-        } catch (error) {
-            console.error('❌ Erreur lors du chargement initial:', error);
-            // L'erreur est déjà propagée à login-error par MongoDB.loadEvaluations
-        }
-        
-        // Assurez-vous d'être sur la page de connexion si l'auto-connexion a échoué
-        if (!state.currentUser) {
-            showPage('login');
-        }
-    };
-
-    init();
-});
+            const scores = calculateSc
