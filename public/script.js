@@ -425,6 +425,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         const criteria = getCriteria();
         let criteriaIndex = 0;
         
+        // Classes spécifiques selon le coordinateur
+        let classOptions = '';
+        if (state.currentUser.username === 'روعة') {
+            classOptions = ['KG1', 'KG2', 'KG3'].map(c => `<option value="${c}">${c}</option>`).join('');
+        } else if (state.currentUser.username === 'عماد') {
+            classOptions = ['G7', 'G8', 'G9', 'G10', 'G11', 'G12'].map(c => `<option value="${c}">${c}</option>`).join('');
+        } else {
+            classOptions = null; // Champ texte libre pour les autres
+        }
+        
         let formHTML = `
             <form id="eval-form" class="card">
                 <h3>
