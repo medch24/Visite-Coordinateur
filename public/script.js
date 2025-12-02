@@ -1588,31 +1588,36 @@ document.addEventListener('DOMContentLoaded', async () => {
     const getPerformanceLevel = (score) => {
         if (score >= 90) return { 
             label_en: "Excellent", 
-            label_fr: "Excellent", 
+            label_fr: "Excellent",
+            label_ar: "ممتاز", 
             class: "excellent", 
             color: "#27ae60" 
         };
         if (score >= 80) return { 
             label_en: "Very Good", 
-            label_fr: "Très Bien", 
+            label_fr: "Très Bien",
+            label_ar: "جيد جدًا", 
             class: "very-good", 
             color: "#2ecc71" 
         };
         if (score >= 70) return { 
             label_en: "Good", 
-            label_fr: "Bien", 
+            label_fr: "Bien",
+            label_ar: "جيد", 
             class: "good", 
             color: "#f39c12" 
         };
         if (score >= 60) return { 
             label_en: "Satisfactory", 
-            label_fr: "Satisfaisant", 
+            label_fr: "Satisfaisant",
+            label_ar: "مقبول", 
             class: "satisfactory", 
             color: "#e67e22" 
         };
         return { 
             label_en: "Needs Improvement", 
-            label_fr: "À améliorer", 
+            label_fr: "À améliorer",
+            label_ar: "يحتاج تحسين", 
             class: "needs-improvement", 
             color: "#e74c3c" 
         };
@@ -1626,11 +1631,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             title_ar: "التحضير والتخطيط",
             maxPoints: 25,
             items: [
-                { text_en: "Lesson plans with clear objectives", text_fr: "Plans de cours avec objectifs clairs", points: 5 },
-                { text_en: "Knowledge of curriculum", text_fr: "Connaissance du curriculum", points: 5 },
-                { text_en: "Appropriate materials", text_fr: "Matériaux appropriés", points: 5 },
-                { text_en: "Differentiated instruction", text_fr: "Enseignement différencié", points: 5 },
-                { text_en: "Assessments aligned with objectives", text_fr: "Évaluations alignées aux objectifs", points: 5 }
+                { text_en: "Lesson plans with clear objectives", text_fr: "Plans de cours avec objectifs clairs", text_ar: "خطط دروس بأهداف واضحة", points: 5 },
+                { text_en: "Knowledge of curriculum", text_fr: "Connaissance du curriculum", text_ar: "معرفة المنهج الدراسي", points: 5 },
+                { text_en: "Appropriate materials", text_fr: "Matériaux appropriés", text_ar: "مواد مناسبة", points: 5 },
+                { text_en: "Differentiated instruction", text_fr: "Enseignement différencié", text_ar: "تعليم متمايز", points: 5 },
+                { text_en: "Assessments aligned with objectives", text_fr: "Évaluations alignées aux objectifs", text_ar: "تقييمات متوافقة مع الأهداف", points: 5 }
             ]
         },
         activities: {
@@ -1639,11 +1644,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             title_ar: "أنشطة التدريس",
             maxPoints: 25,
             items: [
-                { text_en: "Clear and structured lessons", text_fr: "Leçons claires et structurées", points: 5 },
-                { text_en: "Varied teaching strategies", text_fr: "Stratégies d'enseignement variées", points: 5 },
-                { text_en: "Appropriate use of technology", text_fr: "Usage approprié de la technologie", points: 5 },
-                { text_en: "Promotes critical thinking", text_fr: "Favorise la pensée critique", points: 5 },
-                { text_en: "Timely and constructive feedback", text_fr: "Feedback opportun et constructif", points: 5 }
+                { text_en: "Clear and structured lessons", text_fr: "Leçons claires et structurées", text_ar: "دروس واضحة ومنظمة", points: 5 },
+                { text_en: "Varied teaching strategies", text_fr: "Stratégies d'enseignement variées", text_ar: "استراتيجيات تدريس متنوعة", points: 5 },
+                { text_en: "Appropriate use of technology", text_fr: "Usage approprié de la technologie", text_ar: "استخدام مناسب للتكنولوجيا", points: 5 },
+                { text_en: "Promotes critical thinking", text_fr: "Favorise la pensée critique", text_ar: "تعزيز التفكير النقدي", points: 5 },
+                { text_en: "Timely and constructive feedback", text_fr: "Feedback opportun et constructif", text_ar: "تغذية راجعة بناءة وفي الوقت المناسب", points: 5 }
             ]
         },
         classroomControl: {
@@ -1652,11 +1657,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             title_ar: "إدارة الصف",
             maxPoints: 25,
             items: [
-                { text_en: "Conducive learning environment", text_fr: "Environnement d'apprentissage propice", points: 5 },
-                { text_en: "Effective student behavior management", text_fr: "Gestion efficace du comportement", points: 5 },
-                { text_en: "Efficient use of time", text_fr: "Utilisation efficace du temps", points: 5 },
-                { text_en: "Handles disruptions professionally", text_fr: "Gère les perturbations professionnellement", points: 5 },
-                { text_en: "Organized classroom and resources", text_fr: "Classe et ressources organisées", points: 5 }
+                { text_en: "Conducive learning environment", text_fr: "Environnement d'apprentissage propice", text_ar: "بيئة تعليمية ملائمة", points: 5 },
+                { text_en: "Effective student behavior management", text_fr: "Gestion efficace du comportement", text_ar: "إدارة فعالة لسلوك الطلاب", points: 5 },
+                { text_en: "Efficient use of time", text_fr: "Utilisation efficace du temps", text_ar: "استخدام فعال للوقت", points: 5 },
+                { text_en: "Handles disruptions professionally", text_fr: "Gère les perturbations professionnellement", text_ar: "التعامل مع الاضطرابات بشكل احترافي", points: 5 },
+                { text_en: "Organized classroom and resources", text_fr: "Classe et ressources organisées", text_ar: "صف وموارد منظمة", points: 5 }
             ]
         },
         personalCriteria: {
@@ -1665,11 +1670,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             title_ar: "الصفات المهنية",
             maxPoints: 25,
             items: [
-                { text_en: "Professional appearance", text_fr: "Apparence professionnelle", points: 5 },
-                { text_en: "Punctual and reliable", text_fr: "Ponctuel et fiable", points: 5 },
-                { text_en: "Positive relationships with students", text_fr: "Relations positives avec les élèves", points: 5 },
-                { text_en: "Collaboration with colleagues", text_fr: "Collaboration avec les collègues", points: 5 },
-                { text_en: "Commitment to growth", text_fr: "Engagement envers le développement", points: 5 }
+                { text_en: "Professional appearance", text_fr: "Apparence professionnelle", text_ar: "مظهر مهني", points: 5 },
+                { text_en: "Punctual and reliable", text_fr: "Ponctuel et fiable", text_ar: "ملتزم بالمواعيد وموثوق", points: 5 },
+                { text_en: "Positive relationships with students", text_fr: "Relations positives avec les élèves", text_ar: "علاقات إيجابية مع الطلاب", points: 5 },
+                { text_en: "Collaboration with colleagues", text_fr: "Collaboration avec les collègues", text_ar: "التعاون مع الزملاء", points: 5 },
+                { text_en: "Commitment to growth", text_fr: "Engagement envers le développement", text_ar: "الالتزام بالتطوير المهني", points: 5 }
             ]
         }
     });
