@@ -100,11 +100,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (!state.currentUser) {
                     document.getElementById('login-error').textContent = state.currentLang === 'fr' 
                         ? `❌ Erreur: Impossible de se connecter à la base de données MongoDB. ${error.message}` 
-                        : `❌ Error: Cannot connect to MongoDB database. ${error.message}`;
+                        : state.currentLang === 'ar' ? `❌ خطأ: تعذر الاتصال بقاعدة بيانات MongoDB. ${error.message}` : `❌ Error: Cannot connect to MongoDB database. ${error.message}`;
                 } else {
                      alert(state.currentLang === 'fr' 
                         ? '❌ Erreur: Impossible de charger les évaluations depuis MongoDB. Vérifiez votre connexion.' 
-                        : '❌ Error: Cannot load evaluations from MongoDB. Check your connection.');
+                        : state.currentLang === 'ar' ? '❌ خطأ: تعذر تحميل التقييمات من MongoDB. تحقق من الاتصال.' : '❌ Error: Cannot load evaluations from MongoDB. Check your connection.');
                 }
                 return [];
             }
@@ -128,7 +128,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 console.error('❌ ERREUR: Sauvegarde MongoDB échouée', error);
                 alert(state.currentLang === 'fr' 
                     ? '❌ Erreur: Impossible de sauvegarder dans MongoDB. Vérifiez votre connexion.' 
-                    : '❌ Error: Cannot save to MongoDB. Check your connection.');
+                    : state.currentLang === 'ar' ? '❌ خطأ: تعذر الحفظ في MongoDB. تحقق من الاتصال.' : '❌ Error: Cannot save to MongoDB. Check your connection.');
                 throw error;
             }
         },
@@ -150,7 +150,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 console.error('❌ ERREUR: Suppression MongoDB échouée', error);
                 alert(state.currentLang === 'fr' 
                     ? '❌ Erreur: Impossible de supprimer de MongoDB. Vérifiez votre connexion.' 
-                    : '❌ Error: Cannot delete from MongoDB. Check your connection.');
+                    : state.currentLang === 'ar' ? '❌ خطأ: تعذر الحذف من MongoDB. تحقق من الاتصال.' : '❌ Error: Cannot delete from MongoDB. Check your connection.');
                 throw error;
             }
         }
@@ -265,7 +265,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             showPage(user.role === 'coordinator' ? 'coordinator' : 'teacher');
         } else {
             document.getElementById('login-error').textContent = 
-                state.currentLang === 'fr' ? 'Identifiants invalides.' : 'Invalid credentials.';
+                state.currentLang === 'fr' ? 'Identifiants invalides.' : state.currentLang === 'ar' ? 'بيانات الدخول غير صحيحة.' : 'Invalid credentials.';
         }
     });
 
@@ -305,11 +305,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ===== INTERFACE COORDINATEUR =====
     const renderCoordinatorUI = () => {
         document.getElementById('coordinator-welcome').textContent = 
-            `${state.currentLang === 'fr' ? 'Bienvenue' : 'Welcome'}, ${state.currentUser.username}`;
+            `${state.currentLang === 'fr' ? 'Bienvenue' : state.currentLang === 'ar' ? 'مرحبا' : 'Welcome'}, ${state.currentUser.username}`;
         
         const teacherSelect = document.getElementById('teacher-select');
         const currentSelection = teacherSelect.value;
-        teacherSelect.innerHTML = `<option value="">${state.currentLang === 'fr' ? '--- Choisir un enseignant ---' : '--- Choose a teacher ---'}</option>`;
+        teacherSelect.innerHTML = `<option value="">${state.currentLang === 'fr' ? '--- Choisir un enseignant ---' : state.currentLang === 'ar' ? '--- اختر معلمًا ---' : '--- Choose a teacher ---'}</option>`;
         
         state.currentUser.assignedTeachers.sort().forEach(teacher => {
             teacherSelect.innerHTML += `<option value="${teacher}" ${currentSelection === teacher ? 'selected' : ''}>${teacher}</option>`;
@@ -359,27 +359,27 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <li data-id="${ev.id}">
                                 <div class="eval-info">
                                     <i class="fas fa-calendar-alt"></i> 
-                                    ${new Date(ev.date).toLocaleDateString(state.currentLang === 'fr' ? 'fr-FR' : 'en-US')}
+                                    ${new Date(ev.date).toLocaleDateString(state.currentLang === 'fr' ? 'fr-FR' : state.currentLang === 'ar' ? 'ar-EG' : 'en-US')}
                                     <span class="eval-class">
-                                        <b>${state.currentLang === 'fr' ? 'Classe' : 'Class'}:</b> ${ev.class || 'N/A'}
+                                        <b>${state.currentLang === 'fr' ? 'Classe' : state.currentLang === 'ar' ? 'الصف' : 'Class'}:</b> ${ev.class || 'N/A'}
                                     </span>
                                     <span class="eval-subject">
-                                        <b>${state.currentLang === 'fr' ? 'Matière' : 'Subject'}:</b> ${ev.subject || 'N/A'}
+                                        <b>${state.currentLang === 'fr' ? 'Matière' : state.currentLang === 'ar' ? 'المادة' : 'Subject'}:</b> ${ev.subject || 'N/A'}
                                     </span>
                                     <span><b>Score:</b> ${ev.grandTotal}/100</span>
                                 </div>
                                 <div class="eval-actions">
-                                    <button class="view-btn" title="${state.currentLang === 'fr' ? 'Voir les détails' : 'View details'}">
+                                    <button class="view-btn" title="${state.currentLang === 'fr' ? 'Voir les détails' : state.currentLang === 'ar' ? 'عرض التفاصيل' : 'View details'}">
                                         <i class="fas fa-eye"></i> 
-                                        <span data-lang-en="View" data-lang-fr="Voir"></span>
+                                        <span data-lang-en="View" data-lang-fr="Voir" data-lang-ar="عرض"></span>
                                     </button>
-                                    <button class="word-btn" title="${state.currentLang === 'fr' ? 'Télécharger Word' : 'Download Word'}">
+                                    <button class="word-btn" title="${state.currentLang === 'fr' ? 'Télécharger Word' : state.currentLang === 'ar' ? 'تحميل Word' : 'Download Word'}">
                                         <i class="fas fa-file-word"></i> 
-                                        <span data-lang-en="Word" data-lang-fr="Word"></span>
+                                        <span data-lang-en="Word" data-lang-fr="Word" data-lang-ar="Word"></span>
                                     </button>
-                                    <button class="delete-btn" title="${state.currentLang === 'fr' ? 'Supprimer' : 'Delete'}">
+                                    <button class="delete-btn" title="${state.currentLang === 'fr' ? 'Supprimer' : state.currentLang === 'ar' ? 'حذف' : 'Delete'}">
                                         <i class="fas fa-trash"></i> 
-                                        <span data-lang-en="Delete" data-lang-fr="Supprimer"></span>
+                                        <span data-lang-en="Delete" data-lang-fr="Supprimer" data-lang-ar="حذف"></span>
                                     </button>
                                 </div>
                             </li>
@@ -394,7 +394,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             container.innerHTML = `
                 <div class="card">
                     <p style="color: var(--danger-color); text-align: center;">
-                        ⚠️ ${state.currentLang === 'fr' ? 'Erreur de chargement des évaluations' : 'Error loading evaluations'}
+                        ⚠️ ${state.currentLang === 'fr' ? 'Erreur de chargement des évaluations' : state.currentLang === 'ar' ? 'خطأ في تحميل التقييمات' : 'Error loading evaluations'}
                     </p>
                 </div>
             `;
@@ -477,15 +477,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <legend class="category-header">
                         <span class="category-title" 
                               data-lang-en="${cat.title_en}" 
-                              data-lang-fr="${cat.title_fr}"></span>
+                              data-lang-fr="${cat.title_fr}"
+                              data-lang-ar="${cat.title_ar}"></span>
                         <span class="category-points">
                             <span class="current-score">0</span>/${cat.maxPoints} pts
                         </span>
                     </legend>
                     <div class="criteria-table">
                         <div class="table-header">
-                            <div class="criteria-col" data-lang-en="Criteria" data-lang-fr="Critères"></div>
-                            <div class="rating-col" data-lang-en="Rating" data-lang-fr="Éval."></div>
+                            <div class="criteria-col" data-lang-en="Criteria" data-lang-fr="Critères" data-lang-ar="المعايير"></div>
+                            <div class="rating-col" data-lang-en="Rating" data-lang-fr="Éval." data-lang-ar="التقييم"></div>
                             <div class="score-col">Score</div>
                         </div>
             `;
@@ -495,7 +496,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <div class="criteria-row">
                         <div class="criteria-text" 
                              data-lang-en="${item.text_en}" 
-                             data-lang-fr="${item.text_fr}"></div>
+                             data-lang-fr="${item.text_fr}"
+                             data-lang-ar="${item.text_ar}"></div>
                         <div class="rating-controls">
                             ${[1, 2, 3, 4, 5].map(n => `
                                 <input type="radio" 
@@ -534,21 +536,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <div class="comment-group">
                         <label for="s">
                             <i class="fas fa-star"></i> 
-                            <span data-lang-en="Strengths" data-lang-fr="Forces"></span>
+                            <span data-lang-en="Strengths" data-lang-fr="Forces" data-lang-ar="نقاط القوة"></span>
                         </label>
                         <textarea id="s" name="strengths" required rows="4"></textarea>
                     </div>
                     <div class="comment-group">
                         <label for="i">
                             <i class="fas fa-arrow-up"></i> 
-                            <span data-lang-en="Improvements" data-lang-fr="Améliorations"></span>
+                            <span data-lang-en="Improvements" data-lang-fr="Améliorations" data-lang-ar="التحسينات"></span>
                         </label>
                         <textarea id="i" name="toImprove" required rows="4"></textarea>
                     </div>
                     <div class="comment-group">
                         <label for="r">
                             <i class="fas fa-lightbulb"></i> 
-                            <span data-lang-en="Recommendations" data-lang-fr="Recommandations"></span>
+                            <span data-lang-en="Recommendations" data-lang-fr="Recommandations" data-lang-ar="التوصيات"></span>
                         </label>
                         <textarea id="r" name="recommendations" required rows="4"></textarea>
                     </div>
@@ -557,7 +559,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <div class="form-actions">
                     <button type="submit" class="submit-btn">
                         <i class="fas fa-save"></i> 
-                        <span data-lang-en="Save Evaluation" data-lang-fr="Enregistrer"></span>
+                        <span data-lang-en="Save Evaluation" data-lang-fr="Enregistrer" data-lang-ar="حفظ التقييم"></span>
                     </button>
                 </div>
             </form>
@@ -574,7 +576,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             e.preventDefault();
             
             if (form.querySelectorAll('input[type="radio"]:checked').length < criteriaIndex) {
-                alert(state.currentLang === 'fr' ? 'Veuillez noter tous les critères.' : 'Please rate all criteria.');
+                alert(state.currentLang === 'fr' ? 'Veuillez noter tous les critères.' : state.currentLang === 'ar' ? 'يرجى تقييم جميع المعايير.' : 'Please rate all criteria.');
                 return;
             }
             
@@ -611,16 +613,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                 
                 let message = state.currentLang === 'fr' 
                     ? 'Évaluation enregistrée avec succès!' 
-                    : 'Evaluation saved successfully!';
+                    : state.currentLang === 'ar' ? 'تم حفظ التقييم بنجاح!' : 'Evaluation saved successfully!';
                 
                 if (result.source === 'mongodb') {
                     message += state.currentLang === 'fr' 
                         ? ' (Sauvegardé en base de données)' 
-                        : ' (Saved to database)';
+                        : state.currentLang === 'ar' ? ' (محفوظ في قاعدة البيانات)' : ' (Saved to database)';
                 } else {
                     message += state.currentLang === 'fr' 
                         ? ' (Sauvegarde locale)' 
-                        : ' (Local save)';
+                        : state.currentLang === 'ar' ? ' (حفظ محلي)' : ' (Local save)';
                 }
                 
                 alert(message);
@@ -633,7 +635,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 console.error('Erreur lors de la sauvegarde:', error);
                 alert(state.currentLang === 'fr' 
                     ? 'Erreur lors de la sauvegarde' 
-                    : 'Save error');
+                    : state.currentLang === 'ar' ? 'خطأ في الحفظ' : 'Save error');
             }
         });
     };
@@ -682,7 +684,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ===== INTERFACE ENSEIGNANT (AMÉLIORÉ) =====
     const renderTeacherUI = async () => {
         document.getElementById('teacher-welcome').textContent = 
-            `${state.currentLang === 'fr' ? 'Bienvenue' : 'Welcome'}, ${state.currentUser.username}`;
+            `${state.currentLang === 'fr' ? 'Bienvenue' : state.currentLang === 'ar' ? 'مرحبا' : 'Welcome'}, ${state.currentUser.username}`;
         
         const container = document.getElementById('evaluation-reports');
         container.innerHTML = '<div class="card"><p style="text-align:center;">⏳ Chargement des évaluations...</p></div>';
@@ -714,21 +716,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <div class="card-header">
                             <div class="eval-date">
                                 <i class="fas fa-calendar-check"></i> 
-                                ${new Date(ev.date).toLocaleDateString(state.currentLang === 'fr' ? 'fr-FR' : 'en-US', { 
+                                ${new Date(ev.date).toLocaleDateString(state.currentLang === 'fr' ? 'fr-FR' : state.currentLang === 'ar' ? 'ar-EG' : 'en-US', { 
                                     year: 'numeric', 
                                     month: 'long', 
                                     day: 'numeric' 
                                 })}
                                 ${index === 0 ? `
                                     <span class="latest-badge">
-                                        ${state.currentLang === 'fr' ? 'RÉCENT' : 'LATEST'}
+                                        ${state.currentLang === 'fr' ? 'RÉCENT' : state.currentLang === 'ar' ? 'الأحدث' : 'LATEST'}
                                     </span>
                                 ` : ''}
                             </div>
                             <div class="eval-meta">
-                                <span><b>${state.currentLang === 'fr' ? 'Évaluateur' : 'Evaluator'}:</b> ${ev.coordinatorName}</span>
-                                <span><b>${state.currentLang === 'fr' ? 'Classe' : 'Class'}:</b> ${ev.class || 'N/A'}</span>
-                                <span><b>${state.currentLang === 'fr' ? 'Matière' : 'Subject'}:</b> ${ev.subject || 'N/A'}</span>
+                                <span><b>${state.currentLang === 'fr' ? 'Évaluateur' : state.currentLang === 'ar' ? 'المقيّم' : 'Evaluator'}:</b> ${ev.coordinatorName}</span>
+                                <span><b>${state.currentLang === 'fr' ? 'Classe' : state.currentLang === 'ar' ? 'الصف' : 'Class'}:</b> ${ev.class || 'N/A'}</span>
+                                <span><b>${state.currentLang === 'fr' ? 'Matière' : state.currentLang === 'ar' ? 'المادة' : 'Subject'}:</b> ${ev.subject || 'N/A'}</span>
                             </div>
                         </div>
                         <div class="card-content">
@@ -766,7 +768,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             container.innerHTML = `
                 <div class="card">
                     <p style="color: var(--danger-color); text-align: center;">
-                        ⚠️ ${state.currentLang === 'fr' ? 'Erreur de chargement' : 'Loading error'}
+                        ⚠️ ${state.currentLang === 'fr' ? 'Erreur de chargement' : state.currentLang === 'ar' ? 'خطأ في التحميل' : 'Loading error'}
                     </p>
                 </div>
             `;
@@ -782,16 +784,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         document.getElementById('modal-body-content').innerHTML = `
             <div class="detail-grid">
-                <div><strong>${state.currentLang === 'fr' ? 'Date' : 'Date'}:</strong> 
-                    ${new Date(ev.date).toLocaleDateString(state.currentLang === 'fr' ? 'fr-FR' : 'en-US')}</div>
-                <div><strong>${state.currentLang === 'fr' ? 'Classe' : 'Class'}:</strong> ${ev.class || 'N/A'}</div>
-                <div><strong>${state.currentLang === 'fr' ? 'Matière' : 'Subject'}:</strong> ${ev.subject || 'N/A'}</div>
-                <div><strong>${state.currentLang === 'fr' ? 'Séance N°' : 'Session #'}:</strong> ${ev.sessionNumber || 'N/A'}</div>
-                <div><strong>${state.currentLang === 'fr' ? 'Évaluateur' : 'Evaluator'}:</strong> ${ev.coordinatorName}</div>
+                <div><strong>${state.currentLang === 'fr' ? 'Date' : state.currentLang === 'ar' ? 'التاريخ' : 'Date'}:</strong> 
+                    ${new Date(ev.date).toLocaleDateString(state.currentLang === 'fr' ? 'fr-FR' : state.currentLang === 'ar' ? 'ar-EG' : 'en-US')}</div>
+                <div><strong>${state.currentLang === 'fr' ? 'Classe' : state.currentLang === 'ar' ? 'الصف' : 'Class'}:</strong> ${ev.class || 'N/A'}</div>
+                <div><strong>${state.currentLang === 'fr' ? 'Matière' : state.currentLang === 'ar' ? 'المادة' : 'Subject'}:</strong> ${ev.subject || 'N/A'}</div>
+                <div><strong>${state.currentLang === 'fr' ? 'Séance N°' : state.currentLang === 'ar' ? 'رقم الحصة' : 'Session #'}:</strong> ${ev.sessionNumber || 'N/A'}</div>
+                <div><strong>${state.currentLang === 'fr' ? 'Évaluateur' : state.currentLang === 'ar' ? 'المقيّم' : 'Evaluator'}:</strong> ${ev.coordinatorName}</div>
                 <div><strong>Score Total:</strong> <span style="font-size: 1.2em; color: var(--primary-color);">${ev.grandTotal}/100</span></div>
             </div>
             
-            <h4>${state.currentLang === 'fr' ? 'Tableau des Scores' : 'Scores Table'}</h4>
+            <h4>${state.currentLang === 'fr' ? 'Tableau des Scores' : state.currentLang === 'ar' ? 'جدول النتائج' : 'Scores Table'}</h4>
             <div class="criteria-table-details">
                 ${Object.values(ev.criteriaDetails).map(cat => `
                     <div class="category-detail-header">${cat[`title_${state.currentLang}`]}</div>
@@ -807,7 +809,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <div class="criteria-detail-row">
                                 <div class="criteria-detail-text">${item[`text_${state.currentLang}`]}</div>
                                 <div class="criteria-detail-rating">
-                                    ${state.currentLang === 'fr' ? 'Note' : 'Rating'}: <strong>${rating}/5</strong>
+                                    ${state.currentLang === 'fr' ? 'Note' : state.currentLang === 'ar' ? 'التقييم' : 'Rating'}: <strong>${rating}/5</strong>
                                 </div>
                                 <div class="criteria-detail-score">Score: <strong>${score}/${item.points}</strong></div>
                             </div>
@@ -816,18 +818,18 @@ document.addEventListener('DOMContentLoaded', async () => {
                 `).join('')}
             </div>
             
-            <h4>${state.currentLang === 'fr' ? 'Commentaires' : 'Comments'}</h4>
+            <h4>${state.currentLang === 'fr' ? 'Commentaires' : state.currentLang === 'ar' ? 'التعليقات' : 'Comments'}</h4>
             <div class="comments-details">
                 <div class="comment-item">
-                    <h6><i class="fas fa-star"></i> ${state.currentLang === 'fr' ? 'Forces' : 'Strengths'}</h6>
+                    <h6><i class="fas fa-star"></i> ${state.currentLang === 'fr' ? 'Forces' : state.currentLang === 'ar' ? 'نقاط القوة' : 'Strengths'}</h6>
                     <p>${ev.comments.strengths || ''}</p>
                 </div>
                 <div class="comment-item">
-                    <h6><i class="fas fa-arrow-up"></i> ${state.currentLang === 'fr' ? 'Améliorations' : 'Improvements'}</h6>
+                    <h6><i class="fas fa-arrow-up"></i> ${state.currentLang === 'fr' ? 'Améliorations' : state.currentLang === 'ar' ? 'التحسينات' : 'Improvements'}</h6>
                     <p>${ev.comments.toImprove || ''}</p>
                 </div>
                 <div class="comment-item">
-                    <h6><i class="fas fa-lightbulb"></i> ${state.currentLang === 'fr' ? 'Recommandations' : 'Recommendations'}</h6>
+                    <h6><i class="fas fa-lightbulb"></i> ${state.currentLang === 'fr' ? 'Recommandations' : state.currentLang === 'ar' ? 'التوصيات' : 'Recommendations'}</h6>
                     <p>${ev.comments.recommendations || ''}</p>
                 </div>
             </div>
@@ -1540,7 +1542,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
                 z-index: 9999; animation: slideIn 0.5s ease;
             `;
-            notification.innerHTML = `<i class="fas fa-check-circle"></i> ${state.currentLang === 'fr' ? 'Document téléchargé avec succès!' : 'Document downloaded successfully!'}`;
+            notification.innerHTML = `<i class="fas fa-check-circle"></i> ${state.currentLang === 'fr' ? 'Document téléchargé avec succès!' : state.currentLang === 'ar' ? 'تم تحميل الملف بنجاح!' : 'Document downloaded successfully!'}`;
             document.body.appendChild(notification);
             
             setTimeout(() => {
@@ -1552,7 +1554,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.error("Erreur détaillée de la génération Word:", error);
             alert(state.currentLang === 'fr' 
                 ? "Erreur: Impossible de générer le document Word. Consultez la console." 
-                : "Error: Could not generate Word document. Check console.");
+                : state.currentLang === 'ar' ? "خطأ: تعذر إنشاء ملف Word. تحقق من وحدة التحكم." : "Error: Could not generate Word document. Check console.");
         }
     };
 
@@ -1560,7 +1562,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.deleteEvaluation = async (evalId) => {
         const confirmText = state.currentLang === 'fr' 
             ? 'Êtes-vous sûr de vouloir supprimer cette évaluation ?' 
-            : 'Are you sure you want to delete this evaluation?';
+            : state.currentLang === 'ar' ? 'هل أنت متأكد من حذف هذا التقييم؟' : 'Are you sure you want to delete this evaluation?';
         
         if (confirm(confirmText)) {
             const index = EVALUATIONS_DATABASE.findIndex(ev => ev.id === evalId);
@@ -1583,12 +1585,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                     
                     alert(state.currentLang === 'fr' 
                         ? 'Évaluation supprimée avec succès' 
-                        : 'Evaluation deleted successfully');
+                        : state.currentLang === 'ar' ? 'تم حذف التقييم بنجاح' : 'Evaluation deleted successfully');
                 } catch (error) {
                     console.error('Erreur lors de la suppression:', error);
                     alert(state.currentLang === 'fr' 
                         ? 'Erreur lors de la suppression' 
-                        : 'Delete error');
+                        : state.currentLang === 'ar' ? 'خطأ في الحذف' : 'Delete error');
                 }
             }
         }
