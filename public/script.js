@@ -855,6 +855,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 TableCell, TableRow, WidthType, AlignmentType, BorderStyle 
             } = docx;
             
+            // Détecter si le coordinateur est arabe
+            const isArabicCoordinator = ['روعة', 'عماد'].includes(data.coordinatorName);
+            const docLang = isArabicCoordinator ? 'ar' : 'fr';
+            
             const perf = getPerformanceLevel(data.grandTotal);
             
             // Créer un tableau de synthèse par catégorie (CORRECTION LOGIQUE)
@@ -877,7 +881,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 });
                 
                 categorySummary.push({
-                    title: cat[`title_${state.currentLang}`],
+                    title: cat[`title_${docLang}`],
                     total: categoryTotal,
                     max: cat.maxPoints
                 });
@@ -894,7 +898,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                     new Paragraph({
                                         children: [
                                             new TextRun({
-                                                text: cat[`title_${state.currentLang}`] || '',
+                                                text: cat[`title_${docLang}`] || '',
                                                 bold: true,
                                                 color: 'FFFFFF',
                                                 size: 24
@@ -925,7 +929,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                     new Paragraph({
                                         children: [
                                             new TextRun({
-                                                text: item[`text_${state.currentLang}`] || ''
+                                                text: item[`text_${docLang}`] || ''
                                             })
                                         ],
                                         spacing: { before: 80, after: 80 }
@@ -1010,19 +1014,20 @@ document.addEventListener('DOMContentLoaded', async () => {
                         new Paragraph({
                             children: [
                                 new TextRun({
-                                    text: "ÉCOLE INTERNATIONALE ALKAWTHAR",
+                                    text: docLang === 'ar' ? "المدرسة الدولية الكوثر" : "ÉCOLE INTERNATIONALE ALKAWTHAR",
                                     bold: true,
                                     size: 32
                                 })
                             ],
                             heading: HeadingLevel.HEADING_1,
                             alignment: AlignmentType.CENTER,
-                            spacing: { after: 100 }
+                            spacing: { after: 100 },
+                            bidirectional: docLang === 'ar'
                         }),
                         new Paragraph({
                             children: [
                                 new TextRun({
-                                    text: state.currentLang === 'fr' ? "RAPPORT D'ÉVALUATION PÉDAGOGIQUE" : "TEACHER EVALUATION REPORT",
+                                    text: docLang === 'ar' ? "تقرير التقييم التربوي" : "RAPPORT D'ÉVALUATION PÉDAGOGIQUE",
                                     bold: true,
                                     size: 28
                                 })
@@ -1030,7 +1035,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                             heading: HeadingLevel.HEADING_1,
                             alignment: AlignmentType.CENTER,
                             spacing: { after: 300 },
-                            shading: { fill: "F0F4F8" }
+                            shading: { fill: "F0F4F8" },
+                            bidirectional: docLang === 'ar'
                         }),
                         
                         // Ligne de séparation
@@ -1049,7 +1055,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         new Paragraph({
                             children: [
                                 new TextRun({ 
-                                    text: state.currentLang === 'fr' ? 'Enseignant : ' : 'Teacher: ', 
+                                    text: docLang === 'ar' ? 'المعلم : ' : 'Enseignant : ', 
                                     bold: true, 
                                     size: 24 
                                 }),
@@ -1058,12 +1064,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                                     size: 24 
                                 })
                             ],
-                            spacing: { after: 200 }
+                            spacing: { after: 200 },
+                            bidirectional: docLang === 'ar'
                         }),
                         new Paragraph({
                             children: [
                                 new TextRun({ 
-                                    text: state.currentLang === 'fr' ? 'Évaluateur : ' : 'Evaluator: ', 
+                                    text: docLang === 'ar' ? 'المقيّم : ' : 'Évaluateur : ', 
                                     bold: true, 
                                     size: 24 
                                 }),
@@ -1072,12 +1079,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                                     size: 24 
                                 })
                             ],
-                            spacing: { after: 200 }
+                            spacing: { after: 200 },
+                            bidirectional: docLang === 'ar'
                         }),
                         new Paragraph({
                             children: [
                                 new TextRun({ 
-                                    text: state.currentLang === 'fr' ? 'Date de visite : ' : 'Visit Date: ', 
+                                    text: docLang === 'ar' ? 'تاريخ الزيارة : ' : 'Date de visite : ', 
                                     bold: true, 
                                     size: 24 
                                 }),
@@ -1086,12 +1094,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                                     size: 24 
                                 })
                             ],
-                            spacing: { after: 200 }
+                            spacing: { after: 200 },
+                            bidirectional: docLang === 'ar'
                         }),
                         new Paragraph({
                             children: [
                                 new TextRun({ 
-                                    text: state.currentLang === 'fr' ? 'Classe : ' : 'Class: ', 
+                                    text: docLang === 'ar' ? 'الصف : ' : 'Classe : ', 
                                     bold: true, 
                                     size: 24 
                                 }),
@@ -1100,12 +1109,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                                     size: 24 
                                 })
                             ],
-                            spacing: { after: 200 }
+                            spacing: { after: 200 },
+                            bidirectional: docLang === 'ar'
                         }),
                         new Paragraph({
                             children: [
                                 new TextRun({ 
-                                    text: state.currentLang === 'fr' ? 'Matière : ' : 'Subject: ', 
+                                    text: docLang === 'ar' ? 'المادة : ' : 'Matière : ', 
                                     bold: true, 
                                     size: 24 
                                 }),
@@ -1114,12 +1124,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                                     size: 24 
                                 })
                             ],
-                            spacing: { after: 200 }
+                            spacing: { after: 200 },
+                            bidirectional: docLang === 'ar'
                         }),
                         new Paragraph({
                             children: [
                                 new TextRun({ 
-                                    text: state.currentLang === 'fr' ? 'Séance N° : ' : 'Session #: ', 
+                                    text: docLang === 'ar' ? 'رقم الحصة : ' : 'Séance N° : ', 
                                     bold: true, 
                                     size: 24 
                                 }),
@@ -1128,7 +1139,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                                     size: 24 
                                 })
                             ],
-                            spacing: { after: 400 }
+                            spacing: { after: 400 },
+                            bidirectional: docLang === 'ar'
                         }),
                         
                         // Score total avec badge de performance (amélioration visuelle)
@@ -1145,7 +1157,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         new Paragraph({
                             children: [
                                 new TextRun({
-                                    text: `📊 ${state.currentLang === 'fr' ? 'SCORE TOTAL : ' : 'TOTAL SCORE: '}`,
+                                    text: `📊 ${docLang === 'ar' ? 'النتيجة الإجمالية : ' : 'SCORE TOTAL : '}`,
                                     bold: true,
                                     size: 36
                                 }),
@@ -1161,17 +1173,18 @@ document.addEventListener('DOMContentLoaded', async () => {
                             border: {
                                 top: { style: BorderStyle.DOUBLE, size: 6, color: perf.color.replace('#', '') },
                                 bottom: { style: BorderStyle.DOUBLE, size: 6, color: perf.color.replace('#', '') }
-                            }
+                            },
+                            bidirectional: docLang === 'ar'
                         }),
                         new Paragraph({
                             children: [
                                 new TextRun({
-                                    text: `✨ ${state.currentLang === 'fr' ? 'Niveau : ' : 'Level: '}`,
+                                    text: `✨ ${docLang === 'ar' ? 'المستوى : ' : 'Niveau : '}`,
                                     bold: true,
                                     size: 28
                                 }),
                                 new TextRun({
-                                    text: perf[`label_${state.currentLang}`].toUpperCase(),
+                                    text: perf[`label_${docLang}`].toUpperCase(),
                                     bold: true,
                                     size: 32,
                                     color: perf.color.replace('#', '')
@@ -1179,7 +1192,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                             ],
                             alignment: AlignmentType.CENTER,
                             spacing: { after: 300 },
-                            shading: { fill: "F8F9FA" }
+                            shading: { fill: "F8F9FA" },
+                            bidirectional: docLang === 'ar'
                         }),
                         new Paragraph({
                             children: [
@@ -1196,13 +1210,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                         new Paragraph({
                             children: [
                                 new TextRun({
-                                    text: state.currentLang === 'fr' ? '📈 RÉSUMÉ PAR CATÉGORIE' : '📈 SUMMARY BY CATEGORY',
+                                    text: docLang === 'ar' ? '📈 ملخص حسب الفئة' : '📈 RÉSUMÉ PAR CATÉGORIE',
                                     bold: true,
                                     size: 28
                                 })
                             ],
                             heading: HeadingLevel.HEADING_2,
-                            spacing: { before: 300, after: 200 }
+                            spacing: { before: 300, after: 200 },
+                            bidirectional: docLang === 'ar'
                         }),
                         
                         new Table({
@@ -1222,12 +1237,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                                             children: [new Paragraph({ 
                                                 children: [
                                                     new TextRun({
-                                                        text: state.currentLang === 'fr' ? 'Catégorie' : 'Category',
+                                                        text: docLang === 'ar' ? 'الفئة' : 'Catégorie',
                                                         bold: true,
                                                         color: 'FFFFFF'
                                                     })
                                                 ],
-                                                alignment: AlignmentType.CENTER
+                                                alignment: AlignmentType.CENTER,
+                                                bidirectional: docLang === 'ar'
                                             })],
                                             shading: { fill: "005A9E" }
                                         }),
@@ -1235,12 +1251,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                                             children: [new Paragraph({ 
                                                 children: [
                                                     new TextRun({
-                                                        text: state.currentLang === 'fr' ? 'Score Obtenu' : 'Score Obtained',
+                                                        text: docLang === 'ar' ? 'النتيجة المحصلة' : 'Score Obtenu',
                                                         bold: true,
                                                         color: 'FFFFFF'
                                                     })
                                                 ],
-                                                alignment: AlignmentType.CENTER
+                                                alignment: AlignmentType.CENTER,
+                                                bidirectional: docLang === 'ar'
                                             })],
                                             shading: { fill: "005A9E" }
                                         }),
@@ -1248,12 +1265,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                                             children: [new Paragraph({ 
                                                 children: [
                                                     new TextRun({
-                                                        text: state.currentLang === 'fr' ? 'Maximum' : 'Maximum',
+                                                        text: docLang === 'ar' ? 'الحد الأقصى' : 'Maximum',
                                                         bold: true,
                                                         color: 'FFFFFF'
                                                     })
                                                 ],
-                                                alignment: AlignmentType.CENTER
+                                                alignment: AlignmentType.CENTER,
+                                                bidirectional: docLang === 'ar'
                                             })],
                                             shading: { fill: "005A9E" }
                                         }),
@@ -1345,7 +1363,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                             children: [
                                                 new Paragraph({
                                                     children: [new TextRun({
-                                                        text: state.currentLang === 'fr' ? 'Critère d\'Évaluation' : 'Evaluation Criteria',
+                                                        text: docLang === 'ar' ? 'معيار التقييم' : 'Critère d\'Évaluation',
                                                         bold: true,
                                                         color: 'FFFFFF',
                                                         size: 22
@@ -1360,7 +1378,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                             children: [
                                                 new Paragraph({
                                                     children: [new TextRun({
-                                                        text: state.currentLang === 'fr' ? 'Max' : 'Max',
+                                                        text: docLang === 'ar' ? 'الأقصى' : 'Max',
                                                         bold: true,
                                                         color: 'FFFFFF',
                                                         size: 22
@@ -1375,7 +1393,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                             children: [
                                                 new Paragraph({
                                                     children: [new TextRun({
-                                                        text: state.currentLang === 'fr' ? 'Note' : 'Rating',
+                                                        text: docLang === 'ar' ? 'التقييم' : 'Note',
                                                         bold: true,
                                                         color: 'FFFFFF',
                                                         size: 22
@@ -1390,7 +1408,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                             children: [
                                                 new Paragraph({
                                                     children: [new TextRun({
-                                                        text: state.currentLang === 'fr' ? 'Score' : 'Score',
+                                                        text: docLang === 'ar' ? 'النتيجة' : 'Score',
                                                         bold: true,
                                                         color: 'FFFFFF',
                                                         size: 22
@@ -1414,7 +1432,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         new Paragraph({
                             children: [
                                 new TextRun({
-                                    text: state.currentLang === 'fr' ? '⭐ FORCES OBSERVÉES' : '⭐ OBSERVED STRENGTHS',
+                                    text: docLang === 'ar' ? '⭐ نقاط القوة الملاحظة' : '⭐ FORCES OBSERVÉES',
                                     bold: true,
                                     size: 28
                                 })
@@ -1424,7 +1442,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             shading: { fill: "D5F4E6" }
                         }),
                         new Paragraph({
-                            text: data.comments.strengths || (state.currentLang === 'fr' ? 'Aucun commentaire' : 'No comments'),
+                            text: data.comments.strengths || (docLang === 'ar' ? 'لا تعليقات' : 'Aucun commentaire'),
                             spacing: { after: 400, before: 100 },
                             indent: { left: 720 },
                             border: {
@@ -1435,7 +1453,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         new Paragraph({
                             children: [
                                 new TextRun({
-                                    text: state.currentLang === 'fr' ? '📈 AXES D\'AMÉLIORATION' : '📈 AREAS FOR IMPROVEMENT',
+                                    text: docLang === 'ar' ? '📈 محاور التحسين' : '📈 AXES D\'AMÉLIORATION',
                                     bold: true,
                                     size: 28
                                 })
@@ -1445,7 +1463,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             shading: { fill: "FEF5E7" }
                         }),
                         new Paragraph({
-                            text: data.comments.toImprove || (state.currentLang === 'fr' ? 'Aucun commentaire' : 'No comments'),
+                            text: data.comments.toImprove || (docLang === 'ar' ? 'لا تعليقات' : 'Aucun commentaire'),
                             spacing: { after: 400, before: 100 },
                             indent: { left: 720 },
                             border: {
@@ -1456,7 +1474,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         new Paragraph({
                             children: [
                                 new TextRun({
-                                    text: state.currentLang === 'fr' ? '💡 RECOMMANDATIONS' : '💡 RECOMMENDATIONS',
+                                    text: docLang === 'ar' ? '💡 التوصيات' : '💡 RECOMMANDATIONS',
                                     bold: true,
                                     size: 28
                                 })
@@ -1466,7 +1484,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             shading: { fill: "EBF5FB" }
                         }),
                         new Paragraph({
-                            text: data.comments.recommendations || (state.currentLang === 'fr' ? 'Aucun commentaire' : 'No comments'),
+                            text: data.comments.recommendations || (docLang === 'ar' ? 'لا تعليقات' : 'Aucun commentaire'),
                             spacing: { after: 400, before: 100 },
                             indent: { left: 720 },
                             border: {
@@ -1493,13 +1511,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                                     size: 20
                                 }),
                                 new TextRun({
-                                    text: state.currentLang === 'fr' 
-                                        ? `Document généré le ${new Date().toLocaleDateString('fr-FR', { 
+                                    text: docLang === 'ar' 
+                                        ? `تم إنشاء المستند في ${new Date().toLocaleDateString('ar-EG', { 
                                             year: 'numeric', 
                                             month: 'long', 
                                             day: 'numeric' 
                                         })}` 
-                                        : `Document generated on ${new Date().toLocaleDateString('en-US', { 
+                                        : `Document généré le ${new Date().toLocaleDateString('fr-FR', { 
                                             year: 'numeric', 
                                             month: 'long', 
                                             day: 'numeric' 
@@ -1514,9 +1532,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                         new Paragraph({
                             children: [
                                 new TextRun({
-                                    text: state.currentLang === 'fr' 
-                                        ? '© École Internationale Alkawthar - Système d\'Évaluation des Enseignants' 
-                                        : '© École Internationale Alkawthar - Teacher Evaluation System',
+                                    text: docLang === 'ar' 
+                                        ? '© المدرسة الدولية الكوثر - نظام تقييم المعلمين' 
+                                        : '© École Internationale Alkawthar - Système d\'Évaluation des Enseignants',
                                     italics: true,
                                     size: 18,
                                     color: "7F8C8D"
